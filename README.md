@@ -1,5 +1,5 @@
 # playdate
-*get texts when your kid's friends are free. broadcast text their parents when you're free. save time automatically. schedule easier. build friendships. make memories.* 
+*get texts when your kid's friends are free. broadcast texts to their parents when you're free. save time automatically. schedule easier. build friendships. make memories.* 
 
 [playdate.help](https://playdate.help) saves time and helps build friendships by coordinating tentative availability between parents for playdates. It's open-source (AGPLv3) and non-commercial. 
 
