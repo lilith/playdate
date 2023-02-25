@@ -8,4 +8,7 @@ The [design document draft is here](https://docs.google.com/document/d/18AJJTOX9
 
 ideal tech stack: SvelteKit, Twilio, PostgreSQL, DigitalOcean/Heroku/app platform.
 
+## notes:
+
+- [magic links](https://medium.com/@aleksandrasays/sending-magic-links-with-nodejs-765a8686996)
 
