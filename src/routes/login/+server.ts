@@ -9,7 +9,9 @@ const generate = (phone: string) => {
 	const hrs = date.getHours();
 	return {
 		token: jwt.sign({ phone, expiration: date }, JWT_SECRET),
-		time: `${hrs > 12 ? hrs - 12 : hrs}:${date.getMinutes()}${hrs >= 12 ? 'PM' : 'AM'}}`
+		time: `${hrs > 12 ? hrs - 12 : hrs}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}${
+			hrs >= 12 ? 'PM' : 'AM'
+		}`
 	};
 };
 
@@ -32,7 +34,7 @@ export async function POST({ request }: { request: Request }) {
 	try {
 		await client.messages.create({
 			body: `Your login link to playdate.help will expire at ${time}: https://localhost:5173/login/${token}`,
-			from: '+18444120506',
+			from: '+15005550006',
 			to: phone
 		});
 	} catch (err) {

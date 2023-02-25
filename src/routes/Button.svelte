@@ -5,9 +5,15 @@
 	export let color = 'white';
 	export let margin = '';
 	$: cssVarStyles = `--bg:${bgColor};--color:${color};--margin:${margin};`;
+
+	export let onClick: () => void;
 </script>
 
-<button class="pretty-btn cursor-pointer rounded-md border-none" style={cssVarStyles}>
+<button
+	class="pretty-btn cursor-pointer rounded-md border-none"
+	style={cssVarStyles}
+	on:click={onClick}
+>
 	{content}
 </button>
 
