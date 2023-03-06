@@ -23,7 +23,7 @@
 		color: var(--color, black);
 		margin: var(--margin);
 
-		padding: 0.4rem 6.3rem;
+		padding: 0.4rem 2.8rem;
 		font-size: x-large;
 	}
 </style>

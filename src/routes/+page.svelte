@@ -17,7 +17,14 @@
 				phone: phoneInput.getNumber()
 			})
 		});
-		if (response.status == 200) loginSuccess = true;
+		if (response.status == 200) {
+			const thing = await response.json();
+			/**
+			 * TODO: to be deleted once toll-free number verified
+			*/
+			alert(thing.body);
+			loginSuccess = true;
+		}
 	}
 </script>
 
@@ -38,9 +45,11 @@
 	<img src={logo} alt="Playdate logo" id="logo" />
 
 	<PhoneInput bind:phoneInput />
-	<Button onClick={login} content={'Login'} bgColor={'#73A4EB'} margin={'2rem auto 1rem auto'} />
+	<Button onClick={login} content={'Send Login Link'} bgColor={'#73A4EB'} margin={'2rem auto 1rem auto'} />
 	{#if loginSuccess}
 		<p>Login successful! A magic link should be sent to you within 3 mins.</p>
+	{:else}
+		<p>By submitting your phone number you consent to receive SMS messages from Playdate.help. You can opt out at any time.</p>
 	{/if}
 </section>
 
