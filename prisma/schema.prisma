@@ -1,77 +1,11 @@
-# playdate
-
-_get texts when your kid's friends are free. broadcast texts to their parents when you're free. save time automatically. schedule easier. build friendships. make memories._
-
-[playdate.help](https://playdate.help) saves time and helps build friendships by coordinating tentative availability between parents for playdates. It's open-source (AGPLv3) and non-commercial.
-
-The [design document draft is here](https://docs.google.com/document/d/18AJJTOX9x-pXl4mSTfKHp_9Op4cszZLhZkb9UiQZbNA/edit?usp=sharing) (comment and edit!)
-
-ideal tech stack: SvelteKit, Twilio, PostgreSQL, DigitalOcean/Heroku/app platform.
-
-## notes:
-
-- [magic links](https://medium.com/@aleksandrasays/sending-magic-links-with-nodejs-765a8686996)
-- [magic links w/ static len token](https://www.antoniovdlc.me/password-less-authentication-using-magic-links/)
-
-## Env Vars:
-
-- `TWILIO_AUTH_TOKEN`
-- `TWILIO_ACCOUNT_SID`
-
-## Sending SMS / friend links
-
-We might not want to text friends and co-parents unless they've opted into to getting texts from us. What we *can* do, fortunately, is use an SMS hyperlink.
-
-This does mean that inviting friends becomes a two-step process - the app creates a friend request record in the database, and then the app produces a clickable link for the inviting member to use to text their friend
-
-Ex: `<a href="sms:+18664504185?&body=Hi%2520there%252C%2520I%2527d%2520like%2520to%2520place%2520an%2520order%2520for...">Click here to text us!</a>`
-
-Since that link is shared with both parties, it can't handle authentication - it requires the user to confirm their phone number and get a 2nd text. We can pre-fill the target's phone number, though, e.g. 
-https://playdate.help/login?phone=+18664504185
-
-
-## Schema
-
-There's [a separate google doc to focus on schema and implementation stuff](https://docs.google.com/document/d/1YjIzEWKNcBJNziDydF2LP-iSUg0OJrLn5KRN4tNtT_s/edit?usp=sharing). 
-
-https://www.prismabuilder.io/
-
-
-### Strings
-
-We want to use UTF-8 everywhere possible. 
-
-### IDs
-
-Note that it's unclear if a separate id is needed in Prisma. While the Prisma schema definition language permits strings as primary keys, ORMs often have an optimal path designed for integer IDs that are auto-incremented. Thus, even if redundant, integer IDs are specified here and we are adding unique constraints and indexes on the string values that would otherwise serve as the primary key.
-
-### Dates
-Also, all dates are stored as UTC. We convert those to the user's timezone (User.) when displaying them.
-
-### Phone numbers are E.164 (+1 (555) 123-7777 would be "15551237777")
-
-All phone numbers should be stored as max-15 digit strings in E.164 format. This format is purely numeric and does not include the assumed "+" prefix. "+" is a dial-out code, equivalent to "011" on landlines calling from the US to other countries. It's not part of the phone number itself, and the numeric equivalent to "+" varies depending on the country you're calling from. 
-Google's libphonenumber library can be used to parse and format phone numbers. https://github.com/google/libphonenumber
-
-Here's a parser demo: https://rawgit.com/googlei18n/libphonenumber/master/javascript/i18n/phonenumbers/demo-compiled.html
-
-For now, we default to "US" as the country, and reject non-US numbers. We'll use US-centric formatting for display "(555) 123-7777". 
-
-In years, if this goes international, we can extract the country from the phone number with libphonenumber, and use that to determine if a caller's country is different than the friend's country, and adapt display to include country code information.
-
-### Draft schema
-
-```prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 
 model Household {
     id              Int      @id @default(autoincrement())
@@ -274,9 +208,6 @@ enum AvailabilityStatus {
   BUSY
   AVAILABLE
 }
-```
-
-```prisma
 
 // This describes the circle of friends that a household has. It's a many-to-many relationship.
 // Ignore for now, it's autocreated
@@ -288,37 +219,3 @@ model HouseholdConnection {
     friendHousehold     Household @relation(fields: [friendHouseholdId], references: [id])
     createdAt       DateTime @default(now())
 }
-
-// Ignore this model for now, it's a later feature
-model ImpersonationReport {
-    id              Int      @id @default(autoincrement())
-    reportedUserId  Int
-    reportedUser    User @relation(fields: [reportedUserId], references: [id])
-    reporterUserId  Int
-    reporterUser    User @relation(fields: [reporterUserId], references: [id])
-    notes           String?
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
-}
-
-```
-
-## Setting Up Local DB on GitPod
-
-If the Postgre image isn't auto-starting (i.e., `pg_start` is not a recognized command), then I suggest running `gp rebuild`. This will point you towards a GitPod workspace whose URL looks like `https://debug-lilith-playdate-kvvsqrmwmqz.ws-us89b.gitpod.io/`. I've found that `pg_start` is recognized in this new workspace. Don't worry if `pg_start` says that the server is already up.
-
-Next, you'll need to set the following in your `.env` in order to connect with Prisma's Postgres DB:
-
-```
-DATABASE_URL="postgresql://gitpod@localhost:5432/dev?schema=public"
-```
-
-The next 2 steps are taken from Prisma's init prompt:
-```
-3. Run `prisma db pull` to turn your database schema into a Prisma schema.
-4. Run `prisma generate` to generate the Prisma Client. You can then start querying your database.
-```
-
-With the draft auto-generated schema, I've found that `@@index([secret])` is invalid for some table definitions b/c `secret` isn't an actual field in those tables. Will need to dig back into the Google Doc spec to see how this should be corrected. Is it a relation field or not?
-
-Final note: By using [this baby Prisma schema](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/using-prisma-migrate-typescript-postgres), I was able to see that Prisma indeed returns the generated SQL schema in `prisma/migrations`.
