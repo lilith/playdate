@@ -13,6 +13,10 @@ ideal tech stack: SvelteKit, Twilio, PostgreSQL, DigitalOcean/Heroku/app platfor
 - [magic links](https://medium.com/@aleksandrasays/sending-magic-links-with-nodejs-765a8686996)
 - [magic links w/ static len token](https://www.antoniovdlc.me/password-less-authentication-using-magic-links/)
 
+## Env Vars:
+
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_ACCOUNT_SID`
 
 ## Sending SMS / friend links
 
