@@ -7,201 +7,242 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Households
+// unique id
+// nickname
+// notes_for_friends (optional)
 model Household {
-    id              Int      @id @default(autoincrement())
-    name            String
-    publicNotes     String?
-    parents         User[]              // implicit 1-many
-    children        HouseholdChild[]    // implicit 1-many
+  id          Int              @id @default(autoincrement())
+  name        String
+  publicNotes String?
+  parents     User[] // implicit 1-many
+  children    HouseholdChild[] // implicit 1-many
 
-    // We may eventually want to have explicit control over the many-to-many relationship 
-    // But there's no concrete need for that yet
-    friends         Household[] // implicit many-to-many table created behind the scenes
-    
-    
-    outboxFriendRequests FriendRequest[]  @relation(fields: [id], references: [fromHouseholdId])
-    outboxHouseholdRequests JoinHouseholdRequest[]  @relation(fields: [id], references: [householdId])
+  // We may eventually want to have explicit control over the many-to-many relationship 
+  // But there's no concrete need for that yet
+  user    Household   @relation("householdFriends", fields: [id], references: [id])
+  friends Household[] @relation("householdFriends") // implicit many-to-many table created behind the scenes
 
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usersHousehold       HouseholdConnection?   @relation("household")
+  friendsHousehold     HouseholdConnection?   @relation("friendHousehold")
+  FriendRequest        FriendRequest[]
+  JoinHouseholdRequest JoinHouseholdRequest[]
+  AvailabilityDate     AvailabilityDate[]
 }
 
 // For inviting other households to be friends with yours
+// FriendInvites
+//  unique secure id  24+ chars
+//  expires_on
+//  target_member
+//  sender_member
 model FriendRequest {
-    id              Int      @id @default(autoincrement())
-    expires         DateTime?
-    targetPhone     String // The target may not have an account yet, so we can't use a foreign key
-    fromUserId    Int
-    fromUser      User @relation(fields: [fromUserId], references: [id])
-    fromHouseholdId     Int
-    fromHousehold       Household @relation(fields: [fromHouseholdId], references: [id])
-    createdAt       DateTime @default(now())
-    @@index([secret])
+  id              Int       @id @default(autoincrement())
+  expires         DateTime?
+  targetPhone     String // The target may not have an account yet, so we can't use a foreign key
+  fromUserId      Int
+  fromUser        User      @relation(fields: [fromUserId], references: [id])
+  fromHouseholdId Int
+  fromHousehold   Household @relation(fields: [fromHouseholdId], references: [id])
+  createdAt       DateTime  @default(now())
 }
 
 // For inviting co-parents to join a household
 model JoinHouseholdRequest {
-    id              Int      @id @default(autoincrement())
-    expires         DateTime?
-    targetPhone     String      // The target may not have an account yet, so we can't use a foreign key
-    householdId     Int
-    household       Household @relation(fields: [householdId], references: [id])
-    fromUserId    Int
-    fromUser      User @relation(fields: [fromUserId], references: [id])
-    createdAt       DateTime @default(now())
-    @@index([secret])
+  id          Int       @id @default(autoincrement())
+  expires     DateTime?
+  targetPhone String // The target may not have an account yet, so we can't use a foreign key
+  householdId Int
+  household   Household @relation(fields: [householdId], references: [id])
+  fromUserId  Int
+  fromUser    User      @relation(fields: [fromUserId], references: [id])
+  createdAt   DateTime  @default(now())
 }
 
 model HouseholdChild {
-    id          Int      @id @default(autoincrement())
-    householdId Int
-    household   Household @relation(fields: [householdId], references: [id])
+  id          Int       @id @default(autoincrement())
+  householdId Int
+  household   Household @relation(fields: [householdId], references: [id])
 
-    firstName   String
+  firstName String
 
-    pronounSetId    Int
-    pronounSet      PronounSet @relation(fields: [pronounSetId], references: [id])
+  pronounSetId Int
+  pronounSet   PronounSet @relation(fields: [pronounSetId], references: [id])
 
-    lastName    String?
-    dateOfBirth DateTime?
+  lastName    String?
+  dateOfBirth DateTime?
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  AvailabilityDate AvailabilityDate[]
 }
 
-// For performance, we could duplicate the phone # inside the secret field, like "18129898260/secret". That way we can do a single index lookup on phone # and secret.
-// This streamlines testing a login validity.
-// We then just verify that the login link hasn't expired. If it has expired or the record has been purged, we can extract the phone number
-// from the url to pre-populate the phone number field on the login page.
+// LoginLinks
+//  unique id 
+//  token -- 9 random bytes -> base64 encoded 12 chars
+//  expires_on
+//  user
 
-model MagicLink{
-    id         Int      @id @default(autoincrement())
-    secret	   String   @unique // 9 bytes of random data, base64 encoded into 12 characters
-    phone      String   // E.164 format, max 15 digits
-    user       User?    @relation(fields: [phone], references: [phone]) // There may not be a user yet
-    expires    DateTime
-    createdAt  DateTime @default(now())
-    @@index([secret])
+// For performance, we could duplicate the phone # inside the token 
+// field, like "18129898260/token". That way we can do a single index 
+// lookup on phone # and token.
+// This streamlines testing a login validity.
+// We then just verify that the login link hasn't expired. If it has 
+// expired or the record has been purged, we can extract the phone 
+// number from the url to pre-populate the phone number field on the 
+// login page.
+model MagicLink {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique // 9 bytes of random data, base64 encoded into 12 characters
+  phone     String // E.164 format, max 15 digits
+  user      User?    @relation(fields: [phone], references: [phone]) // There may not be a user yet
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
 }
 
 // We create a session after validating a magic link 
 model Session {
-    id         Int      @id @default(autoincrement())
-    secret	   String   @unique
-    phone      String   // E.164 format, max 15 digits
-    expires    DateTime
-    user       User     @relation(fields: [userId], references: [id])
-    userId     Int
-    createdAt  DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  phone     String // E.164 format, max 15 digits
+  expires   DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
 }
-
 
 // We don't want to rely exclusively on Twilio to track STOP/START commands
 // We also need to know if a phone # can receive messages. 
 // And we want to guide users to opt out of specific kinds of messages, like reminders and friend invites, rather than blocking all messages (which breaks login links!)
 // We also don't want a user to have to create a user account just to block friend invites. 
 model PhoneContactPermissions {
-    phone       String   @id  // Let's see if it's very difficult to have a string as ID. It could be a regular @unique field, but then we'd have to add an index on it.
+  phone String @id // Let's see if it's very difficult to have a string as ID. It could be a regular @unique field, but then we'd have to add an index on it.
 
-    blocked     Boolean
+  blocked Boolean
 
-    allowInvites Boolean
-    allowReminders Boolean
+  allowInvites   Boolean
+  allowReminders Boolean
 
-    acceptedTermsAt DateTime?
+  acceptedTermsAt DateTime?
 
-    user User? @relation(fields: [phone], references: [phone])
-
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?
 }
 
 // Don't create a User until after a magic link has verified the phone number
+// Members
+//  unique id
+//  household_id
+//  lang_code
+//  first name
+//  last name
+//  primary_cell
+//  cell_is_real (set after magic link clicked)
+//  time zone
+//  pronouns
+//  flagged_fraud (set if ImpersonationReports filed)
+//  email
+//  email_is_real (not used yet)
+//  reminder_datettime
+//  reminder_interval (days)
+//  enable_reminders
+//  notifications_disabled
+//  accepted_terms_on_datetimeutc
+//  created_on (so we know when invited)
+//  completed_on_datetimeutc (so we know how old an account is)
 model User {
-    id              Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-    // Optional, because we may not have created a household yet.
-    householdId     Int?
-    household       Household? @relation(fields: [householdId], references: [id])
+  // Optional, because we may not have created a household yet.
+  householdId Int?
+  household   Household? @relation(fields: [householdId], references: [id])
 
-    // What if our household was sent a friend request, but to a different parent? 
-    // Thus we have to check household.parents (each) for inboxFriendRequestsPartial and combine 
-    // We may want to optimize this one query to prevent N+1 issues
-    inboxFriendRequestsPartial FriendRequest[]  @relation(fields: [phone], references: [targetPhone])
+  // What if our household was sent a friend request, but to a different parent? 
+  // Thus we have to check household.parents (each) for inboxFriendRequestsPartial and combine 
+  // We may want to optimize this one query to prevent N+1 issues
+  inboxFriendRequestsPartial FriendRequest[]
 
-    // This very infrequently used query is for when a co-parent has invitied you to an existing household
-    inboxHouseholdJoinRequests JoinHouseholdRequest[]  @relation(fields: [phone], references: [targetPhone])
+  // This is for the rare case where a co-parent has invited you to an existing household
+  inboxHouseholdJoinRequests JoinHouseholdRequest[]
 
-    locale      String  // Like en_US or es_MX - used both for formatting numbers/dates and for translation
+  locale String // Like en_US or es_MX - used both for formatting numbers/dates and for translation
 
-    firstName       String
-    lastName        String?
+  firstName String
+  lastName  String?
 
-    phone           String @unique
-    phonePermissions PhoneContactPermissions @relation(fields: [phone], references: [phone])
+  phone            String                  @unique
+  phonePermissions PhoneContactPermissions @relation(fields: [phone], references: [phone])
 
-    timeZone        String   // Time zone string, like "America/Los_Angeles"
+  timeZone String // Time zone string, like "America/Los_Angeles"
 
-    pronounSetId    Int
-    pronounSet      PronounSet @relation(fields: [pronounSetId], references: [id])
+  pronounSetId Int
+  pronounSet   PronounSet @relation(fields: [pronounSetId], references: [id])
 
-    // We automatically lock accounts that are reported for impersonation 
-    locked          Boolean @default(FALSE)
-    lockedReason    String?
+  // We automatically lock accounts that are reported for impersonation 
+  locked       Boolean @default(false)
+  lockedReason String?
 
-    // Email is a backup communication method in case the phone number is not usable
-    // We make a copy of the address when it is verified, so that the verified flag doesn't stay when the user changes their email address
-    email           String?
-    emailVerified   String?
+  // Email is a backup communication method in case the phone number is not usable
+  // We make a copy of the address when it is verified, so that the verified flag doesn't stay when the user changes their email address
+  email         String?
+  emailVerified String?
 
-    reminderDatetime DateTime
-    reminderIntervalDays Int
+  reminderDatetime     DateTime
+  reminderIntervalDays Int
 
-    acceptedTermsAt DateTime
+  acceptedTermsAt DateTime
 
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  MagicLink        MagicLink[]
+  Session          Session[]
+  AvailabilityDate AvailabilityDate[]
 
-    @@index([phone])
+  @@index([phone])
 }
-
 
 model AvailabilityDate {
-    id          Int      @id @default(autoincrement())
-    householdId Int
-    household   Household @relation(fields: [householdId], references: [id])
+  id          Int       @id @default(autoincrement())
+  householdId Int
+  household   Household @relation(fields: [householdId], references: [id])
 
-    parentId    Int? // Eventually we may allow specifying which parent is available
-    parent      User? @relation(fields: [parentId], references: [id]) 
+  parentId Int? // Eventually we may allow specifying which parent is available
+  parent   User? @relation(fields: [parentId], references: [id])
 
-    childId     Int? // And separately, which child is available. For now we assume there's a primary child and a primary parent and let people specify variations in the notes.
-    child       HouseholdChild? @relation(fields: [childId], references: [id])
+  childId Int? // And separately, which child is available. For now we assume there's a primary child and a primary parent and let people specify variations in the notes.
+  child   HouseholdChild? @relation(fields: [childId], references: [id])
 
-    date        DateTime
-    status      AvailabilityStatus @default(UNSPECIFIED) // We don't delete records, we just mark them as unspecified
-    startTime   DateTime
-    endTime     DateTime
+  date      DateTime
+  status    AvailabilityStatus @default(UNSPECIFIED) // We don't delete records, we just mark them as unspecified
+  startTime DateTime
+  endTime   DateTime
 
-    notes       String? // shared notes
-    emoticons   String? // shared emoticons 
+  notes     String? // shared notes
+  emoticons String? // shared emoticons 
 
-    updatedAt   DateTime @updatedAt
-    createdAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
-
 
 // We could make PronounSet an enum and hardcode it, if it simplifies things.
 model PronounSet {
-    id                  Int      @id @default(autoincrement())
-    langCode            String
-    subjective      String // he / she / they
-    objective       String  // him / her / them
-    possessive      String // his / her / their
-    possessiveDeterminer String // his / her / their
-    reflexive       String // himself / herself / themselves
-    createdAt       DateTime @default(now())
+  id                   Int              @id @default(autoincrement())
+  langCode             String
+  subjective           String // he / she / they
+  objective            String // him / her / them
+  possessive           String // his / her / their
+  possessiveDeterminer String // his / her / their
+  reflexive            String // himself / herself / themselves
+  createdAt            DateTime         @default(now())
+  HouseholdChild       HouseholdChild[]
+  User                 User[]
 }
-
 
 enum AvailabilityStatus {
   UNSPECIFIED
@@ -212,10 +253,28 @@ enum AvailabilityStatus {
 // This describes the circle of friends that a household has. It's a many-to-many relationship.
 // Ignore for now, it's autocreated
 model HouseholdConnection {
-    id                  Int      @id @default(autoincrement())
-    householdId         Int
-    household           Household @relation(fields: [householdId], references: [id])
-    friendHouseholdId   Int
-    friendHousehold     Household @relation(fields: [friendHouseholdId], references: [id])
-    createdAt       DateTime @default(now())
+  id                Int       @id @default(autoincrement())
+  householdId       Int       @unique
+  household         Household @relation("household", fields: [householdId], references: [id])
+  friendHouseholdId Int       @unique
+  friendHousehold   Household @relation("friendHousehold", fields: [friendHouseholdId], references: [id])
+  createdAt         DateTime  @default(now())
 }
+
+// model Household {
+//     id              Int      @id @default(autoincrement())
+//     name            String
+//     publicNotes     String?
+//     parents         User[]              // implicit 1-many
+//     children        HouseholdChild[]    // implicit 1-many
+
+//     // We may eventually want to have explicit control over the many-to-many relationship 
+//     // But there's no concrete need for that yet
+//     friends         Household[] // implicit many-to-many table created behind the scenes
+
+//     outboxFriendRequests FriendRequest[]  @relation(fields: [id], references: [fromHouseholdId])
+//     outboxHouseholdRequests JoinHouseholdRequest[]  @relation(fields: [id], references: [householdId])
+
+//     createdAt       DateTime @default(now())
+//     updatedAt       DateTime @updatedAt
+// }

@@ -313,12 +313,13 @@ Next, you'll need to set the following in your `.env` in order to connect with P
 DATABASE_URL="postgresql://gitpod@localhost:5432/dev?schema=public"
 ```
 
-The next 2 steps are taken from Prisma's init prompt:
+The next steps is taken from Prisma's init prompt:
 ```
-3. Run `prisma db pull` to turn your database schema into a Prisma schema.
-4. Run `prisma generate` to generate the Prisma Client. You can then start querying your database.
+Run `prisma generate` to generate the Prisma Client. You can then start querying your database.
 ```
 
+3/8 update:
 With the draft auto-generated schema, I've found that `@@index([secret])` is invalid for some table definitions b/c `secret` isn't an actual field in those tables. Will need to dig back into the Google Doc spec to see how this should be corrected. Is it a relation field or not?
 
-Final note: By using [this baby Prisma schema](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/using-prisma-migrate-typescript-postgres), I was able to see that Prisma indeed returns the generated SQL schema in `prisma/migrations`.
+3/13 update:
+Got rid of errors in auto-generated schema and generated PostgreSQL schema from it (in `prisma/migrations/.../migration.sql). Have yet to go through this schema.
