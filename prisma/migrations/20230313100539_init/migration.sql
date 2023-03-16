@@ -194,7 +194,7 @@ ALTER TABLE "HouseholdChild" ADD CONSTRAINT "HouseholdChild_householdId_fkey" FO
 ALTER TABLE "HouseholdChild" ADD CONSTRAINT "HouseholdChild_pronounSetId_fkey" FOREIGN KEY ("pronounSetId") REFERENCES "PronounSet"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MagicLink" ADD CONSTRAINT "MagicLink_phone_fkey" FOREIGN KEY ("phone") REFERENCES "User"("phone") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- ALTER TABLE "MagicLink" ADD CONSTRAINT "MagicLink_phone_fkey" FOREIGN KEY ("phone") REFERENCES "User"("phone") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

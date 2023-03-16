@@ -21,11 +21,54 @@
 			const thing = await response.json();
 			/**
 			 * TODO: to be deleted once toll-free number verified
-			*/
+			 */
 			alert(thing.body);
 			loginSuccess = true;
 		}
 	}
+
+	// import { PrismaClient } from '@prisma/client'
+
+	// const prisma = new PrismaClient()
+
+	// async function main() {
+	// 	// await prisma.user.create({
+	// 	// 	data: {
+	// 	// 		name: 'Alice',
+	// 	// 		email: 'alice@prisma.io',
+	// 	// 		posts: {
+	// 	// 			create: { title: 'Hello World' },
+	// 	// 		},
+	// 	// 		profile: {
+	// 	// 			create: { bio: 'I like turtles' },
+	// 	// 		},
+	// 	// 	},
+	// 	// })
+
+	// 	// const post = await prisma.post.update({
+	// 	// 	where: { id: 1 },
+	// 	// 	data: { published: true },
+	// 	// })
+	// 	// console.log(post)
+
+	// 	// const allUsers = await prisma.user.findMany({
+	// 	// 	include: {
+	// 	// 		posts: true,
+	// 	// 		profile: false,
+	// 	// 	},
+	// 	// })
+	// 	// console.dir(allUsers, { depth: null })
+	// }
+
+	// main()
+	// .then(async () => {
+	// 	await prisma.$disconnect()
+	// })
+	// .catch(async (e) => {
+	// 	console.error(e)
+	// 	await prisma.$disconnect()
+	// 	process.exit(1)
+	// })
 </script>
 
 <svelte:head>
@@ -45,11 +88,19 @@
 	<img src={logo} alt="Playdate logo" id="logo" />
 
 	<PhoneInput bind:phoneInput />
-	<Button onClick={login} content={'Send Login Link'} bgColor={'#73A4EB'} margin={'2rem auto 1rem auto'} />
+	<Button
+		onClick={login}
+		content={'Send Login Link'}
+		bgColor={'#73A4EB'}
+		margin={'2rem auto 1rem auto'}
+	/>
 	{#if loginSuccess}
 		<p>Login successful! A magic link should be sent to you within 3 mins.</p>
 	{:else}
-		<p>By submitting your phone number you consent to receive SMS messages from Playdate.help. You can opt out at any time.</p>
+		<p>
+			By submitting your phone number you consent to receive SMS messages from Playdate.help. You
+			can opt out at any time.
+		</p>
 	{/if}
 </section>
 

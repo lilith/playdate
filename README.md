@@ -20,42 +20,41 @@ ideal tech stack: SvelteKit, Twilio, PostgreSQL, DigitalOcean/Heroku/app platfor
 
 ## Sending SMS / friend links
 
-We might not want to text friends and co-parents unless they've opted into to getting texts from us. What we *can* do, fortunately, is use an SMS hyperlink.
+We might not want to text friends and co-parents unless they've opted into to getting texts from us. What we _can_ do, fortunately, is use an SMS hyperlink.
 
 This does mean that inviting friends becomes a two-step process - the app creates a friend request record in the database, and then the app produces a clickable link for the inviting member to use to text their friend
 
 Ex: `<a href="sms:+18664504185?&body=Hi%2520there%252C%2520I%2527d%2520like%2520to%2520place%2520an%2520order%2520for...">Click here to text us!</a>`
 
-Since that link is shared with both parties, it can't handle authentication - it requires the user to confirm their phone number and get a 2nd text. We can pre-fill the target's phone number, though, e.g. 
+Since that link is shared with both parties, it can't handle authentication - it requires the user to confirm their phone number and get a 2nd text. We can pre-fill the target's phone number, though, e.g.
 https://playdate.help/login?phone=+18664504185
-
 
 ## Schema
 
-There's [a separate google doc to focus on schema and implementation stuff](https://docs.google.com/document/d/1YjIzEWKNcBJNziDydF2LP-iSUg0OJrLn5KRN4tNtT_s/edit?usp=sharing). 
+There's [a separate google doc to focus on schema and implementation stuff](https://docs.google.com/document/d/1YjIzEWKNcBJNziDydF2LP-iSUg0OJrLn5KRN4tNtT_s/edit?usp=sharing).
 
 https://www.prismabuilder.io/
 
-
 ### Strings
 
-We want to use UTF-8 everywhere possible. 
+We want to use UTF-8 everywhere possible.
 
 ### IDs
 
 Note that it's unclear if a separate id is needed in Prisma. While the Prisma schema definition language permits strings as primary keys, ORMs often have an optimal path designed for integer IDs that are auto-incremented. Thus, even if redundant, integer IDs are specified here and we are adding unique constraints and indexes on the string values that would otherwise serve as the primary key.
 
 ### Dates
+
 Also, all dates are stored as UTC. We convert those to the user's timezone (User.) when displaying them.
 
 ### Phone numbers are E.164 (+1 (555) 123-7777 would be "15551237777")
 
-All phone numbers should be stored as max-15 digit strings in E.164 format. This format is purely numeric and does not include the assumed "+" prefix. "+" is a dial-out code, equivalent to "011" on landlines calling from the US to other countries. It's not part of the phone number itself, and the numeric equivalent to "+" varies depending on the country you're calling from. 
+All phone numbers should be stored as max-15 digit strings in E.164 format. This format is purely numeric and does not include the assumed "+" prefix. "+" is a dial-out code, equivalent to "011" on landlines calling from the US to other countries. It's not part of the phone number itself, and the numeric equivalent to "+" varies depending on the country you're calling from.
 Google's libphonenumber library can be used to parse and format phone numbers. https://github.com/google/libphonenumber
 
 Here's a parser demo: https://rawgit.com/googlei18n/libphonenumber/master/javascript/i18n/phonenumbers/demo-compiled.html
 
-For now, we default to "US" as the country, and reject non-US numbers. We'll use US-centric formatting for display "(555) 123-7777". 
+For now, we default to "US" as the country, and reject non-US numbers. We'll use US-centric formatting for display "(555) 123-7777".
 
 In years, if this goes international, we can extract the country from the phone number with libphonenumber, and use that to determine if a caller's country is different than the friend's country, and adapt display to include country code information.
 
@@ -80,11 +79,11 @@ model Household {
     parents         User[]              // implicit 1-many
     children        HouseholdChild[]    // implicit 1-many
 
-    // We may eventually want to have explicit control over the many-to-many relationship 
+    // We may eventually want to have explicit control over the many-to-many relationship
     // But there's no concrete need for that yet
     friends         Household[] // implicit many-to-many table created behind the scenes
-    
-    
+
+
     outboxFriendRequests FriendRequest[]  @relation(fields: [id], references: [fromHouseholdId])
     outboxHouseholdRequests JoinHouseholdRequest[]  @relation(fields: [id], references: [householdId])
 
@@ -150,7 +149,7 @@ model MagicLink{
     @@index([secret])
 }
 
-// We create a session after validating a magic link 
+// We create a session after validating a magic link
 model Session {
     id         Int      @id @default(autoincrement())
     secret	   String   @unique
@@ -163,9 +162,9 @@ model Session {
 
 
 // We don't want to rely exclusively on Twilio to track STOP/START commands
-// We also need to know if a phone # can receive messages. 
+// We also need to know if a phone # can receive messages.
 // And we want to guide users to opt out of specific kinds of messages, like reminders and friend invites, rather than blocking all messages (which breaks login links!)
-// We also don't want a user to have to create a user account just to block friend invites. 
+// We also don't want a user to have to create a user account just to block friend invites.
 model PhoneContactPermissions {
     phone       String   @id  // Let's see if it's very difficult to have a string as ID. It could be a regular @unique field, but then we'd have to add an index on it.
 
@@ -190,8 +189,8 @@ model User {
     householdId     Int?
     household       Household? @relation(fields: [householdId], references: [id])
 
-    // What if our household was sent a friend request, but to a different parent? 
-    // Thus we have to check household.parents (each) for inboxFriendRequestsPartial and combine 
+    // What if our household was sent a friend request, but to a different parent?
+    // Thus we have to check household.parents (each) for inboxFriendRequestsPartial and combine
     // We may want to optimize this one query to prevent N+1 issues
     inboxFriendRequestsPartial FriendRequest[]  @relation(fields: [phone], references: [targetPhone])
 
@@ -211,7 +210,7 @@ model User {
     pronounSetId    Int
     pronounSet      PronounSet @relation(fields: [pronounSetId], references: [id])
 
-    // We automatically lock accounts that are reported for impersonation 
+    // We automatically lock accounts that are reported for impersonation
     locked          Boolean @default(FALSE)
     lockedReason    String?
 
@@ -238,7 +237,7 @@ model AvailabilityDate {
     household   Household @relation(fields: [householdId], references: [id])
 
     parentId    Int? // Eventually we may allow specifying which parent is available
-    parent      User? @relation(fields: [parentId], references: [id]) 
+    parent      User? @relation(fields: [parentId], references: [id])
 
     childId     Int? // And separately, which child is available. For now we assume there's a primary child and a primary parent and let people specify variations in the notes.
     child       HouseholdChild? @relation(fields: [childId], references: [id])
@@ -249,7 +248,7 @@ model AvailabilityDate {
     endTime     DateTime
 
     notes       String? // shared notes
-    emoticons   String? // shared emoticons 
+    emoticons   String? // shared emoticons
 
     updatedAt   DateTime @updatedAt
     createdAt   DateTime @default(now())
@@ -313,13 +312,16 @@ Next, you'll need to set the following in your `.env` in order to connect with P
 DATABASE_URL="postgresql://gitpod@localhost:5432/dev?schema=public"
 ```
 
-The next steps is taken from Prisma's init prompt:
-```
-Run `prisma generate` to generate the Prisma Client. You can then start querying your database.
-```
+Then to start querying the db, do `npx prisma generate` to gen the Prisma Client.
+
+To reset the DB, do `npx prisma migrate reset`.
 
 3/8 update:
 With the draft auto-generated schema, I've found that `@@index([secret])` is invalid for some table definitions b/c `secret` isn't an actual field in those tables. Will need to dig back into the Google Doc spec to see how this should be corrected. Is it a relation field or not?
 
 3/13 update:
 Got rid of errors in auto-generated schema and generated PostgreSQL schema from it (in `prisma/migrations/.../migration.sql). Have yet to go through this schema.
+
+3/16 update:
+To make it work, got rid of MagicLink foreign key constraint
+Got a simple query to run (saving and retrieving a magicLink)
