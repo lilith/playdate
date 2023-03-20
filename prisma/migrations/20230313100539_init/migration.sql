@@ -67,7 +67,6 @@ CREATE TABLE "Session" (
     "token" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
-    "userId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
@@ -195,9 +194,6 @@ ALTER TABLE "HouseholdChild" ADD CONSTRAINT "HouseholdChild_pronounSetId_fkey" F
 
 -- AddForeignKey
 -- ALTER TABLE "MagicLink" ADD CONSTRAINT "MagicLink_phone_fkey" FOREIGN KEY ("phone") REFERENCES "User"("phone") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE SET NULL ON UPDATE CASCADE;

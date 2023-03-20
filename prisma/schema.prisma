@@ -101,8 +101,6 @@ model MagicLink {
   user      User?    @relation(fields: [phone], references: [phone]) // There may not be a user yet
   expires   DateTime
   createdAt DateTime @default(now())
-
-  @@index([token])
 }
 
 // We create a session after validating a magic link 

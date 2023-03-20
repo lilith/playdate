@@ -51,13 +51,13 @@
 	// 	// })
 	// 	// console.log(post)
 
-	// 	// const allUsers = await prisma.user.findMany({
-	// 	// 	include: {
-	// 	// 		posts: true,
-	// 	// 		profile: false,
-	// 	// 	},
-	// 	// })
-	// 	// console.dir(allUsers, { depth: null })
+	// 	const allUsers = await prisma.magicLink.findMany({
+	// 		// include: {
+	// 		// 	posts: true,
+	// 		// 	profile: false,
+	// 		// },
+	// 	})
+	// 	console.dir(allUsers, { depth: null })
 	// }
 
 	// main()

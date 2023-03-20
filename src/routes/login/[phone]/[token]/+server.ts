@@ -1,11 +1,18 @@
 import { redirect } from '@sveltejs/kit';
+import { PrismaClient } from '@prisma/client';
 
-export function GET({ params }: { params: object }) {
-	let decoded;
+const prisma = new PrismaClient();
+
+export async function GET({ params }: { params: object }) {
+	let magicLinkInfo;
 	try {
-		/**
-		 * TODO: validate token against what's stored in the DB
-		 */
+		// validate token against what's stored in the DB
+		magicLinkInfo = await prisma.magicLink.findUnique({
+			where: {
+				token: params.token
+			}
+		});
+		console.log(magicLinkInfo);
 	} catch {
 		return new Response(
 			JSON.stringify({
@@ -17,21 +24,19 @@ export function GET({ params }: { params: object }) {
 		);
 	}
 
-	/**
-	 * TODO: check DB's expiration date
-	 */
-	// const { expiration } = decoded as { phone: string; expiration: Date };
+	// check DB's expiration date
+	const { expires } = magicLinkInfo as { phone: string; expires: Date };
 
-	// if (expiration < new Date()) {
-	// 	return new Response(
-	// 		JSON.stringify({
-	// 			message: 'Token has expired'
-	// 		}),
-	// 		{
-	// 			status: 403
-	// 		}
-	// 	);
-	// }
+	if (expires < new Date()) {
+		return new Response(
+			JSON.stringify({
+				message: 'Token has expired'
+			}),
+			{
+				status: 403
+			}
+		);
+	}
 
 	throw redirect(308, '/profile');
 }
