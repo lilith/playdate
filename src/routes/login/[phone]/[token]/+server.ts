@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET({ params }: { params: object }) {
+export async function GET({ params, cookies }: { params: { token: string }, cookies: { set: Function, get: Function } }) {
 	let magicLinkInfo;
 	try {
 		// validate token against what's stored in the DB
@@ -12,7 +12,6 @@ export async function GET({ params }: { params: object }) {
 				token: params.token
 			}
 		});
-		console.log(magicLinkInfo);
 	} catch {
 		return new Response(
 			JSON.stringify({
@@ -25,7 +24,7 @@ export async function GET({ params }: { params: object }) {
 	}
 
 	// check DB's expiration date
-	const { expires } = magicLinkInfo as { phone: string; expires: Date };
+	const { phone, expires } = magicLinkInfo as { phone: string; expires: Date };
 
 	if (expires < new Date()) {
 		return new Response(
@@ -37,6 +36,39 @@ export async function GET({ params }: { params: object }) {
 			}
 		);
 	}
+
+	let crypto;
+	try {
+		crypto = await import('node:crypto');
+	} catch (err) {
+		console.error('crypto support is disabled!');
+		return {
+			token: null
+		};
+	}
+
+	const sessionCreatedAt = new Date();
+	const sessionExpires = new Date();
+	sessionExpires.setHours(sessionExpires.getHours() + 1);
+
+	const sessionToken = crypto.randomBytes(64).toString('hex');
+
+	cookies.set('session', sessionToken, {
+		path: '/',
+		httpOnly: false,
+		sameSite: 'lax',
+		secure: false,
+		maxAge: 60 * 60,
+	});
+
+	await prisma.session.create({
+		data: {
+			token: sessionToken,
+			phone,
+			expires: sessionExpires,
+			createdAt: sessionCreatedAt
+		}
+	});
 
 	throw redirect(308, '/profile');
 }

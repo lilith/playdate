@@ -12,6 +12,7 @@ ideal tech stack: SvelteKit, Twilio, PostgreSQL, DigitalOcean/Heroku/app platfor
 
 - [magic links](https://medium.com/@aleksandrasays/sending-magic-links-with-nodejs-765a8686996)
 - [magic links w/ static len token](https://www.antoniovdlc.me/password-less-authentication-using-magic-links/)
+- [Sveltekit cookies](https://dev.to/theether0/sveltekit-changes-session-and-cookies-enb)
 
 ## Env Vars:
 
@@ -315,6 +316,8 @@ DATABASE_URL="postgresql://gitpod@localhost:5432/dev?schema=public"
 Then to start querying the db, do `npx prisma generate` to gen the Prisma Client.
 
 To reset the DB, do `npx prisma migrate reset`.
+
+To push schema changes to migration.sql, do `npx prisma db push`.
 
 3/8 update:
 With the draft auto-generated schema, I've found that `@@index([secret])` is invalid for some table definitions b/c `secret` isn't an actual field in those tables. Will need to dig back into the Google Doc spec to see how this should be corrected. Is it a relation field or not?
