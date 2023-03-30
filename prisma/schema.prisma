@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Pronoun {
+  FAE_FAER_FAERS
+  EEY_EM_EIRS
+  HE_HIM_HIS
+  PER_PER_PERS
+  SHE_HER_HERS
+  THEY_THEM_THEIRS
+  VE_VER_VIS
+  XE_XEM_XYRS
+  ZEZIE_HIR_HIRS
+}
+
 model Household {
   id                   Int                    @id @default(autoincrement())
   name                 String
@@ -50,14 +62,13 @@ model HouseholdChild {
   id               Int                @id @default(autoincrement())
   householdId      Int
   firstName        String
-  pronounSetId     Int
+  pronouns         Pronoun
   lastName         String?
   dateOfBirth      DateTime?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   AvailabilityDate AvailabilityDate[]
   household        Household          @relation(fields: [householdId], references: [id])
-  pronounSet       PronounSet         @relation(fields: [pronounSetId], references: [id])
 }
 
 model MagicLink {
@@ -97,7 +108,7 @@ model User {
   lastName                   String?
   phone                      String                  @unique
   timeZone                   String
-  pronounSetId               Int
+  pronouns                   Pronoun
   locked                     Boolean                 @default(false)
   lockedReason               String?
   email                      String?
@@ -112,7 +123,6 @@ model User {
   inboxHouseholdJoinRequests JoinHouseholdRequest[]
   household                  Household?              @relation(fields: [householdId], references: [id])
   phonePermissions           PhoneContactPermissions @relation(fields: [phone], references: [phone])
-  pronounSet                 PronounSet              @relation(fields: [pronounSetId], references: [id])
 
   @@index([phone])
 }
@@ -133,19 +143,6 @@ model AvailabilityDate {
   child       HouseholdChild?    @relation(fields: [childId], references: [id])
   household   Household          @relation(fields: [householdId], references: [id])
   parent      User?              @relation(fields: [parentId], references: [id])
-}
-
-model PronounSet {
-  id                   Int              @id @default(autoincrement())
-  langCode             String
-  subjective           String
-  objective            String
-  possessive           String
-  possessiveDeterminer String
-  reflexive            String
-  createdAt            DateTime         @default(now())
-  HouseholdChild       HouseholdChild[]
-  User                 User[]
 }
 
 model HouseholdConnection {

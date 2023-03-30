@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "Pronoun" AS ENUM ('FAE_FAER_FAERS', 'EEY_EM_EIRS', 'HE_HIM_HIS', 'PER_PER_PERS', 'SHE_HER_HERS', 'THEY_THEM_THEIRS', 'VE_VER_VIS', 'XE_XEM_XYRS', 'ZEZIE_HIR_HIRS');
+
+-- CreateEnum
 CREATE TYPE "AvailabilityStatus" AS ENUM ('UNSPECIFIED', 'BUSY', 'AVAILABLE');
 
 -- CreateTable
@@ -41,7 +44,7 @@ CREATE TABLE "HouseholdChild" (
     "id" SERIAL NOT NULL,
     "householdId" INTEGER NOT NULL,
     "firstName" TEXT NOT NULL,
-    "pronounSetId" INTEGER NOT NULL,
+    "pronouns" "Pronoun" NOT NULL,
     "lastName" TEXT,
     "dateOfBirth" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -94,7 +97,7 @@ CREATE TABLE "User" (
     "lastName" TEXT,
     "phone" TEXT NOT NULL,
     "timeZone" TEXT NOT NULL,
-    "pronounSetId" INTEGER NOT NULL,
+    "pronouns" "Pronoun" NOT NULL,
     "locked" BOOLEAN NOT NULL DEFAULT false,
     "lockedReason" TEXT,
     "email" TEXT,
@@ -124,20 +127,6 @@ CREATE TABLE "AvailabilityDate" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "AvailabilityDate_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PronounSet" (
-    "id" SERIAL NOT NULL,
-    "langCode" TEXT NOT NULL,
-    "subjective" TEXT NOT NULL,
-    "objective" TEXT NOT NULL,
-    "possessive" TEXT NOT NULL,
-    "possessiveDeterminer" TEXT NOT NULL,
-    "reflexive" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "PronounSet_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -175,25 +164,19 @@ CREATE UNIQUE INDEX "HouseholdConnection_friendHouseholdId_key" ON "HouseholdCon
 ALTER TABLE "Household" ADD CONSTRAINT "Household_id_fkey" FOREIGN KEY ("id") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_fromHouseholdId_fkey" FOREIGN KEY ("fromHouseholdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "JoinHouseholdRequest" ADD CONSTRAINT "JoinHouseholdRequest_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "JoinHouseholdRequest" ADD CONSTRAINT "JoinHouseholdRequest_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "JoinHouseholdRequest" ADD CONSTRAINT "JoinHouseholdRequest_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "HouseholdChild" ADD CONSTRAINT "HouseholdChild_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "HouseholdChild" ADD CONSTRAINT "HouseholdChild_pronounSetId_fkey" FOREIGN KEY ("pronounSetId") REFERENCES "PronounSet"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
--- ALTER TABLE "MagicLink" ADD CONSTRAINT "MagicLink_phone_fkey" FOREIGN KEY ("phone") REFERENCES "User"("phone") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -202,7 +185,7 @@ ALTER TABLE "User" ADD CONSTRAINT "User_householdId_fkey" FOREIGN KEY ("househol
 ALTER TABLE "User" ADD CONSTRAINT "User_phone_fkey" FOREIGN KEY ("phone") REFERENCES "PhoneContactPermissions"("phone") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_pronounSetId_fkey" FOREIGN KEY ("pronounSetId") REFERENCES "PronounSet"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_childId_fkey" FOREIGN KEY ("childId") REFERENCES "HouseholdChild"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -211,10 +194,7 @@ ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_householdId_fkey
 ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_childId_fkey" FOREIGN KEY ("childId") REFERENCES "HouseholdChild"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_friendHouseholdId_fkey" FOREIGN KEY ("friendHouseholdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_friendHouseholdId_fkey" FOREIGN KEY ("friendHouseholdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

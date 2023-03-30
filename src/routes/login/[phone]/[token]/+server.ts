@@ -3,7 +3,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET({ params, cookies }: { params: { token: string }, cookies: { set: Function, get: Function } }) {
+export async function GET({
+	params,
+	cookies
+}: {
+	params: { token: string };
+	cookies: { set: Function; get: Function };
+}) {
 	let magicLinkInfo;
 	try {
 		// validate token against what's stored in the DB
@@ -58,7 +64,7 @@ export async function GET({ params, cookies }: { params: { token: string }, cook
 		httpOnly: false,
 		sameSite: 'lax',
 		secure: false,
-		maxAge: 60 * 60,
+		maxAge: 60 * 60
 	});
 
 	await prisma.session.create({
@@ -70,5 +76,5 @@ export async function GET({ params, cookies }: { params: { token: string }, cook
 		}
 	});
 
-	throw redirect(308, '/profile');
+	throw redirect(308, '/dashboard');
 }

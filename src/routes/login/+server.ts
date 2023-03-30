@@ -36,7 +36,6 @@ async function save(token: string, phone: string, createdAt: Date, expires: Date
 			createdAt
 		}
 	});
-	console.log(newLink);
 }
 
 export async function POST({ request }: { request: Request }) {

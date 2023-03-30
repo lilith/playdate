@@ -13,6 +13,7 @@ ideal tech stack: SvelteKit, Twilio, PostgreSQL, DigitalOcean/Heroku/app platfor
 - [magic links](https://medium.com/@aleksandrasays/sending-magic-links-with-nodejs-765a8686996)
 - [magic links w/ static len token](https://www.antoniovdlc.me/password-less-authentication-using-magic-links/)
 - [Sveltekit cookies](https://dev.to/theether0/sveltekit-changes-session-and-cookies-enb)
+- [passing user data via hook](https://joyofcode.xyz/sveltekit-hooks#modifying-a-fetch-response)
 
 ## Env Vars:
 
