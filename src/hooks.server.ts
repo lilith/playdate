@@ -14,7 +14,7 @@ export const handle = (async ({ event, resolve }) => {
 				token: cookie
 			}
 		});
-    if (!session) throw redirect(303, '/');
+    if (!session || session.expires < new Date()) throw redirect(303, '/');
   }
   
   const response = await resolve(event);
