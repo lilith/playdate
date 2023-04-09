@@ -48,7 +48,7 @@ export const handle = (async ({ event, resolve }) => {
 			lastName: '',
 			pronouns: '',
 			timeZone: null,
-			locale: '',
+			locale: null,
 			email: '',
 			notifFreq: 7,
 			notifStartDay: null,

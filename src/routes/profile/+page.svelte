@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { LANGUAGES } from '../../constants';
 	import Modal from '../Modal.svelte';
+	import { browser } from '$app/environment';
 
 	const PRONOUNS = {
 		FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
@@ -64,6 +66,12 @@
 		const region = new Intl.DateTimeFormat();
 		const options = region.resolvedOptions();
 		setDateTimes(options.timeZone);
+	}
+
+	if (!locale && browser) {
+		locale =
+			LANGUAGES[LANGUAGES.findIndex((x) => x.code === navigator.language)].name ??
+			'English (United States)';
 	}
 
 	async function saveToDB() {
@@ -147,7 +155,12 @@
 		</select>
 
 		<label class="subtitle" for="locale">Language<span class="red">*</span></label>
-		<input type="text" name="locale" bind:value={locale} required />
+		<select name="locale" bind:value={locale} required>
+			<option value="" />
+			{#each $page.data.LANGUAGES as lang}
+				<option value={lang.name}>{lang.name}</option>
+			{/each}
+		</select>
 
 		<label class="subtitle" for="email">Email</label>
 		<input type="text" name="email" bind:value={email} />
