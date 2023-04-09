@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Modal from '../Modal.svelte';
 
 	const PRONOUNS = {
 		FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
@@ -19,11 +20,18 @@
 		pronouns,
 		timeZone,
 		locale,
+		email,
 		notifFreq,
 		notifStartDay,
 		notifHr,
-		notifMin
+		notifMin,
+		acceptedTermsAt,
+		allowInvites,
+		allowReminders
 	} = $page.data.user;
+
+	let showModal = !acceptedTermsAt;
+
 	async function saveToDB() {
 		const response = await fetch('/db', {
 			method: 'POST',
@@ -33,86 +41,167 @@
 				pronouns,
 				timeZone,
 				locale,
+				email,
 				notifFreq,
 				notifStartDay,
 				notifHr,
-				notifMin
+				notifMin,
+				acceptedTermsAt,
+				allowInvites,
+				allowReminders
 			})
 		});
 		if (response.status == 200) {
-			const thing = await response.json();
 			alert('Successfully saved profile info');
 		} else {
-			const thing = await response.json();
 			alert('Something went wrong with saving');
 		}
 	}
 </script>
 
 <div>
+	<Modal
+		bind:showModal
+		clickSelf={() => {
+			return;
+		}}
+	>
+		<h2 slot="header">Terms and Conditions</h2>
+
+		<p>Messaging rates, texting, etcetc</p>
+
+		<!-- svelte-ignore a11y-autofocus -->
+		<div slot="close" let:dialog>
+			<button
+				autofocus
+				on:click={() => {
+					acceptedTermsAt = new Date();
+					dialog.close();
+				}}
+			>
+				Accept
+			</button>
+		</div>
+	</Modal>
+
 	<h1>Profile</h1>
 	<p class="subtitle" style="text-align: center">Part of Household</p>
 	<p style="text-align: center;font-size: 24px;color: #5A5A5A;margin-bottom: 0.5rem;">
 		{$page.data.user.household}
 	</p>
 
-	<label class="subtitle" for="first-name">First Name<span class="red">*</span></label>
-	<input type="text" name="first-name" bind:value={firstName} required />
+	<form method="POST" action="/db" on:submit|preventDefault={saveToDB}>
+		<label class="subtitle" for="first-name">First Name<span class="red">*</span></label>
+		<input type="text" name="first-name" bind:value={firstName} required />
 
-	<label class="subtitle" for="last-name">Last Name</label>
-	<input type="text" name="last-name" bind:value={lastName} />
+		<label class="subtitle" for="last-name">Last Name</label>
+		<input type="text" name="last-name" bind:value={lastName} />
 
-	<label class="subtitle" for="pronouns">Pronouns<span class="red">*</span></label>
-	<select name="pronouns" bind:value={pronouns} required>
-		<option value="" />
-		{#each Object.entries(PRONOUNS) as pronoun}
-			<option value={pronoun[0]}>{pronoun[1]}</option>
-		{/each}
-	</select>
+		<label class="subtitle" for="pronouns">Pronouns<span class="red">*</span></label>
+		<select name="pronouns" bind:value={pronouns} required>
+			<option value="" />
+			{#each Object.entries(PRONOUNS) as pronoun}
+				<option value={pronoun[0]}>{pronoun[1]}</option>
+			{/each}
+		</select>
 
-	<label class="subtitle" for="zone">Zone<span class="red">*</span></label>
-	<input type="text" name="zone" bind:value={timeZone} required />
+		<label class="subtitle" for="zone">Zone<span class="red">*</span></label>
+		<input type="text" name="zone" bind:value={timeZone} required />
 
-	<label class="subtitle" for="locale">Language<span class="red">*</span></label>
-	<input type="text" name="locale" bind:value={locale} required />
+		<label class="subtitle" for="locale">Language<span class="red">*</span></label>
+		<input type="text" name="locale" bind:value={locale} required />
 
-    <label class="subtitle" for="reminder-consent">Periodic reminder notifications</label>
-	<label class="switch">
-		<input name="reminder-consent" type="checkbox" />
-		<span class="slider round" />
-    </label><br>
+		<label class="subtitle" for="email">Email</label>
+		<input type="text" name="email" bind:value={email} />
 
-	<label class="subtitle" for="notif-freq">Notification frequency (days)</label>
-	<select name="notif-freq" bind:value={notifFreq}>
-		{#each [...Array(7).keys()] as interval}
-			<option value={interval + 1}>{interval + 1}</option>
-		{/each}
-	</select>
-	<label class="subtitle" for="notif-start-day">Notification start day</label>
-	<select name="notif-start-day" bind:value={notifStartDay}>
-		{#each ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as day, ind}
-			<option value={ind}>{day}</option>
-		{/each}
-	</select>
-	<label class="subtitle" for="notif-hr">Notification time</label>
-	<select name="notif-hr" bind:value={notifHr}>
-		{#each [...Array(31).keys()] as hr}
-			<option value={hr}>{hr}</option>
-		{/each}
-	</select>:
-	<select name="notif-min" bind:value={notifMin}>
-		{#each [...Array(60).keys()] as min}
-			<option value={min}>{min < 10 ? `0${min}` : min}</option>
-		{/each}
-	</select>
+		<div class="switch-container">
+			<label class="thin-label" for="reminder-consent">Periodic reminder notifications</label>
+			<label class="switch">
+				<input name="reminder-consent" type="checkbox" bind:checked={allowReminders} />
+				<span class="slider round" />
+			</label>
+		</div>
 
-	<button on:click={saveToDB} style="background: #73A4EB;color: white;font-size: 26px;" class="btn">
-		Save
-	</button>
+		<div class="switch-container">
+			<label class="thin-label" for="notif-freq">Notification frequency (days)</label>
+			<select name="notif-freq" bind:value={notifFreq}>
+				{#each [...Array(7).keys()] as interval}
+					<option value={interval + 1}>{interval + 1}</option>
+				{/each}
+			</select>
+		</div>
+
+		<div class="switch-container">
+			<label class="thin-label" for="notif-start-day">Notification start day</label>
+			<select name="notif-start-day" bind:value={notifStartDay}>
+				{#each ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as day, ind}
+					<option value={ind}>{day}</option>
+				{/each}
+			</select>
+		</div>
+
+		<div class="switch-container">
+			<label class="thin-label" for="notif-hr">Notification time</label>
+			<select name="notif-hr" bind:value={notifHr}>
+				{#each [...Array(31).keys()] as hr}
+					<option value={hr}>{hr}</option>
+				{/each}
+			</select>:
+			<select name="notif-min" bind:value={notifMin}>
+				{#each [...Array(60).keys()] as min}
+					<option value={min}>{min < 10 ? `0${min}` : min}</option>
+				{/each}
+			</select>
+		</div>
+
+		<div class="switch-container" style="margin-bottom: 15px;">
+			<label class="thin-label" for="invite-consent">Do not disturb</label>
+			<label class="switch">
+				<input name="invite-consent" type="checkbox" bind:checked={allowInvites} />
+				<span class="slider round" />
+			</label>
+		</div>
+		<p id="descrip">
+			Disallow other parents from sending you availability updates. If selected, your name will have
+			a strikethrough to others in your circle, (e.g., <span style="text-decoration: line-through;"
+				>Jane Doe</span
+			>).
+		</p>
+
+		<button type="submit" class="btn"> Save </button>
+	</form>
 </div>
 
 <style>
+	#descrip {
+		font-style: normal;
+		font-weight: 400;
+		font-size: 19px;
+		line-height: 24px;
+
+		color: #5a5a5a;
+	}
+	.switch-container select {
+		width: fit-content;
+		padding: 0 10px;
+		margin: auto 0;
+	}
+	.switch-container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin: 25px 0;
+	}
+	.thin-label {
+		width: 60%;
+		font-style: normal;
+		font-weight: 400;
+		font-size: 21px;
+		line-height: 26px;
+		color: #5a5a5a;
+	}
 	.btn {
+		margin-top: 25px;
 		width: 100%;
 		border-radius: 6px;
 		height: 45px;
@@ -120,6 +209,9 @@
 			Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 		font-style: normal;
 		font-weight: 600;
+		background: #73a4eb;
+		color: white;
+		font-size: 26px;
 	}
 
 	.subtitle {
@@ -190,11 +282,11 @@
 	}
 
 	input:checked + .slider {
-		background-color: #2196f3;
+		background-color: #98ebdb;
 	}
 
 	input:focus + .slider {
-		box-shadow: 0 0 1px #2196f3;
+		box-shadow: 0 0 1px #98ebdb;
 	}
 
 	input:checked + .slider:before {

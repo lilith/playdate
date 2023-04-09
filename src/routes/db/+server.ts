@@ -1,6 +1,7 @@
 import { json, redirect } from '@sveltejs/kit';
 
 import { PrismaClient } from '@prisma/client';
+import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -10,8 +11,8 @@ export async function POST({
 	locals
 }: {
 	request: Request;
-	cookies: { get: Function };
-	locals: { phone: string; user: { [key: string]: any } | null };
+	cookies: { get: (value: string) => string };
+	locals: { phone: string; user: (User & { phonePermissions: PhoneContactPermissions }) | null };
 }) {
 	const sessionToken = cookies.get('session');
 	if (!sessionToken) throw redirect(303, '/');
@@ -22,10 +23,14 @@ export async function POST({
 		pronouns,
 		timeZone,
 		locale,
+		email,
 		notifFreq,
 		notifStartDay,
 		notifHr,
-		notifMin
+		notifMin,
+		acceptedTermsAt,
+		allowInvites,
+		allowReminders
 	} = await request.json();
 
 	const d = new Date();
@@ -41,13 +46,15 @@ export async function POST({
 		lastName,
 		timeZone,
 		pronouns,
+		email,
 		reminderDatetime: d,
-		reminderIntervalDays: notifFreq
+		reminderIntervalDays: notifFreq,
+		acceptedTermsAt
 	};
 	if (locals.user) {
 		// user exists
 		console.log('UPDATE USER');
-		const user = await prisma.user.update({
+		await prisma.user.update({
 			where: {
 				phone: locals.phone
 			},
@@ -55,17 +62,15 @@ export async function POST({
 				...baseUser,
 				phonePermissions: {
 					update: {
-						blocked: false,
-						allowInvites: false,
-						allowReminders: false
+						allowInvites,
+						allowReminders
 					}
 				}
 			}
 		});
 	} else {
 		console.log('CREATE USER');
-		const now = new Date();
-		const user = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				...baseUser,
 				household: {
@@ -74,15 +79,19 @@ export async function POST({
 					}
 				},
 				phonePermissions: {
-					create: {
-						phone: locals.phone,
-						blocked: false,
-						allowInvites: true,
-						allowReminders: true,
-						acceptedTermsAt: now // TODO: change to when user actually accepts
+					connectOrCreate: {
+						where: {
+							phone: locals.phone
+						},
+						create: {
+							phone: locals.phone,
+							blocked: false,
+							allowInvites,
+							allowReminders,
+							acceptedTermsAt
+						}
 					}
-				},
-				acceptedTermsAt: now // TODO: change to when user actually accepts
+				}
 			}
 		});
 	}

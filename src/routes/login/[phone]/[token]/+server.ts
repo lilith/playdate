@@ -8,7 +8,7 @@ export async function GET({
 	cookies
 }: {
 	params: { token: string };
-	cookies: { set: Function; get: Function };
+	cookies: { set: (a: string, b: string, c: object) => void; get: (value: string) => string };
 }) {
 	let magicLinkInfo;
 	try {

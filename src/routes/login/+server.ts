@@ -28,7 +28,7 @@ const generate = async () => {
 };
 
 async function save(token: string, phone: string, createdAt: Date, expires: Date) {
-	const newLink = await prisma.magicLink.create({
+	await prisma.magicLink.create({
 		data: {
 			token,
 			phone,
