@@ -14,6 +14,16 @@
 		ZEZIE_HIR_HIRS: 'ze/zie, hir, hirs'
 	};
 
+	const WEEKDAYS: { [key: string]: number } = {
+		Sunday: 0,
+		Monday: 1,
+		Tuesday: 2,
+		Wednesday: 3,
+		Thursday: 4,
+		Friday: 5,
+		Saturday: 6
+	};
+
 	let {
 		firstName,
 		lastName,
@@ -31,6 +41,30 @@
 	} = $page.data.user;
 
 	let showModal = !acceptedTermsAt;
+
+	function setDateTimes(zone: string) {
+		const formatter = new Intl.DateTimeFormat([], {
+			timeZone: zone,
+			hour: '2-digit',
+			weekday: 'long'
+		});
+		const formattedDate = formatter.formatToParts(new Date());
+		notifStartDay =
+			WEEKDAYS[formattedDate[formattedDate.findIndex((x) => x.type === 'weekday')].value];
+		notifHr = parseInt(formattedDate[formattedDate.findIndex((x) => x.type === 'hour')].value);
+		timeZone = zone;
+	}
+
+	function onChangeZone(e: Event) {
+		setDateTimes(e.target.value);
+	}
+
+	if (!timeZone) {
+		// set a default timezone based on what the browser tells us
+		const region = new Intl.DateTimeFormat();
+		const options = region.resolvedOptions();
+		setDateTimes(options.timeZone);
+	}
 
 	async function saveToDB() {
 		const response = await fetch('/db', {
@@ -106,7 +140,11 @@
 		</select>
 
 		<label class="subtitle" for="zone">Zone<span class="red">*</span></label>
-		<input type="text" name="zone" bind:value={timeZone} required />
+		<select name="zone" bind:value={timeZone} required on:change={onChangeZone}>
+			{#each Intl.supportedValuesOf('timeZone') as zone}
+				<option value={zone}>{zone}</option>
+			{/each}
+		</select>
 
 		<label class="subtitle" for="locale">Language<span class="red">*</span></label>
 		<input type="text" name="locale" bind:value={locale} required />
@@ -134,7 +172,7 @@
 		<div class="switch-container">
 			<label class="thin-label" for="notif-start-day">Notification start day</label>
 			<select name="notif-start-day" bind:value={notifStartDay}>
-				{#each ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as day, ind}
+				{#each Object.entries(WEEKDAYS) as [day, ind]}
 					<option value={ind}>{day}</option>
 				{/each}
 			</select>

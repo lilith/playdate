@@ -42,18 +42,17 @@ export const handle = (async ({ event, resolve }) => {
 			throw redirect(308, '/profile');
 		}
 
-		const now = new Date();
 		const userInfo: { [key: string]: string | number | null | boolean } = {
 			household: 'N/A',
 			firstName: '',
 			lastName: '',
 			pronouns: '',
-			timeZone: '',
+			timeZone: null,
 			locale: '',
 			email: '',
 			notifFreq: 7,
-			notifStartDay: now.getDay(),
-			notifHr: now.getHours(),
+			notifStartDay: null,
+			notifHr: null,
 			notifMin: 0,
 			acceptedTermsAt: null,
 			allowReminders: true,
