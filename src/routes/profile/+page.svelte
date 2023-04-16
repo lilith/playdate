@@ -3,6 +3,7 @@
 	import { LANGUAGES } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 
 	const PRONOUNS = {
 		FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
@@ -94,7 +95,11 @@
 			})
 		});
 		if (response.status == 200) {
-			alert('Successfully saved profile info');
+			// alert('Successfully saved profile info');
+			console.log($page.data.user.household === 'N/A')
+			if ($page.data.user.household === 'N/A') {
+				goto('/household');
+			}
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -219,7 +224,7 @@
 			>).
 		</p>
 
-		<button type="submit" class="btn"> Save </button>
+		<button type="submit" class="btn" style="margin: 2rem auto 4rem;"> Save </button>
 	</form>
 </div>
 
@@ -250,47 +255,6 @@
 		font-size: 21px;
 		line-height: 26px;
 		color: #5a5a5a;
-	}
-	.btn {
-		margin-top: 25px;
-		width: 100%;
-		border-radius: 6px;
-		height: 45px;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-			Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-		font-style: normal;
-		font-weight: 600;
-		background: #73a4eb;
-		color: white;
-		font-size: 26px;
-	}
-
-	.subtitle {
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-			Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-		font-style: normal;
-		font-weight: 600;
-		font-size: 24px;
-		line-height: 30px;
-		color: #5a5a5a;
-	}
-
-	input,
-	select {
-		border: 1px solid #d9d9d9;
-		width: 100%;
-		border-radius: 6px;
-		height: 45px;
-		margin-bottom: 1rem;
-		margin-top: 0.2rem;
-		font-size: 22px;
-		line-height: 28px;
-		padding: 0 3px;
-	}
-
-	.red {
-		color: #bd0000;
-		font-weight: 400;
 	}
 
 	.switch {
