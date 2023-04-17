@@ -17,7 +17,7 @@ export const handle = (async ({ event, resolve }) => {
 				token: cookie
 			}
 		});
-    	if (!session || session.expires < new Date()) throw redirect(303, '/');
+		if (!session || session.expires < new Date()) throw redirect(303, '/');
 
 		// from hereon, it's a valid req with a cookie / session
 		const user: (User & { phonePermissions: PhoneContactPermissions }) | null =
@@ -56,8 +56,11 @@ export const handle = (async ({ event, resolve }) => {
 			notifMin: 0,
 			acceptedTermsAt: null,
 			allowReminders: true,
-			allowInvites: true
+			allowInvites: true,
+			id: null
 		};
+
+		let household;
 
 		if (user) {
 			for (const key of Object.keys(userInfo)) {
@@ -69,8 +72,34 @@ export const handle = (async ({ event, resolve }) => {
 			userInfo.notifMin = user.reminderDatetime.getMinutes();
 			userInfo.allowReminders = user.phonePermissions.allowReminders;
 			userInfo.allowInvites = user.phonePermissions.allowInvites;
+
+			household = await prisma.household.findUnique({
+				where: {
+					id: user.householdId
+				}
+			});
+			if (household) {
+				household.publicNotes = household.publicNotes ?? '';
+
+				household.kids = await prisma.householdChild.findMany({
+					where: {
+						householdId: user.householdId
+					}
+				});
+
+				household.adults = await prisma.user.findMany({
+					where: {
+						householdId: user.householdId
+					}
+				});
+			}
 		}
 		event.locals.user = userInfo;
+		event.locals.household = household;
+
+		if (!household?.name.length && event.url.pathname !== '/household') {
+			throw redirect(308, '/household');
+		}
 
 		/**
 		F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification

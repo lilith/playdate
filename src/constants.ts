@@ -1,3 +1,15 @@
+export const PRONOUNS = {
+	FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
+	EEY_EM_EIRS: 'e/ey, em, eirs',
+	HE_HIM_HIS: 'he, him, his',
+	PER_PER_PERS: 'per, per, pers',
+	SHE_HER_HERS: 'she, her, hers',
+	THEY_THEM_THEIRS: 'they, them, theirs',
+	VE_VER_VIS: 've, ver, vis',
+	XE_XEM_XYRS: 'xe, xem, xyrs',
+	ZEZIE_HIR_HIRS: 'ze/zie, hir, hirs'
+};
+
 export const LANGUAGES = [
 	{ name: 'Afrikaans', code: 'af' },
 	{ name: 'Albanian - shqip', code: 'sq' },
