@@ -6,7 +6,10 @@ const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
 
-const setLocal = async (user: (User & { phonePermissions: PhoneContactPermissions }) | null, event: RequestEvent<Partial<Record<string, string>>, string | null>) => {
+const setLocal = async (
+	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
+	event: RequestEvent<Partial<Record<string, string>>, string | null>
+) => {
 	const userInfo: { [key: string]: string | number | null | boolean } = {
 		household: 'N/A',
 		firstName: '',
@@ -23,7 +26,7 @@ const setLocal = async (user: (User & { phonePermissions: PhoneContactPermission
 		allowReminders: true,
 		allowInvites: true,
 		id: null,
-		householdId: null,
+		householdId: null
 	};
 
 	if (user) {
@@ -36,7 +39,7 @@ const setLocal = async (user: (User & { phonePermissions: PhoneContactPermission
 		userInfo.notifMin = user.reminderDatetime.getMinutes();
 		userInfo.allowReminders = user.phonePermissions.allowReminders;
 		userInfo.allowInvites = user.phonePermissions.allowInvites;
-		
+
 		if (user.householdId) {
 			const household = await prisma.household.findUnique({
 				where: {
@@ -47,7 +50,7 @@ const setLocal = async (user: (User & { phonePermissions: PhoneContactPermission
 		}
 	}
 	event.locals.user = userInfo;
-}
+};
 
 export const handle = (async ({ event, resolve }) => {
 	const cookie = event.cookies.get('session');
@@ -80,7 +83,7 @@ export const handle = (async ({ event, resolve }) => {
 			return response;
 		}
 
-		await setLocal(user, event)
+		await setLocal(user, event);
 
 		// F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification
 		if (!user) {

@@ -4,7 +4,6 @@
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { AuthRegistrationsCredentialListMappingInstance } from 'twilio/lib/rest/api/v2010/account/sip/domain/authTypes/authTypeRegistrations/authRegistrationsCredentialListMapping';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,
@@ -85,10 +84,6 @@
 			})
 		});
 		if (response.status == 200) {
-			console.log('Successfully saved profile info')
-			const { id } = await response.json();
-			$page.data.user.id = id;
-			// alert('Successfully saved profile info');
 			if ($page.data.user.household === 'N/A') {
 				goto('/household');
 			}

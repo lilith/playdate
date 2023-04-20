@@ -23,15 +23,16 @@ export async function POST({
 
 	const req = await request.json();
 
-	let res: { [key: string]: any } = {};
+	const res: { [key: string]: any } = {};
 	if (req.type === 'user') res['id'] = await saveUser(req, locals);
 	else if (req.type === 'household') await saveHousehold(req);
 	else if (req.type === 'householdChild') res['id'] = await saveKid(req);
 	else if (req.type === 'joinHousehold') {
 		const { err } = await createHouseholdInvite(req);
-		if (err) throw error(400, {
-            message: err
-        });
+		if (err)
+			throw error(400, {
+				message: err
+			});
 	}
 
 	return json(res);
@@ -70,9 +71,13 @@ export async function PATCH({
 	return json('success');
 }
 
-async function createHouseholdInvite(req: { targetPhone: string, householdId: number, fromUserId: number}) {
-	let {targetPhone, householdId, fromUserId} = req;
-	console.log('HOUSEHOLDID: ', householdId)
+async function createHouseholdInvite(req: {
+	targetPhone: string;
+	householdId: number;
+	fromUserId: number;
+}) {
+	const { targetPhone, fromUserId } = req;
+	let { householdId } = req;
 	if (!householdId) {
 		householdId = await createHousehold(fromUserId);
 	}
@@ -83,7 +88,10 @@ async function createHouseholdInvite(req: { targetPhone: string, householdId: nu
 			householdId
 		}
 	});
-	if (existingInvites.length) return { err: 'The user associated with this number has already been invited to this household.' };
+	if (existingInvites.length)
+		return {
+			err: 'The user associated with this number has already been invited to this household.'
+		};
 	const now = new Date();
 	const expires = now;
 	expires.setDate(now.getDate() + 7); // expire 1 week from now
@@ -91,9 +99,9 @@ async function createHouseholdInvite(req: { targetPhone: string, householdId: nu
 		data: {
 			expires,
 			targetPhone,
-			householdId, 
-			fromUserId, 
-			createdAt: now,
+			householdId,
+			fromUserId,
+			createdAt: now
 		}
 	});
 	return {};
@@ -186,19 +194,19 @@ async function createHousehold(userId: number) {
 		data: {
 			name: '',
 			publicNotes: '',
-			updatedAt: new Date(),
+			updatedAt: new Date()
 		}
 	});
-	console.log('CREATED HOUSEHOLD', household)
+	console.log('CREATED HOUSEHOLD', household);
 	// then associate user to it
 	await prisma.user.update({
 		where: {
-			id: userId,
+			id: userId
 		},
 		data: {
 			householdId: household.id
 		}
-	})
+	});
 
 	return household.id;
 }
@@ -214,7 +222,6 @@ async function saveHousehold(req: any) {
 	};
 
 	if (!householdId) {
-		console.log('CREATE HOUSEHOLD FOR USER', userId)
 		await createHousehold(userId);
 	} else {
 		await prisma.household.update({
@@ -228,11 +235,11 @@ async function saveHousehold(req: any) {
 
 async function saveKid(req: any) {
 	const { founderId } = req;
-	delete req.founderId
+	delete req.founderId;
 	delete req.type;
 	// ensure the household exists before adding kid to it
 	if (!req.householdId) {
-		req.householdId = await createHousehold(founderId)
+		req.householdId = await createHousehold(founderId);
 	}
 	const kid = await prisma.householdChild.create({
 		data: req
@@ -254,8 +261,8 @@ async function deleteHousehold(req: any) {
 	// delete all kids
 	const deleteKids = prisma.householdChild.deleteMany({
 		where: {
-		  householdId,
-		},
+			householdId
+		}
 	});
 
 	// disconnect all adults
@@ -279,10 +286,10 @@ async function deleteHousehold(req: any) {
 			updatedAt: new Date()
 		}
 	});
-	  
-	await prisma.$transaction([deleteKids, disconnectAdults, resetHousehold])
+
+	await prisma.$transaction([deleteKids, disconnectAdults, resetHousehold]);
 }
- 
+
 async function updateHouseholdAdult(req: any) {
 	const { id } = req;
 	await prisma.user.update({

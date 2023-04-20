@@ -14,9 +14,9 @@
 	let phoneInput: object;
 	let { householdId, name, publicNotes, kids, adults } = $page.data;
 	afterUpdate(() => {
-		householdId = $page.data.householdId
-		kids = $page.data.kids
-		adults = $page.data.adults
+		householdId = $page.data.householdId;
+		kids = $page.data.kids;
+		adults = $page.data.adults;
 	});
 
 	const now = new Date();
@@ -28,30 +28,36 @@
 	};
 	let modalReason: ModalReason;
 
-	onMount(async () => {
-		if (!$page.data.user.id) await invalidateAll()
+	function stylePhoneInput() {
 		const input: HTMLElement | null = document.querySelector('.iti');
 		if (input && input.style) input.style.flexGrow = '1';
+	}
+
+	onMount(async () => {
+		setTimeout(() => {
+			stylePhoneInput();
+		}, 1000);
+
+		if (!$page.data.user.id) await invalidateAll();
 	});
 
 	async function saveToDB() {
-		console.log($page.data.user)
-		// const response = await fetch('/db', {
-		// 	method: 'POST',
-		// 	body: JSON.stringify({
-		// 		type: 'household',
-		// 		id: householdId,
-		// 		userId: $page.data.user.id,
-		// 		name: name,
-		// 		publicNotes: publicNotes
-		// 	})
-		// });
-		// if (response.status == 200) {
-		// 	alert('Successfully saved household info');
-		// 	if (!householdId) await invalidate('data:householdId')
-		// } else {
-		// 	alert('Something went wrong with saving');
-		// }
+		const response = await fetch('/db', {
+			method: 'POST',
+			body: JSON.stringify({
+				type: 'household',
+				id: householdId,
+				userId: $page.data.user.id,
+				name: name,
+				publicNotes: publicNotes
+			})
+		});
+		if (response.status == 200) {
+			alert('Successfully saved household info');
+			if (!householdId) await invalidate('data:householdId');
+		} else {
+			alert('Something went wrong with saving');
+		}
 	}
 
 	async function addKid(e: SubmitEvent) {
@@ -68,7 +74,7 @@
 			})
 		});
 		if (response.status == 200) {
-			await invalidate('data:householdId')
+			await invalidate('data:householdId');
 			const { id } = await response.json();
 			kids = [
 				...kids,
@@ -94,7 +100,7 @@
 			})
 		});
 		if (response.status == 200) {
-			await invalidate('data:householdId')
+			await invalidate('data:householdId');
 			kids = kids.slice(0, ind).concat(kids.slice(ind + 1));
 		} else {
 			alert('Something went wrong with saving');
@@ -106,7 +112,7 @@
 			method: 'PATCH',
 			body: JSON.stringify({
 				type: 'householdAdult',
-				id: adults[adultInd].id,
+				id: adults[adultInd].id
 			})
 		});
 		if (response.status == 200) {
@@ -151,7 +157,7 @@
 		});
 		if (response.status == 200) {
 			alert('Successfully deleted household');
-			await invalidate('data:householdId')
+			await invalidate('data:householdId');
 
 			document.getElementById('household-form')?.reset();
 			document.getElementById('kid-form')?.reset();
@@ -170,13 +176,13 @@
 			body: JSON.stringify({
 				type: 'joinHousehold',
 				targetPhone: phoneInput.getNumber(),
-				householdId: householdId, 
-				fromUserId: $page.data.user.id, 
+				householdId: householdId,
+				fromUserId: $page.data.user.id
 			})
 		});
 		if (response.status == 200) {
 			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);
-			if (!householdId) await invalidate('data:householdId')
+			if (!householdId) await invalidate('data:householdId');
 		} else {
 			const { message } = await response.json();
 			alert(message);
@@ -223,7 +229,7 @@
 			</button>
 		</div>
 	</Modal>
-	
+
 	<form method="POST" action="/db" id="household-form" on:submit|preventDefault={saveToDB}>
 		<label class="subtitle" for="nickname">Nickname<span class="red">*</span></label>
 		<input type="text" name="nickname" required bind:value={name} />
@@ -294,11 +300,11 @@
 		<div class="delete-btn-container">
 			<button class="btn save-btn" type="submit">Save</button>
 			{#if householdId}
-			<button
-				class="btn important-delete-btn"
-				on:click|preventDefault={() => openModal(ModalReason.DELETE_HOUSEHOLD)}
-				>Delete Household</button
-			>
+				<button
+					class="btn important-delete-btn"
+					on:click|preventDefault={() => openModal(ModalReason.DELETE_HOUSEHOLD)}
+					>Delete Household</button
+				>
 			{/if}
 		</div>
 	</form>
