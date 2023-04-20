@@ -1,10 +1,56 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, RequestEvent } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
+
+const setLocal = async (
+	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
+	event: RequestEvent<Partial<Record<string, string>>, string | null>
+) => {
+	const userInfo: { [key: string]: string | number | null | boolean } = {
+		household: 'N/A',
+		firstName: '',
+		lastName: '',
+		pronouns: '',
+		timeZone: null,
+		locale: null,
+		email: '',
+		notifFreq: 7,
+		notifStartDay: null,
+		notifHr: null,
+		notifMin: 0,
+		acceptedTermsAt: null,
+		allowReminders: true,
+		allowInvites: true,
+		id: null,
+		householdId: null
+	};
+
+	if (user) {
+		for (const key of Object.keys(userInfo)) {
+			if (key in user) userInfo[key] = user[key];
+		}
+		userInfo.notifFreq = user.reminderIntervalDays;
+		userInfo.notifStartDay = user.reminderDatetime.getDay();
+		userInfo.notifHr = user.reminderDatetime.getHours();
+		userInfo.notifMin = user.reminderDatetime.getMinutes();
+		userInfo.allowReminders = user.phonePermissions.allowReminders;
+		userInfo.allowInvites = user.phonePermissions.allowInvites;
+
+		if (user.householdId) {
+			const household = await prisma.household.findUnique({
+				where: {
+					id: user.householdId
+				}
+			});
+			if (household && household.name.length) userInfo.household = household?.name;
+		}
+	}
+	event.locals.user = userInfo;
+};
 
 export const handle = (async ({ event, resolve }) => {
 	const cookie = event.cookies.get('session');
@@ -17,7 +63,7 @@ export const handle = (async ({ event, resolve }) => {
 				token: cookie
 			}
 		});
-    	if (!session || session.expires < new Date()) throw redirect(303, '/');
+		if (!session || session.expires < new Date()) throw redirect(303, '/');
 
 		// from hereon, it's a valid req with a cookie / session
 		const user: (User & { phonePermissions: PhoneContactPermissions }) | null =
@@ -37,44 +83,24 @@ export const handle = (async ({ event, resolve }) => {
 			return response;
 		}
 
+		await setLocal(user, event);
+
 		// F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification
-		if (!user && event.url.pathname !== '/profile') {
-			throw redirect(308, '/profile');
+		if (!user) {
+			if (event.url.pathname !== '/profile') throw redirect(308, '/profile');
+			const response = await resolve(event);
+			return response;
 		}
 
-		const userInfo: { [key: string]: string | number | null | boolean } = {
-			household: 'N/A',
-			firstName: '',
-			lastName: '',
-			pronouns: '',
-			timeZone: null,
-			locale: null,
-			email: '',
-			notifFreq: 7,
-			notifStartDay: null,
-			notifHr: null,
-			notifMin: 0,
-			acceptedTermsAt: null,
-			allowReminders: true,
-			allowInvites: true
-		};
-
-		if (user) {
-			for (const key of Object.keys(userInfo)) {
-				if (key in user) userInfo[key] = user[key];
-			}
-			userInfo.notifFreq = user.reminderIntervalDays;
-			userInfo.notifStartDay = user.reminderDatetime.getDay();
-			userInfo.notifHr = user.reminderDatetime.getHours();
-			userInfo.notifMin = user.reminderDatetime.getMinutes();
-			userInfo.allowReminders = user.phonePermissions.allowReminders;
-			userInfo.allowInvites = user.phonePermissions.allowInvites;
+		// F-D if there is no household associated
+		if (!user.householdId) {
+			if (event.url.pathname !== '/household') throw redirect(308, '/household');
+			const response = await resolve(event);
+			return response;
 		}
-		event.locals.user = userInfo;
 
 		/**
-		F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification
-		F-D if there is no household associated
+		TODO:
 		F-E if the associated household has no nickname
 		F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
 		F-G if there are pending friend invites

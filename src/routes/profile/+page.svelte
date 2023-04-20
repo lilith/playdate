@@ -1,20 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { LANGUAGES } from '../../constants';
+	import { PRONOUNS, LANGUAGES } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
-
-	const PRONOUNS = {
-		FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
-		EEY_EM_EIRS: 'e/ey, em, eirs',
-		HE_HIM_HIS: 'he, him, his',
-		PER_PER_PERS: 'per, per, pers',
-		SHE_HER_HERS: 'she, her, hers',
-		THEY_THEM_THEIRS: 'they, them, theirs',
-		VE_VER_VIS: 've, ver, vis',
-		XE_XEM_XYRS: 'xe, xem, xyrs',
-		ZEZIE_HIR_HIRS: 'ze/zie, hir, hirs'
-	};
+	import { goto } from '$app/navigation';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,
@@ -78,6 +67,7 @@
 		const response = await fetch('/db', {
 			method: 'POST',
 			body: JSON.stringify({
+				type: 'user',
 				firstName,
 				lastName,
 				pronouns,
@@ -94,7 +84,9 @@
 			})
 		});
 		if (response.status == 200) {
-			alert('Successfully saved profile info');
+			if ($page.data.user.household === 'N/A') {
+				goto('/household');
+			}
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -219,7 +211,7 @@
 			>).
 		</p>
 
-		<button type="submit" class="btn"> Save </button>
+		<button type="submit" class="btn" style="margin: 2rem auto 4rem;"> Save </button>
 	</form>
 </div>
 
@@ -250,47 +242,6 @@
 		font-size: 21px;
 		line-height: 26px;
 		color: #5a5a5a;
-	}
-	.btn {
-		margin-top: 25px;
-		width: 100%;
-		border-radius: 6px;
-		height: 45px;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-			Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-		font-style: normal;
-		font-weight: 600;
-		background: #73a4eb;
-		color: white;
-		font-size: 26px;
-	}
-
-	.subtitle {
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-			Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-		font-style: normal;
-		font-weight: 600;
-		font-size: 24px;
-		line-height: 30px;
-		color: #5a5a5a;
-	}
-
-	input,
-	select {
-		border: 1px solid #d9d9d9;
-		width: 100%;
-		border-radius: 6px;
-		height: 45px;
-		margin-bottom: 1rem;
-		margin-top: 0.2rem;
-		font-size: 22px;
-		line-height: 28px;
-		padding: 0 3px;
-	}
-
-	.red {
-		color: #bd0000;
-		font-weight: 400;
 	}
 
 	.switch {
