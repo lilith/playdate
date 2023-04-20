@@ -1,9 +1,10 @@
 <script lang="ts">
 	import PhoneInput from '../PhoneInput.svelte';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 	import { PRONOUNS } from '../../constants';
 	import Modal from '../Modal.svelte';
+	import { invalidate, invalidateAll } from '$app/navigation';
 
 	enum ModalReason {
 		DISCONNECT_ADULT,
@@ -11,7 +12,13 @@
 	}
 
 	let phoneInput: object;
-	let { id: householdId, name, publicNotes, kids, adults } = $page.data.household;
+	let { householdId, name, publicNotes, kids, adults } = $page.data;
+	afterUpdate(() => {
+		householdId = $page.data.householdId
+		kids = $page.data.kids
+		adults = $page.data.adults
+	});
+
 	const now = new Date();
 	let showModal = false;
 	let adultInd: number;
@@ -22,25 +29,29 @@
 	let modalReason: ModalReason;
 
 	onMount(async () => {
+		if (!$page.data.user.id) await invalidateAll()
 		const input: HTMLElement | null = document.querySelector('.iti');
 		if (input && input.style) input.style.flexGrow = '1';
 	});
 
 	async function saveToDB() {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'household',
-				id: householdId,
-				name,
-				publicNotes
-			})
-		});
-		if (response.status == 200) {
-			alert('Successfully saved household info');
-		} else {
-			alert('Something went wrong with saving');
-		}
+		console.log($page.data.user)
+		// const response = await fetch('/db', {
+		// 	method: 'POST',
+		// 	body: JSON.stringify({
+		// 		type: 'household',
+		// 		id: householdId,
+		// 		userId: $page.data.user.id,
+		// 		name: name,
+		// 		publicNotes: publicNotes
+		// 	})
+		// });
+		// if (response.status == 200) {
+		// 	alert('Successfully saved household info');
+		// 	if (!householdId) await invalidate('data:householdId')
+		// } else {
+		// 	alert('Something went wrong with saving');
+		// }
 	}
 
 	async function addKid(e: SubmitEvent) {
@@ -48,7 +59,8 @@
 			method: 'POST',
 			body: JSON.stringify({
 				type: 'householdChild',
-				householdId,
+				householdId: householdId,
+				founderId: $page.data.user.id,
 				firstName: e.target[0].value,
 				pronouns: e.target[2].value,
 				lastName: e.target[1].value,
@@ -56,6 +68,7 @@
 			})
 		});
 		if (response.status == 200) {
+			await invalidate('data:householdId')
 			const { id } = await response.json();
 			kids = [
 				...kids,
@@ -81,6 +94,7 @@
 			})
 		});
 		if (response.status == 200) {
+			await invalidate('data:householdId')
 			kids = kids.slice(0, ind).concat(kids.slice(ind + 1));
 		} else {
 			alert('Something went wrong with saving');
@@ -93,7 +107,6 @@
 			body: JSON.stringify({
 				type: 'householdAdult',
 				id: adults[adultInd].id,
-				householdId: null
 			})
 		});
 		if (response.status == 200) {
@@ -106,7 +119,7 @@
 	function openModal(type: ModalReason, ind?: number) {
 		switch (type) {
 			case ModalReason.DISCONNECT_ADULT:
-				if (ind !== null) {
+				if (ind !== undefined) {
 					if (adults[ind].id === $page.data.user.id) {
 						modalText.heading = 'Disconnect From Household';
 						modalText.content =
@@ -138,8 +151,35 @@
 		});
 		if (response.status == 200) {
 			alert('Successfully deleted household');
+			await invalidate('data:householdId')
+
+			document.getElementById('household-form')?.reset();
+			document.getElementById('kid-form')?.reset();
 		} else {
 			alert('Something went wrong with saving');
+		}
+	}
+
+	async function inviteAdult() {
+		if (!phoneInput.isValidNumber()) {
+			alert('You have entered an invalid contact number.');
+			return;
+		}
+		const response = await fetch('/db', {
+			method: 'POST',
+			body: JSON.stringify({
+				type: 'joinHousehold',
+				targetPhone: phoneInput.getNumber(),
+				householdId: householdId, 
+				fromUserId: $page.data.user.id, 
+			})
+		});
+		if (response.status == 200) {
+			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);
+			if (!householdId) await invalidate('data:householdId')
+		} else {
+			const { message } = await response.json();
+			alert(message);
 		}
 	}
 </script>
@@ -183,8 +223,8 @@
 			</button>
 		</div>
 	</Modal>
-
-	<form method="POST" action="/db" on:submit|preventDefault={saveToDB}>
+	
+	<form method="POST" action="/db" id="household-form" on:submit|preventDefault={saveToDB}>
 		<label class="subtitle" for="nickname">Nickname<span class="red">*</span></label>
 		<input type="text" name="nickname" required bind:value={name} />
 
@@ -206,7 +246,7 @@
 			<hr class="inner-section" />
 		{/each}
 
-		<form method="POST" action="/db" on:submit|preventDefault={addKid}>
+		<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
 			<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
 			<input type="text" name="first-name" required />
 
@@ -248,16 +288,18 @@
 
 		<div style="display: flex; gap: 20px;">
 			<PhoneInput bind:phoneInput />
-			<button class="add-btn">+</button>
+			<button class="add-btn" on:click|preventDefault={inviteAdult}>+</button>
 		</div>
 
 		<div class="delete-btn-container">
 			<button class="btn save-btn" type="submit">Save</button>
+			{#if householdId}
 			<button
 				class="btn important-delete-btn"
 				on:click|preventDefault={() => openModal(ModalReason.DELETE_HOUSEHOLD)}
 				>Delete Household</button
 			>
+			{/if}
 		</div>
 	</form>
 </div>
