@@ -5,6 +5,7 @@ import type { User, PhoneContactPermissions } from '@prisma/client';
 const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
+import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
@@ -52,6 +53,18 @@ const setLocal = async (
 	event.locals.user = userInfo;
 };
 
+const redirectOrContinue = (
+	event: RequestEvent,
+	path: string,
+	resolve: (
+		event: RequestEvent<Partial<Record<string, string>>, string | null>,
+		opts?: ResolveOptions | undefined
+	) => MaybePromise<Response>
+) => {
+	if (event.url.pathname !== path) throw redirect(308, path);
+	return resolve(event);
+};
+
 export const handle = (async ({ event, resolve }) => {
 	const cookie = event.cookies.get('session');
 
@@ -87,22 +100,36 @@ export const handle = (async ({ event, resolve }) => {
 
 		// F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification
 		if (!user) {
-			if (event.url.pathname !== '/profile') throw redirect(308, '/profile');
-			const response = await resolve(event);
-			return response;
+			return redirectOrContinue(event, '/profile', resolve);
 		}
 
 		// F-D if there is no household associated
 		if (!user.householdId) {
-			if (event.url.pathname !== '/household') throw redirect(308, '/household');
-			const response = await resolve(event);
-			return response;
+			return redirectOrContinue(event, '/household', resolve);
+		}
+
+		const household = await prisma.household.findUnique({
+			where: {
+				id: user.householdId
+			}
+		});
+		// F-D if there is no household associated
+		if (!household) {
+			return redirectOrContinue(event, '/household', resolve);
+		}
+		const kids = await prisma.householdChild.findMany({
+			where: {
+				householdId: user.householdId
+			}
+		});
+		// F-E if the associated household has no nickname
+		// F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
+		if (!household.name || !household.name.length || !kids.length) {
+			return redirectOrContinue(event, '/household', resolve);
 		}
 
 		/**
 		TODO:
-		F-E if the associated household has no nickname
-		F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
 		F-G if there are pending friend invites
 		If all of these are complete, the user will go to the default dashboard page F-H
 		*/
