@@ -8,14 +8,14 @@ export const load = (async ({ parent, depends }) => {
 		householdId: number | null;
 		name: string;
 		publicNotes: string;
-		kids: Array<{
+		kids: {
 			firstName: string;
 			pronouns: Pronoun;
 			lastName: string | null;
 			id: number;
-		}>;
+		}[];
 		adults: User[];
-		[key: string]: any;
+		[key: string]: number | string | Array<object | User> | null;
 	} = {
 		householdId: null,
 		name: '',

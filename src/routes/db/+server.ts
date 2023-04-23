@@ -1,6 +1,6 @@
 import { json, redirect, error } from '@sveltejs/kit';
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Pronoun } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -16,14 +16,13 @@ export async function POST({
 		phone: string;
 		user: (User & { phonePermissions: PhoneContactPermissions }) | null;
 	};
-	household: any;
 }) {
 	const sessionToken = cookies.get('session');
 	if (!sessionToken) throw redirect(303, '/');
 
 	const req = await request.json();
 
-	const res: { [key: string]: any } = {};
+	const res: { [key: string]: string | Pronoun | number | Date | boolean } = {};
 	if (req.type === 'user') res['id'] = await saveUser(req, locals);
 	else if (req.type === 'household') await saveHousehold(req);
 	else if (req.type === 'householdChild') res['id'] = await saveKid(req);
@@ -108,7 +107,21 @@ async function createHouseholdInvite(req: {
 }
 
 async function saveUser(
-	req: any,
+	req: {
+		firstName: string;
+		lastName: string;
+		pronouns: Pronoun;
+		timeZone: string;
+		locale: string;
+		email: string;
+		notifFreq: number;
+		notifStartDay: number;
+		notifHr: number;
+		notifMin: number;
+		acceptedTermsAt: Date;
+		allowReminders: boolean;
+		allowInvites: boolean;
+	},
 	locals: { phone: string; user: (User & { phonePermissions: PhoneContactPermissions }) | null }
 ) {
 	const {
@@ -135,7 +148,7 @@ async function saveUser(
 	d.setMinutes(notifMin);
 
 	const baseUser = {
-		locale: locale,
+		locale,
 		firstName,
 		lastName,
 		timeZone,
@@ -211,13 +224,16 @@ async function createHousehold(userId: number) {
 	return household.id;
 }
 
-async function saveHousehold(req: any) {
-	const { id: householdId, userId } = req;
-	delete req.type;
-	delete req.id;
-	delete req.userId;
+async function saveHousehold(req: {
+	id: number;
+	userId: number;
+	name: string;
+	publicNotes: string;
+}) {
+	const { id: householdId, userId, name, publicNotes } = req;
 	const data = {
-		...req,
+		name,
+		publicNotes,
 		updatedAt: new Date()
 	};
 
@@ -233,21 +249,33 @@ async function saveHousehold(req: any) {
 	}
 }
 
-async function saveKid(req: any) {
-	const { founderId } = req;
-	delete req.founderId;
-	delete req.type;
+async function saveKid(req: {
+	householdId: number;
+	founderId: number;
+	firstName: string;
+	pronouns: Pronoun;
+	lastName: string;
+	dateOfBirth: Date;
+}) {
+	const { founderId, firstName, pronouns, lastName, dateOfBirth } = req;
+	let { householdId } = req;
 	// ensure the household exists before adding kid to it
-	if (!req.householdId) {
-		req.householdId = await createHousehold(founderId);
+	if (!householdId) {
+		householdId = await createHousehold(founderId);
 	}
 	const kid = await prisma.householdChild.create({
-		data: req
+		data: {
+			householdId,
+			firstName,
+			pronouns,
+			lastName,
+			dateOfBirth
+		}
 	});
 	return kid.id;
 }
 
-async function deleteKid(req: any) {
+async function deleteKid(req: { id: number }) {
 	const { id } = req;
 	await prisma.householdChild.delete({
 		where: {
@@ -256,7 +284,7 @@ async function deleteKid(req: any) {
 	});
 }
 
-async function deleteHousehold(req: any) {
+async function deleteHousehold(req: { id: number }) {
 	const { id: householdId } = req;
 	// delete all kids
 	const deleteKids = prisma.householdChild.deleteMany({
@@ -290,7 +318,7 @@ async function deleteHousehold(req: any) {
 	await prisma.$transaction([deleteKids, disconnectAdults, resetHousehold]);
 }
 
-async function updateHouseholdAdult(req: any) {
+async function updateHouseholdAdult(req: { id: number }) {
 	const { id } = req;
 	await prisma.user.update({
 		where: {
