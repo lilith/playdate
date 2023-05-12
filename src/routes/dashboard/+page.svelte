@@ -1,10 +1,79 @@
 <script>
 	import Legend from './Legend.svelte';
+	const overlaps = [
+		{
+			dateRange: 'Tuesday 2/12',
+			householdId: 2,
+			house: 'Doe House (Alice, 8) (Kevin, 6)',
+			timeRange: '11am - 6pm',
+			userAvailability: '🏠🚗',
+			themAvailability: '🏠🚗👥🌟',
+			contacts: [
+				{
+					name: 'John Doe',
+					phone: '+15107120505'
+				},
+				{
+					name: 'John Doe',
+					phone: '+15107120505'
+				}
+			]
+		}
+	];
+	const userSched = [
+		{
+			dateRange: 'Tuesday 2/12',
+			timeRange: '11am - 6pm',
+			availability: '🏠🚗'
+		},
+		{
+			dateRange: 'Wednesday 2/13 - Sunday 2/17',
+			availability: 'Busy'
+		}
+	];
+	const circleScheds = [
+		{
+			dateRange: 'Tuesday 2/12',
+			householdId: 2,
+			house: 'Doe House (Alice, 8) (Kevin, 6)',
+			timeRange: '11am - 6pm',
+			availability: '🏠🚗',
+			themAvailability: '🏠🚗👥🌟',
+			contacts: [
+				{
+					name: 'John Doe',
+					phone: '+15107120505'
+				},
+				{
+					name: 'John Doe',
+					phone: '+15107120505'
+				}
+			]
+		},
+		{
+			dateRange: 'Tuesday 2/12',
+			householdId: 2,
+			house: 'Smith House (Alice, 8) (Kevin, 6)',
+			timeRange: '11am - 6pm',
+			availability: '🏠🚗',
+			themAvailability: '🏠🚗👥🌟',
+			contacts: [
+				{
+					name: 'John Doe',
+					phone: '+15107120505'
+				},
+				{
+					name: 'John Doe',
+					phone: '+15107120505'
+				}
+			]
+		}
+	];
 </script>
 
-<div>
+<div class="container">
 	<h1>Dashboard</h1>
-	<div class="container">
+	<div style="margin-bottom: 2rem;">
 		<p class="subtitle">Notices<span>2</span></p>
 		<div class="notice">
 			<p>Empty Schedule</p>
@@ -19,105 +88,102 @@
 
 	<!-- planning on condensing range of contiguous days and hours overlapping into one summary -->
 	<p class="subtitle">Overlaps</p>
-	<p class="bold larger">Tuesday 2/12</p>
-	<div class="summary">
-		<p class="bold household">Doe House (Alice, 8) (Kevin, 6)</p>
-		<p class="bold">11am - 6pm</p>
-		<div class="tooltip-container">
-			<div class="tooltip">
-				<p>
-					You: 🏠🚗
-					<span class="tooltiptext">
-						<Legend />
-					</span>
-				</p>
+	{#each overlaps as overlap}
+		<p class="bold larger">{overlap.dateRange}</p>
+		<div class="summary">
+			<a class="bold household" href="/household/{overlap.householdId}">{overlap.house}</a>
+			<p class="bold">{overlap.timeRange}</p>
+			<div class="tooltip-container">
+				<div class="tooltip">
+					<p>
+						You: {overlap.userAvailability}
+						<span class="tooltiptext">
+							<Legend />
+						</span>
+					</p>
+				</div>
+				|
+				<div class="tooltip">
+					<p>
+						Them: {overlap.themAvailability}
+						<span class="tooltiptext">
+							<Legend />
+						</span>
+					</p>
+				</div>
 			</div>
-			|
-			<div class="tooltip">
-				<p>
-					Them: 🏠🚗👥🌟
-					<span class="tooltiptext">
-						<Legend />
-					</span>
-				</p>
-			</div>
+			<p>Contacts to set up a play date:</p>
+			<ul>
+				{#each overlap.contacts as contact}
+					<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
+				{/each}
+			</ul>
 		</div>
-		<p>Contacts to set up a play date:</p>
-		<ul>
-			<li>John Doe - <a href="tel:+15107120505">(123) 244-5677</a></li>
-			<li>John Doe - <a href="tel:+15107120505">(123) 244-5677</a></li>
-		</ul>
-	</div>
+	{/each}
 
 	<p class="subtitle">Your Schedule</p>
-	<!-- TODO: put a foreach here -->
-	<div class="summary">
-		<p class="bold">Tuesday 2/12</p>
-		<p class="bold">11am - 6pm</p>
-		<div class="tooltip">
-			<p>
-				🏠🚗
-				<span class="tooltiptext">
-					<Legend />
-				</span>
-			</p>
+	{#each userSched as sched}
+		<div class="summary">
+			<p class="bold">{sched.dateRange}</p>
+			{#if sched.availability === 'Busy'}
+				<p class="bold">Busy</p>
+			{:else}
+				<p class="bold">{sched.timeRange}</p>
+				<div class="tooltip">
+					<p>
+						{sched.availability}
+						<span class="tooltiptext">
+							<Legend />
+						</span>
+					</p>
+				</div>
+			{/if}
 		</div>
-	</div>
-	<div class="summary">
-		<p class="bold">Wednesday 2/13 - Sunday 2/17</p>
-		<p class="bold">Busy</p>
-	</div>
-	<div class="summary">
-		<p class="bold">Monday 2/18</p>
-		<p class="bold">11am - 6pm</p>
-		<div class="tooltip">
-			<p>
-				🏠🚗
-				<span class="tooltiptext">
-					<Legend />
-				</span>
-			</p>
-		</div>
-	</div>
+	{/each}
 
 	<p class="subtitle">Your Circle's Schedules</p>
-	<div class="summary">
-		<p class="bold household">Doe House (Alice, 8) (Kevin, 6)</p>
-		<p class="bold">Tuesday 2/12</p>
-		<p class="bold">11am - 6pm</p>
-		<div class="tooltip">
-			<p>
-				🏠🚗
-				<span class="tooltiptext">
-					<Legend />
-				</span>
-			</p>
+	{#each circleScheds as sched}
+		<p class="bold larger">{sched.dateRange}</p>
+		<div class="summary">
+			<a class="bold household" href="/household/{sched.householdId}">{sched.house}</a>
+			<p class="bold">{sched.timeRange}</p>
+			<div class="tooltip">
+				<p>
+					{sched.availability}
+					<span class="tooltiptext">
+						<Legend />
+					</span>
+				</p>
+			</div>
+			<p>Contacts to set up a play date:</p>
+			<ul>
+				{#each sched.contacts as contact}
+					<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
+				{/each}
+			</ul>
 		</div>
-		<ul>
-			<li>John Doe - <a href="tel:+15107120505">(123) 244-5677</a></li>
-			<li>John Doe - <a href="tel:+15107120505">(123) 244-5677</a></li>
-		</ul>
-	</div>
-	<div class="summary">
-		<p class="bold household">Smith House (Alice, 8) (Kevin, 6)</p>
-		<p class="bold">Tuesday 2/12</p>
-		<p class="bold">11am - 6pm</p>
-		<div class="tooltip">
-			<p>
-				🏠🚗
-				<span class="tooltiptext">
-					<Legend />
-				</span>
-			</p>
+	{/each}
+	<div id="navigator">
+		<div>
+			<a href="/profile">Profile</a>
 		</div>
-		<ul>
-			<li>John Doe - <a href="tel:+15107120505">(123) 244-5677</a></li>
-			<li>John Doe - <a href="tel:+15107120505">(123) 244-5677</a></li>
-		</ul>
+		<div>
+			<a href="/household">Household</a>
+		</div>
 	</div>
 </div>
 
 <style>
+	#navigator {
+		position: fixed;
+		bottom: 0;
+		display: flex;
+		width: 100%;
+	}
+	#navigator div {
+		width: calc((100% - 2rem) / 2);
+		text-align: center;
+	}
 	.household {
 		color: black;
 		font-size: large;
@@ -138,15 +204,6 @@
 
 	li {
 		list-style: inside;
-	}
-
-	.subtitle {
-		margin-bottom: 1rem;
-	}
-
-	.container {
-		margin-bottom: 2rem;
-		background: #f7f9fa;
 	}
 
 	.bold {
