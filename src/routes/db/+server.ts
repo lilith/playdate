@@ -32,6 +32,8 @@ export async function POST({
 			throw error(400, {
 				message: err
 			});
+	} else if (req.type === 'schedule') {
+		await saveSchedule(req);
 	}
 
 	return json(res);
@@ -68,6 +70,54 @@ export async function PATCH({
 
 	if (req.type === 'householdAdult') await updateHouseholdAdult(req);
 	return json('success');
+}
+
+async function saveSchedule(req: {
+	monthDay: string;
+	status: string;
+	notes: string | undefined;
+	householdId: number;
+	startHr: number | undefined;
+	startMin: number | undefined;
+	endHr: number | undefined;
+	endMin: number | undefined;
+}) {
+	const { monthDay, status, notes, householdId, startHr, startMin, endHr, endMin } = req;
+	const date = new Date(monthDay);
+	const startTime = new Date(date);
+	const endTime = new Date(date);
+	console.log('DATE', date)
+	if (startHr) startTime.setHours(startHr);
+	if (startMin) startTime.setMinutes(startMin);
+	if (endHr) endTime.setHours(endHr);
+	if (endMin) endTime.setMinutes(endMin);
+
+	console.log(monthDay, status)
+	// if (status === 'BUSY') {
+		// if an entry for this date already exists in the db, then patch it
+		// otherwise create it
+		console.log(householdId, date)
+		await prisma.availabilityDate.upsert({
+			where: {
+				householdId_date: {
+					householdId,
+					date,
+				}
+			},
+			update: {
+				status,
+				notes,
+			},
+			create: {
+				householdId,
+				date,
+				status,
+				startTime,
+				endTime,
+				notes,
+			},
+		})
+	// }
 }
 
 async function createHouseholdInvite(req: {

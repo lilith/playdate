@@ -1,5 +1,5 @@
 <script>
-	import Legend from './Legend.svelte';
+	import Legend from '../Legend.svelte';
 	const overlaps = [
 		{
 			dateRange: 'Tuesday 2/12',
@@ -163,27 +163,9 @@
 			</ul>
 		</div>
 	{/each}
-	<div id="navigator">
-		<div>
-			<a href="/profile">Profile</a>
-		</div>
-		<div>
-			<a href="/household">Household</a>
-		</div>
-	</div>
 </div>
 
 <style>
-	#navigator {
-		position: fixed;
-		bottom: 0;
-		display: flex;
-		width: 100%;
-	}
-	#navigator div {
-		width: calc((100% - 2rem) / 2);
-		text-align: center;
-	}
 	.household {
 		color: black;
 		font-size: large;
@@ -196,10 +178,6 @@
 
 	.larger {
 		font-size: larger;
-	}
-
-	a {
-		color: black;
 	}
 
 	li {
@@ -242,49 +220,4 @@
 		padding-bottom: 0.8rem;
 		font-size: large;
 	}
-
-	.tooltip {
-		position: relative;
-		display: inline-flex;
-		justify-content: center;
-		width: 50%;
-	}
-
-	.tooltip p {
-		border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-		width: fit-content;
-	}
-
-	/* Tooltip text */
-	.tooltip .tooltiptext {
-		visibility: hidden;
-		width: 133px;
-		background-color: black;
-		color: #fff;
-		text-align: left;
-		padding: 5px 0;
-		border-radius: 6px;
-		position: absolute;
-		z-index: 1;
-		left: 50%;
-		bottom: 110%;
-		transform: translateX(-50%);
-		padding-left: 0.5rem;
-	}
-
-	/* Show the tooltip text when you mouse over the tooltip container */
-	.tooltip:hover .tooltiptext {
-		visibility: visible;
-	}
-
-	.tooltip .tooltiptext::after {
-		content: ' ';
-		position: absolute;
-		top: 100%; /* At the bottom of the tooltip */
-		left: 50%;
-		margin-left: -5px;
-		border-width: 5px;
-		border-style: solid;
-		border-color: black transparent transparent transparent;
-	}
-</style>
+	</style>

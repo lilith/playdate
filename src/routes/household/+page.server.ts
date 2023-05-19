@@ -26,7 +26,7 @@ export const load = (async ({ parent, depends }) => {
 
 	const { user } = await parent();
 	const householdId = user.householdId;
-	if (user.householdId) {
+	if (householdId) {
 		const household = await prisma.household.findUnique({
 			where: {
 				id: householdId

@@ -4,7 +4,8 @@
 	export let bgColor = '#f4ed2a';
 	export let color = 'white';
 	export let margin = '';
-	$: cssVarStyles = `--bg:${bgColor};--color:${color};--margin:${margin};`;
+	export let padding = '0.4rem 2.8rem';
+	$: cssVarStyles = `--bg:${bgColor};--color:${color};--margin:${margin};--padding:${padding}`;
 
 	export let onClick: () => void;
 </script>
@@ -23,7 +24,7 @@
 		color: var(--color, black);
 		margin: var(--margin);
 
-		padding: 0.4rem 2.8rem;
+		padding: var(--padding);
 		font-size: x-large;
 	}
 </style>

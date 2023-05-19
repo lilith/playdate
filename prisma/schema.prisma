@@ -147,6 +147,7 @@ model AvailabilityDate {
   child       HouseholdChild?    @relation(fields: [childId], references: [id])
   household   Household          @relation(fields: [householdId], references: [id])
   parent      User?              @relation(fields: [parentId], references: [id])
+  @@unique([householdId, date])
 }
 
 model HouseholdConnection {

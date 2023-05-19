@@ -60,6 +60,7 @@ const redirectOrContinue = (
 		opts?: ResolveOptions | undefined
 	) => MaybePromise<Response>
 ) => {
+	console.log('REDIRECT OR CONT', event.url.pathname, path)
 	if (event.url.pathname !== path) throw redirect(308, path);
 	return resolve(event);
 };
@@ -114,6 +115,7 @@ export const handle = (async ({ event, resolve }) => {
 
 		// F-D if there is no household associated
 		if (!user.householdId) {
+			console.log('1')
 			return redirectOrContinue(event, '/household', resolve);
 		}
 
@@ -124,6 +126,7 @@ export const handle = (async ({ event, resolve }) => {
 		});
 		// F-D if there is no household associated
 		if (!household) {
+			console.log('2')
 			return redirectOrContinue(event, '/household', resolve);
 		}
 		const kids = await prisma.householdChild.findMany({
@@ -134,6 +137,7 @@ export const handle = (async ({ event, resolve }) => {
 		// F-E if the associated household has no nickname
 		// F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
 		if (!household.name || !household.name.length || !kids.length) {
+			console.log('3')
 			return redirectOrContinue(event, '/household', resolve);
 		}
 
@@ -143,6 +147,7 @@ export const handle = (async ({ event, resolve }) => {
 		If all of these are complete, the user will go to the default dashboard page F-H
 		*/
 	}
+	console.log('DOWN HERE')
 	const response = await resolve(event);
 	return response;
 }) satisfies Handle;
