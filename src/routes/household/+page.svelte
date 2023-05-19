@@ -348,6 +348,7 @@
 		border-radius: 6px;
 		margin: 1rem auto;
 		gap: 20px;
+		background: white;
 	}
 	.delete-btn,
 	.add-btn {
