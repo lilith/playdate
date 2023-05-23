@@ -83,18 +83,8 @@ async function saveSchedule(req: {
 	endHr: number;
 	endMin: number;
 }) {
-	const {
-		monthDay,
-		status,
-		notes,
-		emoticons,
-		householdId,
-		startHr,
-		startMin,
-		endHr,
-		endMin
-	} = req;
-	console.log('REQ', req)
+	const { monthDay, status, notes, emoticons, householdId, startHr, startMin, endHr, endMin } = req;
+	console.log('REQ', req);
 	const date = new Date(monthDay);
 	// if (startHr !== null && startMin !== null && endHr !== null && endMin !== null) {
 	const startTime = new Date(date);
@@ -104,15 +94,15 @@ async function saveSchedule(req: {
 	endTime.setHours(endHr);
 	endTime.setMinutes(endMin);
 	// }
-	
+
 	// if (status === 'BUSY') {
-		// if an entry for this date already exists in the db, then patch it
-		// otherwise create it
+	// if an entry for this date already exists in the db, then patch it
+	// otherwise create it
 	await prisma.availabilityDate.upsert({
 		where: {
 			householdId_date: {
 				householdId,
-				date,
+				date
 			}
 		},
 		update: {
@@ -120,7 +110,7 @@ async function saveSchedule(req: {
 			notes,
 			emoticons,
 			startTime,
-			endTime,
+			endTime
 		},
 		create: {
 			householdId,
@@ -129,9 +119,9 @@ async function saveSchedule(req: {
 			notes,
 			emoticons,
 			startTime,
-			endTime,
-		},
-	})
+			endTime
+		}
+	});
 	// }
 }
 

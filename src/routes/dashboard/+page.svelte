@@ -220,4 +220,4 @@
 		padding-bottom: 0.8rem;
 		font-size: large;
 	}
-	</style>
+</style>

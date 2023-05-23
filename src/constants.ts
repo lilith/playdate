@@ -1,12 +1,4 @@
-export const DAYS = [
-	'Sun.',
-	'Mon.',
-	'Tues.',
-	'Wed.',
-	'Thur.',
-	'Fri.',
-	'Sat.'
-];
+export const DAYS = ['Sun.', 'Mon.', 'Tues.', 'Wed.', 'Thur.', 'Fri.', 'Sat.'];
 
 export const PRONOUNS = {
 	FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
