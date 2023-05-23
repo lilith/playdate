@@ -137,7 +137,7 @@ export const handle = (async ({ event, resolve }) => {
 		// F-E if the associated household has no nickname
 		// F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
 		if (!household.name || !household.name.length || !kids.length) {
-			console.log('3')
+			console.log('3', !household.name, !household.name.length, !kids.length)
 			return redirectOrContinue(event, '/household', resolve);
 		}
 

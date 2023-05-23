@@ -5,25 +5,84 @@
     import { invalidate } from '$app/navigation';
     import { afterUpdate, onMount } from 'svelte';
     import { page } from '$app/stores';
+	import { AvailabilityStatus } from '@prisma/client';
 
     let { availabilityDates, user } = $page.data;
 
-    let rows: any[] = [];
-    const EMOTICONS = ['🏠','🚗','👤','👥','🏫','⭐️','🌟','🙏'];
+    let rows: {
+        englishDay: string,
+        monthDay: string,
+        availRange: any,
+        notes: string | undefined,
+        emoticons: Set<string>,
+        startHr: number | undefined,
+        startMin: number | undefined,
+        endHr: number | undefined,
+        endMin: number | undefined,
+    }[] = [];
+    function oneStr(emoji: string) {
+        return [...emoji].join("");
+    }
+    // const EMOTICONS_ENGLISH = [
+    //     'house',
+    //     'car',
+    //     'person',
+    //     'people',
+    //     'school',
+    //     'star1',
+    //     'star2',
+    //     'star3',
+    // ];
+    // const EMOTICONS = [
+    //     '🏠',
+    //     '🚗',
+    //     '👤',
+    //     '👥',
+    //     '🏫',
+    //     '⭐️',
+    //     '🌟',
+    //     '🙏'
+    // ];
+    const EMOTICONS = {
+        '🏠': 'houes',
+        '🚗': 'car',
+        '👤': 'person',
+        '👥': 'people',
+        '🏫': 'school',
+        '⭐️': 'star1',
+        '🌟': 'star2',
+        '🙏': 'star3',
+    };
+
+    const now = new Date();
     onMount(() => {
-        rows = [...Array(21).keys()].map((x) => {
+        rows = [...Array(21).keys()].map((x, i) => {
             const date = new Date(new Date().setDate(now.getDate() + x));
             const englishDay = DAYS[date.getDay()];
-            const monthDay = `${date.getMonth()}/${date.getDate()}`;
+            const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
             let availRange = 'Unspecified'; // one of 'BUSY', 'Unspecified', and some time range
             let notes;
-            let emoticons = new Set();
-
+            let startHr;
+            let startMin;
+            let endHr;
+            let endMin;
+            let emoticons = new Set<string>();
             if (availabilityDates && monthDay in availabilityDates) {
                 availRange = availabilityDates[monthDay].availRange;
+                if (availRange !== AvailabilityStatus.UNSPECIFIED && availRange !== AvailabilityStatus.BUSY) {
+                    // it's gonna be formatted like H:MM - H:MM
+                    const timeSplit = availRange.split(/[( - )|:]/);
+                    startHr = parseInt(timeSplit[0]);
+                    startMin = parseInt(timeSplit[1]);
+                    endHr = parseInt(timeSplit[3]);
+                    endMin = parseInt(timeSplit[4]);
+                }
                 notes = availabilityDates[monthDay].notes;
-                if (availabilityDates[monthDay].emoticons)
-                    availabilityDates[monthDay].emoticons.forEach((x: string) => emoticons.add(x))
+                if (availabilityDates[monthDay].emoticons) {
+                    for (const emoji of availabilityDates[monthDay].emoticons.split(',')) {
+                        emoticons.add(emoji);
+                    }
+                }
             }
             return {
                 englishDay,
@@ -31,6 +90,10 @@
                 availRange,
                 notes,
                 emoticons,
+                startHr,
+                startMin,
+                endHr,
+                endMin,
             };
         });
     });
@@ -49,12 +112,6 @@
             };
         });
 	});
-    const now = new Date();
-
-    let startHr = now.getHours();
-    let startMin = now.getMinutes();
-    let endHr = now.getHours();
-    let endMin = now.getMinutes();
     
     // const emoticons: { [key: string]: boolean } = {
     //     '🏠': false,
@@ -72,12 +129,15 @@
     async function markAs(
         i: number,
         status: string,
-        // startHr?: number,
-        // startMin?: number,
-        // endHr?: number,
-        // endMin?: number,
     ) {
-        console.log(rows[i], status)
+        if (status === AvailabilityStatus.UNSPECIFIED) {
+            rows[i].notes = '';
+            rows[i].emoticons = new Set();
+            rows[i].startHr = undefined;
+            rows[i].startMin = undefined;
+            rows[i].endHr = undefined;
+            rows[i].endMin = undefined;
+        }
         const response = await fetch('/db', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -85,12 +145,12 @@
 				monthDay: rows[i].monthDay,
                 status,
                 notes: rows[i].notes,
-                emoticons: rows[i].emoticons,
+                emoticons: Array.from(rows[i].emoticons).join(','),
                 householdId: user.householdId,
-                startHr,
-                startMin,
-                endHr,
-                endMin,
+                startHr: rows[i].startHr,
+                startMin: rows[i].startMin,
+                endHr: rows[i].endHr,
+                endMin: rows[i].endMin,
 			})
 		});
 		if (response.status == 200) {
@@ -101,63 +161,16 @@
     }
 
     function toggleEmoticon(i: number, emoticon: string) {
-        console.log(i, emoticon)
         if (rows[i].emoticons.has(emoticon)) {
             rows[i].emoticons.delete(emoticon);
         } else {
             rows[i].emoticons.add(emoticon);
         }
         rows[i].emoticons = new Set(rows[i].emoticons);
-        console.log(rows[i].emoticons)
     }
 </script>
 <div style="text-align: center;">
     <h1>Calendar</h1>
-    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-        <table class="legend">
-            <tr>
-                <th colspan="2">Circumstances</th>
-            </tr>
-            <tr>
-                <td>🏠</td>
-                <td>Can Host</td>
-            </tr>
-            <tr>
-                <td>🚗</td>
-                <td>Can Visit</td>
-            </tr>
-            <tr>
-                <td>👤</td>
-                <td>Just Kids</td>
-            </tr>
-            <tr>
-                <td>👥</td>
-                <td>Chaperones</td>
-            </tr>
-            <tr>
-                <td>🏫</td>
-                <td>At School</td>
-            </tr>
-        </table>
-        <table class="legend">
-            <tr>
-                <th colspan="2">Likelihood of Availability</th>
-            </tr>
-            <tr>
-                <td>⭐️</td>
-                <td>Good</td>
-            </tr>
-            <tr>
-                <td>🌟</td>
-                <td>Great</td>
-            </tr>
-            <tr>
-                <td>🙏</td>
-                <td>Please help</td>
-            </tr>
-        </table>
-    </div>
-    <p class="subtitle-2">Legends</p>
 
     <table id="schedule">
     {#each rows as row, i}
@@ -173,8 +186,8 @@
             </td>
             {#if row.availRange === 'Unspecified'}
             <td
-                on:click={() => markAs(i, 'BUSY')}
-                on:keyup={() => markAs(i, 'BUSY')}
+                on:click={() => markAs(i, AvailabilityStatus.BUSY)}
+                on:keyup={() => markAs(i, AvailabilityStatus.BUSY)}
                 class="busy"
             >
                 Mark Busy
@@ -186,8 +199,15 @@
             >
                 Edit
             </td>
-            {:else if row.availRange === 'BUSY'}
-            <td colspan="2">Clear</td>
+            {:else if row.availRange === 'Busy'}
+            <td
+                colspan="2"
+                class="clear"
+                on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+                on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+            >
+                Clear
+            </td>
             {:else}
             <td
                 class="edit"
@@ -198,8 +218,8 @@
             </td>
             <td
                 class="clear"
-                on:click={() => markAs(i, 'BUSY')}
-                on:keyup={() => markAs(i, 'BUSY')}
+                on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+                on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
             >
                 Clear
             </td>
@@ -208,19 +228,28 @@
         {#if shownRows.has(i)}
         <tr style="background: #A0E3FF">
             <td colspan="5" style="padding: 0.4rem;">
-                <div style="margin-bottom: 0.5rem; font-size: large; font-weight: 600;">
-                    {row.englishDay} {row.monthDay} 
+                <div style="position: relative; margin: 0.8rem 1rem;">
+                    <div style="margin-bottom: 0.5rem; font-size: large; font-weight: 600;">
+                        {row.englishDay} {row.monthDay} 
+                    </div>
+                    <div
+                        class="close-btn"
+                        on:click={() => { shownRows.delete(i); shownRows = new Set(shownRows); }}
+                        on:keyup={() => { shownRows.delete(i); shownRows = new Set(shownRows); }}
+                    >
+                        X
+                    </div>
                 </div>
-                <form on:submit={(e) => markAs(i, 'AVAILABLE')}>
+                <form on:submit|preventDefault={() => markAs(i, AvailabilityStatus.AVAILABLE)}>
                     <div class="v-center-h-space">
                         <label class="thin-label" for="start-hr">Start</label>
                         <div>
-                            <select name="start-hr" bind:value={startHr}>
-                                {#each [...Array(31).keys()] as hr}
+                            <select name="start-hr" bind:value={row.startHr}>
+                                {#each [...Array(24).keys()] as hr}
                                     <option value={hr}>{hr}</option>
                                 {/each}
                             </select>:
-                            <select name="start-min" bind:value={startMin}>
+                            <select name="start-min" bind:value={row.startMin}>
                                 {#each [...Array(60).keys()] as min}
                                     <option value={min}>{min < 10 ? `0${min}` : min}</option>
                                 {/each}
@@ -228,12 +257,12 @@
                         </div>
                         <label class="thin-label" for="end-hr">End</label>
                         <div>
-                            <select name="end-hr" bind:value={endHr}>
-                                {#each [...Array(31).keys()] as hr}
+                            <select name="end-hr" bind:value={row.endHr}>
+                                {#each [...Array(24).keys()] as hr}
                                     <option value={hr}>{hr}</option>
                                 {/each}
                             </select>:
-                            <select name="end-min" bind:value={endMin}>
+                            <select name="end-min" bind:value={row.endMin}>
                                 {#each [...Array(60).keys()] as min}
                                     <option value={min}>{min < 10 ? `0${min}` : min}</option>
                                 {/each}
@@ -241,23 +270,14 @@
                         </div>
                     </div>
                     <div class="v-center-h-space">
-                        <!-- {#each Object.entries(emoticons) as [emoticon, chosen]}
-                            <div
-                                class="emoji {chosen ? 'chosen' : ''}"
-                                on:click={() => emoticons[emoticon] = !chosen}
-                                on:keyup={() => emoticons[emoticon] = !chosen}
-                            >
-                                {emoticon}
-                            </div>
-                        {/each} -->
                         {#key row.emoticons}
-                        {#each EMOTICONS as emoticon}
+                        {#each Object.entries(EMOTICONS) as [emoji, english]}
                             <div
-                                class="emoji {row.emoticons.has(emoticon) ? 'chosen' : ''}"
-                                on:click={() => toggleEmoticon(i, emoticon)}
-                                on:keyup={() => toggleEmoticon(i, emoticon)}
+                                class="emoji {row.emoticons.has(english) ? 'chosen' : ''}"
+                                on:click={() => toggleEmoticon(i, english)}
+                                on:keyup={() => toggleEmoticon(i, english)}
                             >
-                                {emoticon}
+                                {emoji}
                             </div>
                         {/each}
                         {/key}
@@ -292,6 +312,12 @@
     </table>
 </div>
 <style>
+    .close-btn {
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-size: large;
+    }
     .emoji.chosen {
         border: 1px solid black;
     }
@@ -324,14 +350,7 @@
         border-collapse: collapse;
         border: 1px solid #dddddd;
     }
-    .legend {
-        font-size: larger;
-        width: fit-content;
-    }
-    .legend tr:nth-child(odd){background-color: #f2f2f2;}
-    .legend td {
-        padding: 0.4rem 0.9rem;
-    }
+    
     #schedule {
         width: 100%;
     }
@@ -342,18 +361,6 @@
     td {
         border-right: 1px solid #dddddd;
         text-align: left;
-    }
-
-    .subtitle-2 {
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
-        font-size: larger;
-        font-weight: 500;
-    }
-
-    th {
-        height: 4rem;
-        border-bottom: 1px solid #dddddd;
     }
     .emoji {
         background: white;

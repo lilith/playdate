@@ -76,5 +76,6 @@ export async function GET({
 		}
 	});
 
+	console.log('redirect to dashboard')
 	throw redirect(308, '/dashboard');
 }

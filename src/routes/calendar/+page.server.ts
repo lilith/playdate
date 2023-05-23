@@ -9,8 +9,8 @@ export const load = (async ({ parent, depends }) => {
     const availabilityDates: {
         [key: string]: {
             availRange: string,
-            notes: string | undefined,
-            emoticons: string | undefined,
+            notes: string | null,
+            emoticons: string | null,
         }
     } = {};
     // e.g. MONTH/DAY: {
@@ -23,12 +23,17 @@ export const load = (async ({ parent, depends }) => {
                 householdId
             }
         });
-        rawAvailabilityDates.forEach((x: {
-            date: Date, status: AvailabilityStatus,
-            startTime: Date, endTime: Date,
+        /*
+        {
+            date: Date,
+            status: AvailabilityStatus,
+            startTime: Date,
+            endTime: Date,
             emoticons: string | undefined,
             notes: string | undefined,
-        }) => {
+        }
+         */
+        rawAvailabilityDates.forEach((x) => {
             const key = `${x.date.getMonth() + 1}/${x.date.getDate()}`;
             let availRange;
             switch (x.status) {
@@ -39,17 +44,20 @@ export const load = (async ({ parent, depends }) => {
                     availRange = 'Unspecified';
                     break;
                 default: {
-                    const startMins = x.startTime.getMinutes();
-                    let startRange = `${startMins}`;
-                    if (startMins < 10) startRange = `0${startRange}`;
-                    startRange = `${x.startTime.getHours()}:{startRange}`;
+                    availRange = 'AVAILABLE'; // should never actually be rendered as such
+                    if (x.startTime && x.endTime) {
+                        const startMins = x.startTime.getMinutes();
+                        let startRange = `${startMins}`;
+                        if (startMins < 10) startRange = `0${startRange}`;
+                        startRange = `${x.startTime.getHours()}:${startRange}`;
 
-                    const endMins = x.endTime.getMinutes();
-                    let endRange = `${endMins}`;
-                    if (endMins < 10) endRange = `0${endRange}`;
-                    endRange = `${x.endTime.getHours()}:{endRange}`;
+                        const endMins = x.endTime.getMinutes();
+                        let endRange = `${endMins}`;
+                        if (endMins < 10) endRange = `0${endRange}`;
+                        endRange = `${x.endTime.getHours()}:${endRange}`;
 
-                    availRange = `${startRange} - ${endRange}`;
+                        availRange = `${startRange} - ${endRange}`;
+                    }
                 }
             }
             availabilityDates[key] = {

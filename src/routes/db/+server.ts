@@ -1,6 +1,6 @@
 import { json, redirect, error } from '@sveltejs/kit';
 
-import { PrismaClient, Pronoun } from '@prisma/client';
+import { type AvailabilityStatus, PrismaClient, Pronoun } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -74,49 +74,64 @@ export async function PATCH({
 
 async function saveSchedule(req: {
 	monthDay: string;
-	status: string;
+	status: AvailabilityStatus;
 	notes: string | undefined;
+	emoticons: string | undefined;
 	householdId: number;
-	startHr: number | undefined;
-	startMin: number | undefined;
-	endHr: number | undefined;
-	endMin: number | undefined;
+	startHr: number;
+	startMin: number;
+	endHr: number;
+	endMin: number;
 }) {
-	const { monthDay, status, notes, householdId, startHr, startMin, endHr, endMin } = req;
+	const {
+		monthDay,
+		status,
+		notes,
+		emoticons,
+		householdId,
+		startHr,
+		startMin,
+		endHr,
+		endMin
+	} = req;
+	console.log('REQ', req)
 	const date = new Date(monthDay);
+	// if (startHr !== null && startMin !== null && endHr !== null && endMin !== null) {
 	const startTime = new Date(date);
+	startTime.setHours(startHr);
+	startTime.setMinutes(startMin);
 	const endTime = new Date(date);
-	console.log('DATE', date)
-	if (startHr) startTime.setHours(startHr);
-	if (startMin) startTime.setMinutes(startMin);
-	if (endHr) endTime.setHours(endHr);
-	if (endMin) endTime.setMinutes(endMin);
-
-	console.log(monthDay, status)
+	endTime.setHours(endHr);
+	endTime.setMinutes(endMin);
+	// }
+	
 	// if (status === 'BUSY') {
 		// if an entry for this date already exists in the db, then patch it
 		// otherwise create it
-		console.log(householdId, date)
-		await prisma.availabilityDate.upsert({
-			where: {
-				householdId_date: {
-					householdId,
-					date,
-				}
-			},
-			update: {
-				status,
-				notes,
-			},
-			create: {
+	await prisma.availabilityDate.upsert({
+		where: {
+			householdId_date: {
 				householdId,
 				date,
-				status,
-				startTime,
-				endTime,
-				notes,
-			},
-		})
+			}
+		},
+		update: {
+			status,
+			notes,
+			emoticons,
+			startTime,
+			endTime,
+		},
+		create: {
+			householdId,
+			date,
+			status,
+			notes,
+			emoticons,
+			startTime,
+			endTime,
+		},
+	})
 	// }
 }
 

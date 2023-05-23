@@ -7,34 +7,10 @@
 	<!-- <Header /> -->
 	<main>
 		<slot />
-		<div id="navigator">
-			<div>
-				<a href="/profile">Profile</a>
-			</div>
-			<div>
-				<a href="/household">Household</a>
-			</div>
-			<div>
-				<a href="/calendar">Calendar</a>
-			</div>
-		</div>
 	</main>
 </div>
 
 <style>
-	#navigator {
-		position: fixed;
-		bottom: 0;
-		display: flex;
-		width: 100%;
-	}
-	#navigator div {
-		width: calc((100% - 2rem) / 2);
-		text-align: center;
-	}
-	a {
-		color: black;
-	}
 	.app {
 		display: flex;
 		flex-direction: column;
