@@ -174,7 +174,7 @@
 		const response = await fetch('/db', {
 			method: 'POST',
 			body: JSON.stringify({
-				type: 'joinHousehold',
+				type: 'inviteToHousehold',
 				targetPhone: phoneInput.getNumber(),
 				householdId: householdId,
 				fromUserId: $page.data.user.id
@@ -193,14 +193,6 @@
 <svelte:head>
 	<title>Household</title>
 	<meta name="description" content="Playdate app" />
-
-	<link
-		rel="stylesheet"
-		href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"
-	/>
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"
-	></script>
 </svelte:head>
 <div>
 	<h1>Household</h1>
@@ -332,24 +324,7 @@
 		border-top: 2px solid #d9d9d9;
 		margin-bottom: 1rem;
 	}
-	.card {
-		font-weight: 400;
-		font-size: 1.5rem;
-		display: flex;
-		align-items: center;
-		text-align: center;
 
-		color: #797979;
-		display: flex;
-		flex-direction: column;
-		border: 1px solid #d9d9d9;
-		width: 80%;
-		padding: 38px 35px;
-		border-radius: 6px;
-		margin: 1rem auto;
-		gap: 20px;
-		background: white;
-	}
 	.delete-btn,
 	.add-btn {
 		background: #fce9be;
@@ -359,11 +334,7 @@
 		height: 40px;
 		font-size: 26px;
 	}
-	.card button hr {
-		width: 40%;
-		border-top: 3px solid #5a5a5a;
-		margin: 30%;
-	}
+	
 	.subtitle-2 {
 		font-weight: 400;
 		font-size: 20px;

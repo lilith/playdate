@@ -26,7 +26,7 @@ export async function POST({
 	if (req.type === 'user') res['id'] = await saveUser(req, locals);
 	else if (req.type === 'household') await saveHousehold(req);
 	else if (req.type === 'householdChild') res['id'] = await saveKid(req);
-	else if (req.type === 'joinHousehold') {
+	else if (req.type === 'inviteToHousehold') {
 		const { err } = await createHouseholdInvite(req);
 		if (err)
 			throw error(400, {
@@ -34,6 +34,8 @@ export async function POST({
 			});
 	} else if (req.type === 'schedule') {
 		await saveSchedule(req);
+	} else if (req.type === 'inviteToCircle') {
+		await createCircleInvite(req);
 	}
 
 	return json(res);
@@ -70,6 +72,36 @@ export async function PATCH({
 
 	if (req.type === 'householdAdult') await updateHouseholdAdult(req);
 	return json('success');
+}
+
+async function createCircleInvite(req: {
+	targetPhone: string;
+	fromUserId: number;
+  	fromHouseholdId: number;
+}) {
+	const { targetPhone, fromUserId, fromHouseholdId } = req;
+
+	const existingInvites = await prisma.friendRequest.findMany({
+		where: {
+			targetPhone,
+			fromHouseholdId,
+		}
+	});
+	if (existingInvites.length)
+		return {
+			err: 'The user associated with this number has already been invited to this circle.'
+		};
+	const now = new Date();
+	const expires = now;
+	expires.setDate(now.getDate() + 7); // expire 1 week from now
+	await prisma.friendRequest.create({
+		data: {
+			expires,
+			targetPhone,
+			fromUserId,
+			fromHouseholdId,
+		}
+	});
 }
 
 async function saveSchedule(req: {
@@ -155,7 +187,6 @@ async function createHouseholdInvite(req: {
 			targetPhone,
 			householdId,
 			fromUserId,
-			createdAt: now
 		}
 	});
 	return {};

@@ -188,3 +188,27 @@ textarea {
 	border-style: solid;
 	border-color: black transparent transparent transparent;
 }
+
+.card {
+	font-weight: 400;
+	font-size: 1.5rem;
+	display: flex;
+	align-items: center;
+	text-align: center;
+
+	color: #797979;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #d9d9d9;
+	width: 80%;
+	padding: 38px 35px;
+	border-radius: 6px;
+	margin: 1rem auto;
+	gap: 20px;
+	background: white;
+}
+.card button hr {
+	width: 40%;
+	border-top: 3px solid #5a5a5a;
+	margin: 30%;
+}

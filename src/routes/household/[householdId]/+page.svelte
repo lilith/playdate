@@ -69,7 +69,7 @@
 	.small-font {
 		font-size: 1.2rem;
 	}
-	.card {
+	/* .card {
 		font-weight: 400;
 		font-size: 1.5rem;
 		display: flex;
@@ -85,5 +85,5 @@
 		border-radius: 6px;
 		margin: 1rem auto;
 		background: white;
-	}
+	} */
 </style>
