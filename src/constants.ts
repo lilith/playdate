@@ -156,3 +156,27 @@ export const LANGUAGES = [
 	{ name: 'Yoruba - Èdè Yorùbá', code: 'yo' },
 	{ name: 'Zulu - isiZulu', code: 'zu' }
 ];
+
+export const EMOTICONS_REVERSE: { [key: string]: string } = {
+	house: '🏠',
+	car: '🚗',
+	person: '👤',
+	people: '👥',
+	school: '🏫',
+	star1: '⭐️',
+	star2: '🌟',
+	star3: '🙏'
+};
+
+export type Dates = { [key: string]: {
+	englishDay: string;
+	monthDay: string;
+	availRange: string;
+	notes: string | null;
+	emoticons: string;
+	startHr: number;
+	startMin: number;
+	endHr: number;
+	endMin: number;
+	householdId: number;
+}[] };

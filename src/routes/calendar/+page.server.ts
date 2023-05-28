@@ -23,16 +23,7 @@ export const load = (async ({ parent, depends }) => {
 				householdId
 			}
 		});
-		/*
-        {
-            date: Date,
-            status: AvailabilityStatus,
-            startTime: Date,
-            endTime: Date,
-            emoticons: string | undefined,
-            notes: string | undefined,
-        }
-         */
+
 		rawAvailabilityDates.forEach((x) => {
 			const key = `${x.date.getMonth() + 1}/${x.date.getDate()}`;
 			let availRange;

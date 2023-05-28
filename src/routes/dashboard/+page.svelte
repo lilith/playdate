@@ -1,25 +1,32 @@
-<script>
+<script lang="ts">
 	import Legend from '../Legend.svelte';
-	const overlaps = [
-		{
-			dateRange: 'Tuesday 2/12',
-			householdId: 2,
-			house: 'Doe House (Alice, 8) (Kevin, 6)',
-			timeRange: '11am - 6pm',
-			userAvailability: '🏠🚗',
-			themAvailability: '🏠🚗👥🌟',
-			contacts: [
-				{
-					name: 'John Doe',
-					phone: '+15107120505'
-				},
-				{
-					name: 'John Doe',
-					phone: '+15107120505'
-				}
-			]
-		}
-	];
+	import NavBar from '../NavBar.svelte';
+	import { page } from '$app/stores';
+	import type { Dates } from '../../constants';
+	import type { Household } from './constants';
+	import { formatMin } from '../../utils';
+
+	const { overlaps: overlapDays, households, userDates } = $page.data as { overlaps: Dates, households: Household, userDates: Dates };
+	// const overlaps = [
+	// 	{
+	// 		dateRange: 'Tuesday 2/12',
+	// 		householdId: 2,
+	// 		house: 'Doe House (Alice, 8) (Kevin, 6)',
+	// 		timeRange: '11am - 6pm',
+	// 		userAvailability: '🏠🚗',
+	// 		themAvailability: '🏠🚗👥🌟',
+	// 		contacts: [
+	// 			{
+	// 				name: 'John Doe',
+	// 				phone: '+15107120505'
+	// 			},
+	// 			{
+	// 				name: 'John Doe',
+	// 				phone: '+15107120505'
+	// 			}
+	// 		]
+	// 	}
+	// ];
 	const userSched = [
 		{
 			dateRange: 'Tuesday 2/12',
@@ -69,10 +76,11 @@
 			]
 		}
 	];
+	// const emptySchedule;
 </script>
 
 <div class="container">
-	<h1>Dashboard</h1>
+	<NavBar pageName="Dashboard" />
 	<div style="margin-bottom: 2rem;">
 		<p class="subtitle">Notices<span>2</span></p>
 		<div class="notice">
@@ -88,15 +96,20 @@
 
 	<!-- planning on condensing range of contiguous days and hours overlapping into one summary -->
 	<p class="subtitle">Overlaps</p>
-	{#each overlaps as overlap}
-		<p class="bold larger">{overlap.dateRange}</p>
+	{#each Object.values(overlapDays) as overlapDay}
+	{#each overlapDay as overlap}
+		<p class="bold larger">{overlap.englishDay} {overlap.monthDay}</p>
 		<div class="summary">
-			<a class="bold household" href="/household/{overlap.householdId}">{overlap.house}</a>
-			<p class="bold">{overlap.timeRange}</p>
+			<a class="bold household" href="/household/{overlap.householdId}">
+				{households[overlap.householdId].name} (
+					{households[overlap.householdId].kids}
+				)
+			</a>
+			<p class="bold">{overlap.startHr}:{formatMin(overlap.startMin)} - {overlap.endHr}:{formatMin(overlap.endMin)}</p>
 			<div class="tooltip-container">
 				<div class="tooltip">
 					<p>
-						You: {overlap.userAvailability}
+						You: {userDates[overlap.monthDay][0].emoticons}
 						<span class="tooltiptext">
 							<Legend />
 						</span>
@@ -105,7 +118,7 @@
 				|
 				<div class="tooltip">
 					<p>
-						Them: {overlap.themAvailability}
+						Them: {overlap.emoticons}
 						<span class="tooltiptext">
 							<Legend />
 						</span>
@@ -114,11 +127,12 @@
 			</div>
 			<p>Contacts to set up a play date:</p>
 			<ul>
-				{#each overlap.contacts as contact}
+				{#each households[overlap.householdId].parents as contact}
 					<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
 				{/each}
 			</ul>
 		</div>
+	{/each}
 	{/each}
 
 	<p class="subtitle">Your Schedule</p>

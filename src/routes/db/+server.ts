@@ -36,6 +36,12 @@ export async function POST({
 		await saveSchedule(req);
 	} else if (req.type === 'inviteToCircle') {
 		await createCircleInvite(req);
+	} else if (req.type === 'acceptFriendReq') {
+		await acceptFriendReq(req);
+	} else if (req.type === 'rejectFriendReq') {
+		await deleteFriendReq(req);
+	} else if (req.type === 'deleteFriend') {
+		await deleteFriend(req);
 	}
 
 	return json(res);
@@ -101,6 +107,40 @@ async function createCircleInvite(req: {
 			fromUserId,
 			fromHouseholdId,
 		}
+	});
+}
+
+async function deleteFriend(req: { connectionId: number; }) {
+	await prisma.householdConnection.delete({
+		where: {
+			id: req.connectionId,
+		},
+	});
+}
+
+async function acceptFriendReq(req: {
+	householdId: number;
+	friendHouseholdId: number;
+	friendReqId: number;
+}) {
+	const { householdId, friendHouseholdId, friendReqId } = req;
+	// add to user's circle
+	await prisma.householdConnection.create({
+		data: {
+			householdId,
+			friendHouseholdId,
+		}
+	});
+
+	// delete friend req
+	await deleteFriendReq({ reqId: friendReqId });
+}
+
+function deleteFriendReq(req: { reqId: number; }) {
+	return prisma.friendRequest.delete({
+		where: {
+			id: req.reqId,
+		},
 	});
 }
 

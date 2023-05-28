@@ -12,6 +12,7 @@ const setLocal = async (
 ) => {
 	const userInfo: { [key: string]: string | number | null | boolean } = {
 		household: 'N/A',
+		phone: '',
 		firstName: '',
 		lastName: '',
 		pronouns: '',
@@ -33,6 +34,7 @@ const setLocal = async (
 		for (const key of Object.keys(userInfo)) {
 			if (key in user) userInfo[key] = user[key];
 		}
+		userInfo.phone = user.phone;
 		userInfo.notifFreq = user.reminderIntervalDays;
 		userInfo.notifStartDay = user.reminderDatetime.getDay();
 		userInfo.notifHr = user.reminderDatetime.getHours();
@@ -95,10 +97,12 @@ export const handle = (async ({ event, resolve }) => {
 					phone: session.phone
 				},
 				include: {
-					phonePermissions: true
+					phonePermissions: true,
+					AvailabilityDate: true,
 				}
 			});
 
+			console.log('AVAILABILITY DATE', user.AvailabilityDate)
 		if (event.url.pathname === '/db') {
 			event.locals.user = user;
 			event.locals.phone = session.phone;

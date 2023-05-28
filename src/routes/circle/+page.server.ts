@@ -3,43 +3,73 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 export const load = (async ({ parent, depends }) => {
-	// depends('data:householdId');
-	// const householdInfo: {
-	// 	householdId: number | null;
-	// 	name: string;
-	// 	publicNotes: string;
-	// 	kids: {
-	// 		firstName: string;
-	// 		pronouns: Pronoun;
-	// 		lastName: string | null;
-	// 		id: number;
-	// 	}[];
-	// 	adults: User[];
-	// 	[key: string]: number | string | Array<object | User> | null;
-	// } = {
-	// 	householdId: null,
-	// 	name: '',
-	// 	publicNotes: '',
-	// 	kids: [],
-	// 	adults: []
-	// };
-
+	depends('data:circle');
 	const { user } = await parent();
 	const householdId = user.householdId;
-	let friendReqsInfo, circleInfo;
+	let friendReqsInfo: { [key: string]: any }[] = [];
+	let circleInfo: { [key: string]: any}[] = [];
+	const clause = {
+		select: {
+			id: true,
+			name: true,
+			parents: {
+				select: {
+					firstName: true,
+					  lastName: true,
+					phonePermissions: {
+						select: {
+							allowInvites: true,
+						}
+					}
+				},
+			}
+		}
+	};
 	if (householdId) {
 		const circle = await prisma.householdConnection.findMany({
 			where: {
-				householdId
+				// householdId
+				OR: [
+					{
+						householdId
+					},
+					{
+					  	friendHouseholdId: householdId
+					},
+				],
+			},
+			select: {
+				id: true,
+				friendHouseholdId: true,
+				friendHousehold: clause,
+				household: clause,
 			}
 		});
-		console.log('CIRCLE', circle)
+
+		circleInfo = circle.map((x) => {
+			if (householdId === x.friendHousehold.id) {
+				return {
+					connectionId: x.id,
+					id: x.household.id,
+					name: x.household.name,
+					parents: x.household.parents,
+				};
+			}
+ 			return {
+				connectionId: x.id,
+				id: x.friendHouseholdId,
+				name: x.friendHousehold.name,
+				parents: x.friendHousehold.parents,
+			};
+		});
 
         const friendReqs = await prisma.friendRequest.findMany({
             where: {
                 targetPhone: user.phone,
             },
 			select: {
+				id: true,
+				fromHouseholdId: true,
 				fromHousehold: {
 					select: {
 						name: true,
@@ -60,25 +90,16 @@ export const load = (async ({ parent, depends }) => {
         });
 
         friendReqsInfo = friendReqs.map((x) => ({
-			householdName: x.fromHousehold.name,
+			reqId: x.id,
+			id: x.fromHouseholdId,
+			name: x.fromHousehold.name,
 			parents: x.fromHousehold.parents,
 			phone: x.fromUser.phone
 		}));
-
-        /**
-        model FriendRequest {
-  id              Int       @id @default(autoincrement())
-  expires         DateTime?
-  targetPhone     String
-  fromUserId      Int
-  fromHouseholdId Int
-  createdAt       DateTime  @default(now())
-  fromHousehold   Household @relation(fields: [fromHouseholdId], references: [id])
-  fromUser        User      @relation(fields: [fromUserId], references: [id])
-}
-         */
 	}
+	console.log('friendReqsInfo', friendReqsInfo)
 	return {
 		friendReqsInfo,
+		circleInfo,
 	};
 }) satisfies PageServerLoad;

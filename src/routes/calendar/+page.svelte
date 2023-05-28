@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { DAYS, PRONOUNS } from '../../constants';
+	import { DAYS, PRONOUNS, EMOTICONS_REVERSE } from '../../constants';
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
 	import { invalidate } from '$app/navigation';
 	import { afterUpdate, onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { AvailabilityStatus } from '@prisma/client';
+	import NavBar from '../NavBar.svelte';
 
 	let { availabilityDates, user, kidNames } = $page.data;
 
@@ -33,16 +34,6 @@
 		endMin: number | undefined;
 	}[] = [];
 
-	const EMOTICONS_REVERSE: { [key: string]: string } = {
-		house: '🏠',
-		car: '🚗',
-		person: '👤',
-		people: '👥',
-		school: '🏫',
-		star1: '⭐️',
-		star2: '🌟',
-		star3: '🙏'
-	};
 	const EMOTICONS = {
 		'🏠': 'house',
 		'🚗': 'car',
@@ -222,190 +213,191 @@
 	}
 </script>
 
-<div style="text-align: center;">
-	<h1>Calendar</h1>
-
-	<table id="schedule">
-		{#each rows as row, i}
-			<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
-				<td>
-					{row.englishDay}
-				</td>
-				<td>
-					{row.monthDay}
-				</td>
-				<td>
-					{row.availRange}
-				</td>
-				{#if row.availRange === 'Unspecified'}
-					<td
-						on:click={() => markAs(i, AvailabilityStatus.BUSY)}
-						on:keyup={() => markAs(i, AvailabilityStatus.BUSY)}
-						class="busy"
-					>
-						Mark Busy
+<div>
+	<NavBar pageName="Calendar" />
+	<div style="text-align: center; margin: 2rem 0;">
+		<table id="schedule">
+			{#each rows as row, i}
+				<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
+					<td>
+						{row.englishDay}
 					</td>
-					<td
-						class="edit"
-						on:click={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-						on:keyup={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-					>
-						Edit
+					<td>
+						{row.monthDay}
 					</td>
-				{:else if row.availRange === 'Busy'}
-					<td
-						colspan="2"
-						class="clear"
-						on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
-						on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
-					>
-						Clear
+					<td>
+						{row.availRange}
 					</td>
-				{:else}
-					<td
-						class="edit"
-						on:click={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-						on:keyup={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-					>
-						Edit
-					</td>
-					<td
-						class="clear"
-						on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
-						on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
-					>
-						Clear
-					</td>
+					{#if row.availRange === 'Unspecified'}
+						<td
+							on:click={() => markAs(i, AvailabilityStatus.BUSY)}
+							on:keyup={() => markAs(i, AvailabilityStatus.BUSY)}
+							class="busy"
+						>
+							Mark Busy
+						</td>
+						<td
+							class="edit"
+							on:click={() => {
+								shownRows.add(i);
+								shownRows = new Set(shownRows);
+							}}
+							on:keyup={() => {
+								shownRows.add(i);
+								shownRows = new Set(shownRows);
+							}}
+						>
+							Edit
+						</td>
+					{:else if row.availRange === 'Busy'}
+						<td
+							colspan="2"
+							class="clear"
+							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+							on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+						>
+							Clear
+						</td>
+					{:else}
+						<td
+							class="edit"
+							on:click={() => {
+								shownRows.add(i);
+								shownRows = new Set(shownRows);
+							}}
+							on:keyup={() => {
+								shownRows.add(i);
+								shownRows = new Set(shownRows);
+							}}
+						>
+							Edit
+						</td>
+						<td
+							class="clear"
+							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+							on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
+						>
+							Clear
+						</td>
+					{/if}
+				</tr>
+				{#if shownRows.has(i)}
+					<tr style="background: #A0E3FF">
+						<td colspan="5" style="padding: 0.4rem;">
+							<div style="position: relative; margin: 0.8rem 1rem;">
+								<div style="margin-bottom: 0.5rem; font-size: large; font-weight: 600;">
+									{row.englishDay}
+									{row.monthDay}
+								</div>
+								<div
+									class="close-btn"
+									on:click={() => {
+										shownRows.delete(i);
+										shownRows = new Set(shownRows);
+									}}
+									on:keyup={() => {
+										shownRows.delete(i);
+										shownRows = new Set(shownRows);
+									}}
+								>
+									X
+								</div>
+							</div>
+							<form on:submit|preventDefault={() => markAs(i, AvailabilityStatus.AVAILABLE)}>
+								<div class="v-center-h-space">
+									<label class="thin-label" for="start-hr">Start</label>
+									<div>
+										<select name="start-hr" bind:value={row.startHr}>
+											{#each [...Array(24).keys()] as hr}
+												<option value={hr}>{hr}</option>
+											{/each}
+										</select>:
+										<select name="start-min" bind:value={row.startMin}>
+											{#each [...Array(60).keys()] as min}
+												<option value={min}>{min < 10 ? `0${min}` : min}</option>
+											{/each}
+										</select>
+									</div>
+									<label class="thin-label" for="end-hr">End</label>
+									<div>
+										<select name="end-hr" bind:value={row.endHr}>
+											{#each [...Array(24).keys()] as hr}
+												<option value={hr}>{hr}</option>
+											{/each}
+										</select>:
+										<select name="end-min" bind:value={row.endMin}>
+											{#each [...Array(60).keys()] as min}
+												<option value={min}>{min < 10 ? `0${min}` : min}</option>
+											{/each}
+										</select>
+									</div>
+								</div>
+								<div class="v-center-h-space">
+									{#key row.emoticons}
+										{#each Object.entries(EMOTICONS) as [emoji, english]}
+											<div
+												class="emoji {row.emoticons.has(english) ? 'chosen' : ''}"
+												on:click={() => toggleEmoticon(i, english)}
+												on:keyup={() => toggleEmoticon(i, english)}
+											>
+												{emoji}
+											</div>
+										{/each}
+									{/key}
+									<div class="tooltip">
+										<p>
+											Legend
+											<span class="tooltiptext">
+												<Legend />
+											</span>
+										</p>
+									</div>
+								</div>
+								<div class="v-center-h-space" style="gap: 0.5rem;">
+									<textarea
+										bind:value={row.notes}
+										style="font-size: inherit;"
+										name="notes"
+										placeholder="(add notes)"
+									/>
+									<Button
+										onClick={() => {}}
+										content={'✓'}
+										bgColor={'#73A4EB'}
+										padding="0.1rem 0.5rem"
+									/>
+								</div>
+							</form>
+						</td>
+					</tr>
 				{/if}
-			</tr>
-			{#if shownRows.has(i)}
-				<tr style="background: #A0E3FF">
-					<td colspan="5" style="padding: 0.4rem;">
-						<div style="position: relative; margin: 0.8rem 1rem;">
-							<div style="margin-bottom: 0.5rem; font-size: large; font-weight: 600;">
-								{row.englishDay}
-								{row.monthDay}
-							</div>
-							<div
-								class="close-btn"
-								on:click={() => {
-									shownRows.delete(i);
-									shownRows = new Set(shownRows);
-								}}
-								on:keyup={() => {
-									shownRows.delete(i);
-									shownRows = new Set(shownRows);
-								}}
-							>
-								X
-							</div>
-						</div>
-						<form on:submit|preventDefault={() => markAs(i, AvailabilityStatus.AVAILABLE)}>
-							<div class="v-center-h-space">
-								<label class="thin-label" for="start-hr">Start</label>
-								<div>
-									<select name="start-hr" bind:value={row.startHr}>
-										{#each [...Array(24).keys()] as hr}
-											<option value={hr}>{hr}</option>
-										{/each}
-									</select>:
-									<select name="start-min" bind:value={row.startMin}>
-										{#each [...Array(60).keys()] as min}
-											<option value={min}>{min < 10 ? `0${min}` : min}</option>
-										{/each}
-									</select>
-								</div>
-								<label class="thin-label" for="end-hr">End</label>
-								<div>
-									<select name="end-hr" bind:value={row.endHr}>
-										{#each [...Array(24).keys()] as hr}
-											<option value={hr}>{hr}</option>
-										{/each}
-									</select>:
-									<select name="end-min" bind:value={row.endMin}>
-										{#each [...Array(60).keys()] as min}
-											<option value={min}>{min < 10 ? `0${min}` : min}</option>
-										{/each}
-									</select>
-								</div>
-							</div>
-							<div class="v-center-h-space">
-								{#key row.emoticons}
-									{#each Object.entries(EMOTICONS) as [emoji, english]}
-										<div
-											class="emoji {row.emoticons.has(english) ? 'chosen' : ''}"
-											on:click={() => toggleEmoticon(i, english)}
-											on:keyup={() => toggleEmoticon(i, english)}
-										>
-											{emoji}
-										</div>
-									{/each}
-								{/key}
-								<div class="tooltip">
-									<p>
-										Legend
-										<span class="tooltiptext">
-											<Legend />
-										</span>
-									</p>
-								</div>
-							</div>
-							<div class="v-center-h-space" style="gap: 0.5rem;">
-								<textarea
-									bind:value={row.notes}
-									style="font-size: inherit;"
-									name="notes"
-									placeholder="(add notes)"
-								/>
-								<Button
-									onClick={() => {}}
-									content={'✓'}
-									bgColor={'#73A4EB'}
-									padding="0.1rem 0.5rem"
-								/>
-							</div>
-						</form>
-					</td>
-				</tr>
+			{/each}
+		</table>
+		{#key schedDiffs}
+			{#if schedDiffs.length}
+				<p class="subtitle">Notify Circle</p>
+				<p id="preview-notif-subtitle">Preview of your notification messsage(s)</p>
+				<div id="preview-notif">
+					{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
+					of {kidNames}) has updated {PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
+					<br />
+					Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)
+					<br /><br />
+
+					{#each schedDiffs as diff}
+						<p>{diff}</p>
+					{/each}
+				</div>
+
+				<table id="notif-table">
+					<tr style="display: flex; justify-content: flex-end;">
+						<!-- TODO: make this functional and do a #each on all circle members user can notify -->
+						<td colspan="2"><button class="notif-btn">Notify All</button></td>
+					</tr>
+				</table>
 			{/if}
-		{/each}
-	</table>
-	{#key schedDiffs}
-		{#if schedDiffs.length}
-			<p class="subtitle">Notify Circle</p>
-			<p id="preview-notif-subtitle">Preview of your notification messsage(s)</p>
-			<div id="preview-notif">
-				{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
-				of {kidNames}) has updated {PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
-				<br />
-				Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)
-				<br /><br />
-
-				{#each schedDiffs as diff}
-					<p>{diff}</p>
-				{/each}
-			</div>
-
-			<table id="notif-table">
-				<tr style="display: flex; justify-content: flex-end;">
-					<!-- TODO: make this functional and do a #each on all circle members user can notify -->
-					<td colspan="2"><button class="notif-btn">Notify All</button></td>
-				</tr>
-			</table>
-		{/if}
-	{/key}
+		{/key}
+	</div>
 </div>
 
 <style>

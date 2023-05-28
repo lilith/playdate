@@ -5,6 +5,7 @@
 	import { PRONOUNS } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { invalidate, invalidateAll } from '$app/navigation';
+	import NavBar from '../NavBar.svelte';
 
 	enum ModalReason {
 		DISCONNECT_ADULT,
@@ -195,7 +196,7 @@
 	<meta name="description" content="Playdate app" />
 </svelte:head>
 <div>
-	<h1>Household</h1>
+	<NavBar pageName="Household" />
 
 	<Modal bind:showModal>
 		<h2 slot="header">{modalText.heading}</h2>
