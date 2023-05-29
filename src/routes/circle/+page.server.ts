@@ -6,8 +6,28 @@ export const load = (async ({ parent, depends }) => {
 	depends('data:circle');
 	const { user } = await parent();
 	const householdId = user.householdId;
-	let friendReqsInfo: { [key: string]: any }[] = [];
-	let circleInfo: { [key: string]: any}[] = [];
+	let friendReqsInfo: {
+		reqId: number;
+		id: number;
+		name: string;
+		parents: {
+			firstName: string;
+			lastName: string | null;
+		}[];
+		phone: string;
+	}[] = [];
+	let circleInfo: {
+		connectionId: number;
+		id: number;
+		name: string;
+		parents: {
+			firstName: string;
+			lastName: string | null;
+			phonePermissions: {
+				allowInvites: boolean;
+			};
+		}[];
+	}[] = [];
 	const clause = {
 		select: {
 			id: true,
@@ -15,13 +35,13 @@ export const load = (async ({ parent, depends }) => {
 			parents: {
 				select: {
 					firstName: true,
-					  lastName: true,
+					lastName: true,
 					phonePermissions: {
 						select: {
-							allowInvites: true,
+							allowInvites: true
 						}
 					}
-				},
+				}
 			}
 		}
 	};
@@ -34,15 +54,15 @@ export const load = (async ({ parent, depends }) => {
 						householdId
 					},
 					{
-					  	friendHouseholdId: householdId
-					},
-				],
+						friendHouseholdId: householdId
+					}
+				]
 			},
 			select: {
 				id: true,
 				friendHouseholdId: true,
 				friendHousehold: clause,
-				household: clause,
+				household: clause
 			}
 		});
 
@@ -52,21 +72,21 @@ export const load = (async ({ parent, depends }) => {
 					connectionId: x.id,
 					id: x.household.id,
 					name: x.household.name,
-					parents: x.household.parents,
+					parents: x.household.parents
 				};
 			}
- 			return {
+			return {
 				connectionId: x.id,
 				id: x.friendHouseholdId,
 				name: x.friendHousehold.name,
-				parents: x.friendHousehold.parents,
+				parents: x.friendHousehold.parents
 			};
 		});
 
-        const friendReqs = await prisma.friendRequest.findMany({
-            where: {
-                targetPhone: user.phone,
-            },
+		const friendReqs = await prisma.friendRequest.findMany({
+			where: {
+				targetPhone: user.phone
+			},
 			select: {
 				id: true,
 				fromHouseholdId: true,
@@ -76,20 +96,20 @@ export const load = (async ({ parent, depends }) => {
 						parents: {
 							select: {
 								firstName: true,
-      							lastName: true,
+								lastName: true
 							}
 						}
 					}
 				},
 				fromUser: {
 					select: {
-						phone: true,
+						phone: true
 					}
 				}
-			},
-        });
+			}
+		});
 
-        friendReqsInfo = friendReqs.map((x) => ({
+		friendReqsInfo = friendReqs.map((x) => ({
 			reqId: x.id,
 			id: x.fromHouseholdId,
 			name: x.fromHousehold.name,
@@ -97,9 +117,8 @@ export const load = (async ({ parent, depends }) => {
 			phone: x.fromUser.phone
 		}));
 	}
-	console.log('friendReqsInfo', friendReqsInfo)
 	return {
 		friendReqsInfo,
-		circleInfo,
+		circleInfo
 	};
 }) satisfies PageServerLoad;

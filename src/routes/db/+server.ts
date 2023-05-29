@@ -83,14 +83,14 @@ export async function PATCH({
 async function createCircleInvite(req: {
 	targetPhone: string;
 	fromUserId: number;
-  	fromHouseholdId: number;
+	fromHouseholdId: number;
 }) {
 	const { targetPhone, fromUserId, fromHouseholdId } = req;
 
 	const existingInvites = await prisma.friendRequest.findMany({
 		where: {
 			targetPhone,
-			fromHouseholdId,
+			fromHouseholdId
 		}
 	});
 	if (existingInvites.length)
@@ -105,16 +105,16 @@ async function createCircleInvite(req: {
 			expires,
 			targetPhone,
 			fromUserId,
-			fromHouseholdId,
+			fromHouseholdId
 		}
 	});
 }
 
-async function deleteFriend(req: { connectionId: number; }) {
+async function deleteFriend(req: { connectionId: number }) {
 	await prisma.householdConnection.delete({
 		where: {
-			id: req.connectionId,
-		},
+			id: req.connectionId
+		}
 	});
 }
 
@@ -128,7 +128,7 @@ async function acceptFriendReq(req: {
 	await prisma.householdConnection.create({
 		data: {
 			householdId,
-			friendHouseholdId,
+			friendHouseholdId
 		}
 	});
 
@@ -136,11 +136,11 @@ async function acceptFriendReq(req: {
 	await deleteFriendReq({ reqId: friendReqId });
 }
 
-function deleteFriendReq(req: { reqId: number; }) {
+function deleteFriendReq(req: { reqId: number }) {
 	return prisma.friendRequest.delete({
 		where: {
-			id: req.reqId,
-		},
+			id: req.reqId
+		}
 	});
 }
 
@@ -226,7 +226,7 @@ async function createHouseholdInvite(req: {
 			expires,
 			targetPhone,
 			householdId,
-			fromUserId,
+			fromUserId
 		}
 	});
 	return {};

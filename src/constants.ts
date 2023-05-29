@@ -168,7 +168,7 @@ export const EMOTICONS_REVERSE: { [key: string]: string } = {
 	star3: '🙏'
 };
 
-export type Dates = { [key: string]: {
+export type DateDetails = {
 	englishDay: string;
 	monthDay: string;
 	availRange: string;
@@ -179,4 +179,11 @@ export type Dates = { [key: string]: {
 	endHr: number;
 	endMin: number;
 	householdId: number;
-}[] };
+	status?: string;
+};
+
+export type BusyDetails = {
+	status: 'Busy';
+	availRange: string;
+};
+export type Dates = { [key: string]: DateDetails[] };

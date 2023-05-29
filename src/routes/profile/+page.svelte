@@ -66,7 +66,7 @@
 	}
 
 	async function saveToDB() {
-		console.log('ALLoW INVITES', !doNotDisturb)
+		console.log('ALLoW INVITES', !doNotDisturb);
 		const response = await fetch('/db', {
 			method: 'POST',
 			body: JSON.stringify({

@@ -1,13 +1,33 @@
 import type { PageServerLoad } from './$types';
 import { PrismaClient, AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
-import { DAYS, type Dates, EMOTICONS_REVERSE } from '../../constants';
+import {
+	DAYS,
+	type Dates,
+	type DateDetails,
+	type BusyDetails,
+	EMOTICONS_REVERSE
+} from '../../constants';
+import type { Household } from './constants';
 
 const prisma = new PrismaClient();
+
+const getHousehold = (household: Household) => {
+	return {
+		name: household.name,
+		kids: household.children.map(
+			(y) => `${y.firstName}${y.lastName && y.lastName.length ? ` ${y.lastName}` : ''}`
+		),
+		parents: household.parents.map((y) => ({
+			name: `${y.firstName}${y.lastName && y.lastName.length ? ` ${y.lastName}` : ''}`,
+			phone: y.phone
+		}))
+	};
+};
 
 const getFormattedAvailability = (
 	rawAvailabilityDates: AvailabilityDate[],
 	dates: Dates,
-	householdId: number,
+	householdId: number
 ) => {
 	const allAvailableDates: {
 		[key: string]: {
@@ -19,7 +39,9 @@ const getFormattedAvailability = (
 
 	rawAvailabilityDates.forEach((x) => {
 		const key = `${x.date.getMonth() + 1}/${x.date.getDate()}`;
-		if (x.status !== AvailabilityStatus.BUSY && x.status !== AvailabilityStatus.UNSPECIFIED) {
+		let availRange = 'Busy';
+		if (x.status === AvailabilityStatus.UNSPECIFIED) return;
+		if (x.status !== AvailabilityStatus.BUSY) {
 			if (x.startTime && x.endTime) {
 				const startMins = x.startTime.getMinutes();
 				let startRange = `${startMins}`;
@@ -31,46 +53,65 @@ const getFormattedAvailability = (
 				if (endMins < 10) endRange = `0${endRange}`;
 				endRange = `${x.endTime.getHours()}:${endRange}`;
 
-				const availRange = `${startRange} - ${endRange}`;
-
-				allAvailableDates[key] = {
-					availRange,
-					notes: x.notes,
-					emoticons: x.emoticons
-				};
+				availRange = `${startRange} - ${endRange}`;
 			}
 		}
+
+		allAvailableDates[key] = {
+			availRange,
+			notes: x.notes,
+			emoticons: x.emoticons
+		};
 	});
 
+	const res: (DateDetails | BusyDetails)[] = [];
 	const now = new Date();
+	let lastIsBusy = false;
 	[...Array(21).keys()].forEach((x) => {
 		const date = new Date(new Date().setDate(now.getDate() + x));
 		const englishDay = DAYS[date.getDay()];
 		const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
-		
+
 		if (allAvailableDates && monthDay in allAvailableDates) {
 			const availRange = allAvailableDates[monthDay].availRange;
-			let notes;
-			let startHr;
-			let startMin;
-			let endHr;
-			let endMin;
-			let emoticons = '';
-			// it's gonna be formatted like H:MM - H:MM
-			const timeSplit = availRange.split(/[( - )|:]/);
-			startHr = parseInt(timeSplit[0]);
-			startMin = parseInt(timeSplit[1]);
-			endHr = parseInt(timeSplit[3]);
-			endMin = parseInt(timeSplit[4]);
 
-			notes = allAvailableDates[monthDay].notes;
-			if (allAvailableDates[monthDay].emoticons) {
-				for (const emoji of allAvailableDates[monthDay].emoticons.split(',')) {
-					emoticons += EMOTICONS_REVERSE[emoji];
+			if (availRange === 'Busy') {
+				if (lastIsBusy) {
+					const lastEntry = res[res.length - 1].availRange;
+					// if dateRange has multiple days, then just change the last date
+					// otherwise just append new date to last one with a hyphen
+					if (lastEntry.includes(' - ')) {
+						const dates = lastEntry.split(' - ');
+						dates[dates.length - 1] = `${englishDay} ${monthDay}`;
+						res[res.length - 1].availRange = dates.join(' - ');
+					} else {
+						res[res.length - 1].availRange += ` - ${englishDay} ${monthDay}`;
+					}
+				} else {
+					lastIsBusy = true;
+					res.push({
+						status: 'Busy',
+						availRange: `${englishDay} ${monthDay}`
+					});
 				}
-			}
+			} else {
+				let emoticons = '';
+				// it's gonna be formatted like H:MM - H:MM
+				const timeSplit = availRange.split(/[( - )|:]/);
+				const startHr = parseInt(timeSplit[0]);
+				const startMin = parseInt(timeSplit[1]);
+				const endHr = parseInt(timeSplit[3]);
+				const endMin = parseInt(timeSplit[4]);
 
-			if (dates) {
+				const notes = allAvailableDates[monthDay].notes;
+				if (allAvailableDates[monthDay].emoticons) {
+					for (const emoji of allAvailableDates[monthDay].emoticons.split(',')) {
+						emoticons += EMOTICONS_REVERSE[emoji];
+					}
+				}
+
+				lastIsBusy = false;
+
 				const payload = {
 					englishDay,
 					monthDay,
@@ -81,82 +122,103 @@ const getFormattedAvailability = (
 					startMin,
 					endHr,
 					endMin,
-					householdId,
+					householdId
 				};
 				if (monthDay in dates) {
 					dates[monthDay].push(payload);
 				} else {
 					dates[monthDay] = [payload];
 				}
+
+				res.push({ ...payload, status: 'Available' });
 			}
 		}
 	});
+
+	return res;
 };
 export const load = (async ({ parent }) => {
 	const { user } = await parent();
 	const householdId = user.householdId;
 	const household = await prisma.household.findUnique({
 		where: {
-			id: householdId,
+			id: householdId
 		},
 		select: {
 			AvailabilityDate: true,
-			id: true,
+			id: true
 		}
 	});
 	if (household) {
 		const rawAvailabilityDates = household.AvailabilityDate;
 		const userDates: Dates = {};
-		getFormattedAvailability(rawAvailabilityDates, userDates, household.id);
+		const userDatesArr = getFormattedAvailability(rawAvailabilityDates, userDates, household.id);
 
-		// get availabilityDates of all circle members
-		const circle = await prisma.householdConnection.findMany({
-			where: {
-				householdId
-			},
+		const clause = {
 			select: {
-				friendHouseholdId: true,
-				friendHousehold: {
+				name: true,
+				parents: {
 					select: {
-						name: true,
-						parents: {
-							select: {
-								firstName: true,
-      							lastName: true,
-								phone: true,
-							},
-						},
-						AvailabilityDate: true,
-						children: {
-							select: {
-								firstName: true,
-								lastName: true,
-								dateOfBirth: true,
-							}
-						}
+						firstName: true,
+						lastName: true,
+						phone: true
+					}
+				},
+				AvailabilityDate: true,
+				children: {
+					select: {
+						firstName: true,
+						lastName: true,
+						dateOfBirth: true
 					}
 				}
 			}
+		};
+		// get availabilityDates of all circle members
+		const circle = await prisma.householdConnection.findMany({
+			where: {
+				OR: [
+					{
+						householdId
+					},
+					{
+						friendHouseholdId: householdId
+					}
+				]
+			},
+			select: {
+				householdId: true,
+				friendHouseholdId: true,
+				friendHousehold: clause,
+				household: clause
+			}
 		});
-		
-		const households: { [key: string]: {
-			name: string;
-			kids: string[]; // kid names
-			parents: { name: string; phone: string }[];
-		} } = {};
-		const circleDates: Dates = {};
-		circle.forEach((x) => {
-			getFormattedAvailability(x.friendHousehold.AvailabilityDate, circleDates, x.friendHouseholdId);
-			households[x.friendHouseholdId] = {
-				name: x.friendHousehold.name,
-				kids: x.friendHousehold.children.map((y) => 
-					`${y.firstName}${y.lastName && y.lastName.length ? ` ${y.lastName}` : ''}`
-				),
-				parents: x.friendHousehold.parents.map((y) => ({
-					name: `${y.firstName}${y.lastName && y.lastName.length ? ` ${y.lastName}` : ''}`,
-					phone: y.phone,
-				})),
+
+		const households: {
+			[key: number]: {
+				name: string;
+				kids: string[]; // kid names
+				parents: { name: string; phone: string }[];
 			};
+		} = {};
+		const circleDates: Dates = {};
+		const circleDatesMap: { [key: number]: (DateDetails | BusyDetails)[] } = {};
+		circle.forEach((x) => {
+			if (householdId === x.friendHouseholdId) {
+				circleDatesMap[x.householdId] = getFormattedAvailability(
+					x.household.AvailabilityDate,
+					circleDates,
+					x.householdId
+				);
+				households[x.householdId] = getHousehold(x.household);
+				return;
+			}
+			circleDatesMap[x.friendHouseholdId] = getFormattedAvailability(
+				x.friendHousehold.AvailabilityDate,
+				circleDates,
+				x.friendHouseholdId
+			);
+			households[x.friendHouseholdId] = getHousehold(x.friendHousehold);
 		});
 
 		// detect overlaps
@@ -185,7 +247,7 @@ export const load = (async ({ parent }) => {
 						startHr: startHr2,
 						startMin: startMin2,
 						endHr: endHr2,
-						endMin: endMin2,
+						endMin: endMin2
 					} = circleDateDetails;
 					const userStart = new Date(`${monthDay}/${yr}`);
 					const userEnd = new Date(userStart);
@@ -206,13 +268,20 @@ export const load = (async ({ parent }) => {
 					circleEnd.setHours(endHr2);
 					circleEnd.setMinutes(endMin2);
 					const end2 = circleEnd.getTime();
-					
+
 					if (
 						(start1 <= start2 && end1 <= end2) ||
 						(start2 <= start1 && end2 <= end1) ||
 						(start2 <= start1 && end1 <= end2) ||
 						(start1 <= start2 && end2 <= end1)
 					) {
+						const start = new Date(Math.max(start1, start2));
+						const end = new Date(Math.min(end1, end2));
+						circleDateDetails.startHr = start.getHours();
+						circleDateDetails.startMin = start.getMinutes();
+						circleDateDetails.endHr = end.getHours();
+						circleDateDetails.endMin = end.getMinutes();
+
 						if (monthDay in overlaps) {
 							overlaps[monthDay].push(circleDateDetails);
 						} else {
@@ -221,13 +290,16 @@ export const load = (async ({ parent }) => {
 					}
 				});
 			}
-		})
+		});
 
 		return {
 			userDates,
 			circleDates,
 			households,
 			overlaps,
+			circle,
+			userDatesArr,
+			circleDatesMap
 		};
 	}
 }) satisfies PageServerLoad;

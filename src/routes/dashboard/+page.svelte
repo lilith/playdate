@@ -2,187 +2,201 @@
 	import Legend from '../Legend.svelte';
 	import NavBar from '../NavBar.svelte';
 	import { page } from '$app/stores';
-	import type { Dates } from '../../constants';
-	import type { Household } from './constants';
+	import type { Dates, DateDetails, BusyDetails } from '../../constants';
 	import { formatMin } from '../../utils';
+	import type { Household } from './constants';
 
-	const { overlaps: overlapDays, households, userDates } = $page.data as { overlaps: Dates, households: Household, userDates: Dates };
-	// const overlaps = [
-	// 	{
-	// 		dateRange: 'Tuesday 2/12',
-	// 		householdId: 2,
-	// 		house: 'Doe House (Alice, 8) (Kevin, 6)',
-	// 		timeRange: '11am - 6pm',
-	// 		userAvailability: '🏠🚗',
-	// 		themAvailability: '🏠🚗👥🌟',
-	// 		contacts: [
-	// 			{
-	// 				name: 'John Doe',
-	// 				phone: '+15107120505'
-	// 			},
-	// 			{
-	// 				name: 'John Doe',
-	// 				phone: '+15107120505'
-	// 			}
-	// 		]
-	// 	}
-	// ];
-	const userSched = [
-		{
-			dateRange: 'Tuesday 2/12',
-			timeRange: '11am - 6pm',
-			availability: '🏠🚗'
-		},
-		{
-			dateRange: 'Wednesday 2/13 - Sunday 2/17',
-			availability: 'Busy'
-		}
-	];
-	const circleScheds = [
-		{
-			dateRange: 'Tuesday 2/12',
-			householdId: 2,
-			house: 'Doe House (Alice, 8) (Kevin, 6)',
-			timeRange: '11am - 6pm',
-			availability: '🏠🚗',
-			themAvailability: '🏠🚗👥🌟',
-			contacts: [
-				{
-					name: 'John Doe',
-					phone: '+15107120505'
-				},
-				{
-					name: 'John Doe',
-					phone: '+15107120505'
-				}
-			]
-		},
-		{
-			dateRange: 'Tuesday 2/12',
-			householdId: 2,
-			house: 'Smith House (Alice, 8) (Kevin, 6)',
-			timeRange: '11am - 6pm',
-			availability: '🏠🚗',
-			themAvailability: '🏠🚗👥🌟',
-			contacts: [
-				{
-					name: 'John Doe',
-					phone: '+15107120505'
-				},
-				{
-					name: 'John Doe',
-					phone: '+15107120505'
-				}
-			]
-		}
-	];
-	// const emptySchedule;
+	type CircleMember = {
+		friendHouseholdId: number;
+		householdId: number;
+		friendHousehold: Household;
+		household: Household;
+	}[];
+	const {
+		overlaps: overlapDays,
+		households,
+		userDates,
+		circle,
+		userDatesArr,
+		circleDatesMap
+	} = $page.data as {
+		overlaps: Dates;
+		households: {
+			[key: number | string]: {
+				name: string;
+				kids: string[];
+				parents: {
+					name: string;
+					phone: string;
+				}[];
+			};
+		};
+		userDates: Dates;
+		circle: CircleMember;
+		userDatesArr: (DateDetails | BusyDetails)[];
+		circleDatesMap: {
+			[key: number]: (DateDetails | BusyDetails)[];
+		};
+	};
+
+	const emptySchedule = Object.keys(userDates).length === 0;
+	const noFriends = circle.length === 0;
+	const numNotices = [emptySchedule, noFriends].reduce(
+		(accumulator, currentValue) => accumulator + (currentValue ? 1 : 0),
+		0
+	);
 </script>
 
 <div class="container">
 	<NavBar pageName="Dashboard" />
 	<div style="margin-bottom: 2rem;">
-		<p class="subtitle">Notices<span>2</span></p>
-		<div class="notice">
-			<p>Empty Schedule</p>
-			<p>Please mark your tentative availability.</p>
-		</div>
+		<p class="subtitle">Notices<span>{numNotices}</span></p>
+		{#if emptySchedule}
+			<div class="notice">
+				<p>Empty Schedule</p>
+				<p>Please mark your tentative availability.</p>
+			</div>
+		{/if}
 
-		<div class="notice">
-			<p>Find your friends</p>
-			<p>Be sure to invite your friends to set up play dates!</p>
-		</div>
+		{#if noFriends}
+			<div class="notice">
+				<p>Find your friends</p>
+				<p>Be sure to invite your friends to set up play dates!</p>
+			</div>
+		{/if}
+
+		{#if !numNotices}
+			<p class="default">No notices at this time</p>
+		{/if}
 	</div>
 
 	<!-- planning on condensing range of contiguous days and hours overlapping into one summary -->
 	<p class="subtitle">Overlaps</p>
 	{#each Object.values(overlapDays) as overlapDay}
-	{#each overlapDay as overlap}
-		<p class="bold larger">{overlap.englishDay} {overlap.monthDay}</p>
-		<div class="summary">
-			<a class="bold household" href="/household/{overlap.householdId}">
-				{households[overlap.householdId].name} (
+		{#each overlapDay as overlap}
+			<p class="bold larger">{overlap.englishDay} {overlap.monthDay}</p>
+			<div class="summary">
+				<a class="bold household" href="/household/{overlap.householdId}">
+					{households[overlap.householdId].name} (
 					{households[overlap.householdId].kids}
-				)
-			</a>
-			<p class="bold">{overlap.startHr}:{formatMin(overlap.startMin)} - {overlap.endHr}:{formatMin(overlap.endMin)}</p>
-			<div class="tooltip-container">
-				<div class="tooltip">
-					<p>
-						You: {userDates[overlap.monthDay][0].emoticons}
-						<span class="tooltiptext">
-							<Legend />
-						</span>
-					</p>
+					)
+				</a>
+				<p class="bold">
+					{overlap.startHr}:{formatMin(overlap.startMin)} - {overlap.endHr}:{formatMin(
+						overlap.endMin
+					)}
+				</p>
+				<div class="tooltip-container">
+					<div class="tooltip">
+						<p>
+							You: {userDates[overlap.monthDay][0].emoticons}
+							<span class="tooltiptext">
+								<Legend />
+							</span>
+						</p>
+					</div>
+					|
+					<div class="tooltip">
+						<p>
+							Them: {overlap.emoticons}
+							<span class="tooltiptext">
+								<Legend />
+							</span>
+						</p>
+					</div>
 				</div>
-				|
-				<div class="tooltip">
-					<p>
-						Them: {overlap.emoticons}
-						<span class="tooltiptext">
-							<Legend />
-						</span>
-					</p>
-				</div>
+				<p>Contacts to set up a play date:</p>
+				<ul>
+					{#each households[overlap.householdId].parents as contact}
+						<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
+					{/each}
+				</ul>
 			</div>
-			<p>Contacts to set up a play date:</p>
-			<ul>
-				{#each households[overlap.householdId].parents as contact}
-					<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
-				{/each}
-			</ul>
-		</div>
+		{/each}
 	{/each}
-	{/each}
+	{#if Object.keys(overlapDays).length === 0}
+		<p class="default">No overlaps detected</p>
+	{/if}
 
 	<p class="subtitle">Your Schedule</p>
-	{#each userSched as sched}
+	{#each userDatesArr as sched}
 		<div class="summary">
-			<p class="bold">{sched.dateRange}</p>
-			{#if sched.availability === 'Busy'}
+			{#if sched.status === 'Busy'}
+				<p class="bold">{sched.availRange}</p>
 				<p class="bold">Busy</p>
 			{:else}
-				<p class="bold">{sched.timeRange}</p>
+				<p class="bold">
+					{'englishDay' in sched ? sched.englishDay : ''}
+					{'monthDay' in sched ? sched.monthDay : ''}
+				</p>
+				<p class="bold">{sched.availRange}</p>
 				<div class="tooltip">
 					<p>
-						{sched.availability}
+						{'emoticons' in sched ? sched.emoticons : 'N/A'}
 						<span class="tooltiptext">
 							<Legend />
 						</span>
 					</p>
 				</div>
+				{#if 'notes' in sched}
+					<p>{sched.notes}</p>
+				{/if}
 			{/if}
 		</div>
 	{/each}
+	{#if userDatesArr.length === 0}
+		<p class="default">Empty for the next 21 days</p>
+	{/if}
 
 	<p class="subtitle">Your Circle's Schedules</p>
-	{#each circleScheds as sched}
-		<p class="bold larger">{sched.dateRange}</p>
-		<div class="summary">
-			<a class="bold household" href="/household/{sched.householdId}">{sched.house}</a>
-			<p class="bold">{sched.timeRange}</p>
-			<div class="tooltip">
-				<p>
-					{sched.availability}
-					<span class="tooltiptext">
-						<Legend />
-					</span>
-				</p>
+	{#each Object.entries(circleDatesMap) as [householdId, scheds]}
+		<a href="/household/{householdId}" class="bold larger"
+			>{households[householdId].name} ({households[householdId].kids.join(', ')})</a
+		>
+		{#each households[householdId].parents as contact}
+			<p class="parent">{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></p>
+		{/each}
+
+		{#each scheds as sched}
+			<div class="summary">
+				{#if sched.status === 'Busy'}
+					<p class="bold">{sched.availRange}</p>
+					<p class="bold">Busy</p>
+				{:else}
+					<p class="bold">
+						{'englishDay' in sched ? sched.englishDay : ''}
+						{'monthDay' in sched ? sched.monthDay : ''}
+					</p>
+					<p class="bold">{sched.availRange}</p>
+					<div class="tooltip">
+						<p>
+							{'emoticons' in sched ? sched.emoticons : ''}
+							<span class="tooltiptext">
+								<Legend />
+							</span>
+						</p>
+					</div>
+				{/if}
 			</div>
-			<p>Contacts to set up a play date:</p>
-			<ul>
-				{#each sched.contacts as contact}
-					<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
-				{/each}
-			</ul>
-		</div>
+		{/each}
 	{/each}
+	{#if Object.keys(circleDatesMap).length === 0}
+		<p class="default">Empty for the next 21 days</p>
+	{/if}
 </div>
 
 <style>
+	.default {
+		font-size: large;
+		text-align: center;
+	}
 	.household {
 		color: black;
 		font-size: large;
+	}
+	.parent {
+		font-size: large;
+		margin: 0.4rem 0;
 	}
 
 	.tooltip-container {

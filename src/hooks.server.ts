@@ -98,11 +98,10 @@ export const handle = (async ({ event, resolve }) => {
 				},
 				include: {
 					phonePermissions: true,
-					AvailabilityDate: true,
+					AvailabilityDate: true
 				}
 			});
 
-			console.log('AVAILABILITY DATE', user.AvailabilityDate)
 		if (event.url.pathname === '/db') {
 			event.locals.user = user;
 			event.locals.phone = session.phone;

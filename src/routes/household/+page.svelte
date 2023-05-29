@@ -335,7 +335,7 @@
 		height: 40px;
 		font-size: 26px;
 	}
-	
+
 	.subtitle-2 {
 		font-weight: 400;
 		font-size: 20px;
