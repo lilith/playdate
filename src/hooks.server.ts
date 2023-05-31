@@ -67,9 +67,8 @@ const redirectOrContinue = (
 
 export const handle = (async ({ event, resolve }) => {
 
-	// // log env vars from sveltekit server side
-	console.log(dotenv.config())
-	console.log('DATABASE_PRISMA_URL', process.env['DATABASE_PRISMA_URL']);
+	// // log env var from sveltekit server side
+	console.log('DATABASE_PRISMA_URL', process.env.DATABASE_PRISMA_URL);
 
 	// // Fail fast if we don't have the env var
 	// if (!process.env['DATABASE_PRISMA_URL']) {
