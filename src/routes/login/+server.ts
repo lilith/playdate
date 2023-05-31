@@ -1,4 +1,4 @@
-import { TWILIO_ACCOUNT_SID, env as private_env, TWILIO_AUTH_TOKEN } from '$env/dynamic/private';
+import { env as private_env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
@@ -83,11 +83,11 @@ export async function POST({ request }: { request: Request }) {
 
 	let client;
 	if (private_env.TWILIO_API_KEY) {
-		client = Twilio(private_env.TWILIO_API_KEY, TWILIO_AUTH_TOKEN, {
-			accountSid: TWILIO_ACCOUNT_SID
+		client = Twilio(private_env.TWILIO_API_KEY, private_env.TWILIO_AUTH_TOKEN, {
+			accountSid: private_env.TWILIO_ACCOUNT_SID
 		});
 	}else{ 
-		client = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN);
 	}
 	let message;
 	try {
