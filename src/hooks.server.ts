@@ -1,7 +1,7 @@
 import type { Handle, RequestEvent } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
-
+import dotenv from 'dotenv';
 const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
@@ -67,10 +67,14 @@ const redirectOrContinue = (
 
 export const handle = (async ({ event, resolve }) => {
 
-	// Fail fast if we don't have the env var
-	if (!process.env['DATABASE_PRISMA_URL']) {
-		throw new Error('DATABASE_PRISMA_URL is not set');
-	}
+	// // log env vars from sveltekit server side
+	console.log(dotenv.config())
+	console.log('DATABASE_PRISMA_URL', process.env['DATABASE_PRISMA_URL']);
+
+	// // Fail fast if we don't have the env var
+	// if (!process.env['DATABASE_PRISMA_URL']) {
+	// 	throw new Error('DATABASE_PRISMA_URL is not set');
+	// }
 
 
 	const cookie = event.cookies.get('session');
