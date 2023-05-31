@@ -1,4 +1,4 @@
-import { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } from '$env/static/private';
+import { TWILIO_ACCOUNT_SID, env as private_env, TWILIO_AUTH_TOKEN } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
@@ -19,9 +19,9 @@ const generate = async () => {
 			token: null
 		};
 	}
-
+	let token = crypto.randomBytes(8).toString('hex');
 	return {
-		token: crypto.randomBytes(8).toString('hex'),
+		token,
 		createdAt,
 		expires
 	};
@@ -40,7 +40,7 @@ async function save(token: string, phone: string, createdAt: Date, expires: Date
 
 export async function POST({ request }: { request: Request }) {
 	const { phone } = await request.json();
-	if (!phone)
+	if (!phone){
 		return new Response(
 			JSON.stringify({
 				message: 'Missing a phone number'
@@ -49,10 +49,12 @@ export async function POST({ request }: { request: Request }) {
 				status: 401
 			}
 		);
+	}
 
 	const { token, createdAt, expires } = await generate();
 
-	if (!token)
+	if (!token){
+		console.error("token generation failed")
 		return new Response(
 			JSON.stringify({
 				message: 'Token generation failed'
@@ -61,7 +63,7 @@ export async function POST({ request }: { request: Request }) {
 				status: 500
 			}
 		);
-
+	}
 	// save these attrs to DB
 	save(token, phone, createdAt, expires)
 		.then(async () => {
@@ -79,8 +81,14 @@ export async function POST({ request }: { request: Request }) {
 		expires.getMinutes() < 10 ? '0' : ''
 	}${expires.getMinutes()}${hrs >= 12 ? 'PM' : 'AM'}`;
 
-	const client = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-
+	let client;
+	if (private_env.TWILIO_API_KEY) {
+		client = Twilio(private_env.TWILIO_API_KEY, TWILIO_AUTH_TOKEN, {
+			accountSid: TWILIO_ACCOUNT_SID
+		});
+	}else{ 
+		client = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+	}
 	let message;
 	try {
 		message = await client.messages.create({
@@ -92,6 +100,7 @@ export async function POST({ request }: { request: Request }) {
 		});
 		console.log(message);
 	} catch (err) {
+		console.error(err);
 		return new Response(
 			JSON.stringify({
 				message: err
