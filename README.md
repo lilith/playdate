@@ -100,9 +100,9 @@ Got a simple query to run (saving and retrieving a magicLink)
 4. npm add @vercel/postgres and dotenv
 5. npm audit fix
 6. npm i -g vercel
-7. vercel env pull .env.development.local
+7. vercel env pull .env (NOTE! .env.local, .env.development.local, etc are NOT supported by dotenv it seems)
 8. vercel link
-9. deploys
+9. deploy
 
 Both locally and when deployed the issues is that env vars are not populated. 
 
