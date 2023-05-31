@@ -66,6 +66,13 @@ const redirectOrContinue = (
 };
 
 export const handle = (async ({ event, resolve }) => {
+
+	// Fail fast if we don't have the env var
+	if (!process.env['PRISMA_DATABASE_URL']) {
+		throw new Error('PRISMA_DATABASE_URL is not set');
+	}
+
+
 	const cookie = event.cookies.get('session');
 
 	// check whether authenticated
