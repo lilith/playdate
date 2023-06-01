@@ -174,7 +174,8 @@
 			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
-			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);
+			
+			alert(`The user with phone # ${phoneInput.getNumber()} has been authorized to manage this household. Please ask them to log in and accept.`);
 			if (!householdId) await invalidate('data:householdId');
 		} else {
 			const { message } = await response.json();
@@ -216,13 +217,13 @@
 	</Modal>
 
 	<form method="POST" action="/db" id="household-form" on:submit|preventDefault={saveToDB}>
-		<label class="subtitle" for="nickname">Nickname<span class="red">*</span></label>
+		<label class="subtitle" for="nickname">Household Nickname<span class="red">*</span></label>
 		<input type="text" name="nickname" required bind:value={name} />
 
 		<label class="subtitle" for="faq">FAQ</label>
 		<textarea
 			name="faq"
-			placeholder="e.g. work hours, school, or address"
+			placeholder="e.g. work hours, school, allergies, or address"
 			bind:value={publicNotes}
 		/>
 
@@ -259,12 +260,12 @@
 				max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
 			/>
 
-			<div id="btn-container"><button class="add-btn">+</button></div>
+			<div id="btn-container"><button class="text-btn">Save & Add Child</button></div>
 		</form>
 
 		<hr class="section" />
 
-		<p class="subtitle">Adults</p>
+		<p class="subtitle">Adult (Household managers)</p>
 		{#each adults as adult, ind}
 			<div class="card">
 				<p>{adult.firstName} {adult.lastName}</p>
@@ -276,16 +277,17 @@
 			</div>
 			<hr class="inner-section" />
 		{/each}
-
+		You can authorize other guardians to manage this household by entering their phone number.
+		After authorizing them, ask them to log in and accept the invite.
 		<div style="display: flex; gap: 20px;">
 			<PhoneInput bind:phoneInput />
-			<button class="add-btn" on:click|preventDefault={inviteAdult}>+</button>
+			<button class="text-btn" on:click|preventDefault={inviteAdult}>Authorize Adult</button>
 		</div>
 
 		<div class="delete-btn-container">
 			<button class="btn save-btn" type="submit">Save</button>
 			{#if householdId}
-				<button
+				<button	
 					class="btn important-delete-btn"
 					on:click|preventDefault={() => openModal(ModalReason.DELETE_HOUSEHOLD)}
 					>Delete Household</button
@@ -326,6 +328,15 @@
 		width: 40px;
 		height: 40px;
 		font-size: 26px;
+	}
+	
+	.text-btn{
+		background: #fce9be;
+		border: 1.5px solid #5a5a5a;
+		border-radius: 0.5rem;
+		width: auto;
+		font-size: 1.5rem;
+		padding: 0.25rem;
 	}
 
 	.subtitle-2 {
