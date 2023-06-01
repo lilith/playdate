@@ -3,7 +3,9 @@ import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+	log: ['query', 'info', 'warn', 'error'],
+  });
 
 const generate = async () => {
 	const createdAt = new Date();
@@ -82,14 +84,19 @@ export async function POST({ request }: { request: Request }) {
 	}${expires.getMinutes()}${hrs >= 12 ? 'PM' : 'AM'}`;
 
 	let client;
-	if (private_env.TWILIO_API_KEY) {
-		client = Twilio(private_env.TWILIO_API_KEY, private_env.TWILIO_AUTH_TOKEN, {
-			accountSid: private_env.TWILIO_ACCOUNT_SID
+	// So far Twilio API keys cause an internal server error on their end, https://www.twilio.com/docs/errors/20500
+	const useApiKey = false; 
+	if (useApiKey && private_env.TWILIO_API_KEY && private_env.TWILIO_API_SECRET) {
+		client = Twilio(private_env.TWILIO_API_KEY, private_env.TWILIO_API_SECRET, {
+			accountSid: private_env.TWILIO_ACCOUNT_SID,
+			logLevel: 'debug',
 		});
 	} else {
-		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN);
+		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN, 
+			{logLevel: 'debug'});
 	}
 	let message;
+	let createMessageRequest;
 	try {
 
 		// In development, use the path the request was sent to and the port
@@ -101,16 +108,21 @@ export async function POST({ request }: { request: Request }) {
 		
 		const url = import.meta.env.PROD ? private_env.PLAYDATE_URL : request.headers.get('host');
 
-		message = await client.messages.create({
+		createMessageRequest = {
 			body: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
 				1
 			)}/${token}`,
 			from: private_env.TWILIO_PHONE_NUMBER || '+15005550006',
+			messagingServiceSid: private_env.TWILIO_MESSAGING_SERVICE_SID,
 			to: phone
-		});
+		};
+
+		message = await client.messages.create(createMessageRequest);
 		console.log(message);
 	} catch (err) {
 		console.error(err);
+		console.error("message create request parameters:");
+		console.error(createMessageRequest);
 		return new Response(
 			JSON.stringify({
 				message: err
