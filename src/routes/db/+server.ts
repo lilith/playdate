@@ -1,6 +1,6 @@
 import { json, redirect, error } from '@sveltejs/kit';
 
-import { PrismaClient, Pronoun } from '@prisma/client';
+import { type AvailabilityStatus, PrismaClient, Pronoun } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -26,12 +26,22 @@ export async function POST({
 	if (req.type === 'user') res['id'] = await saveUser(req, locals);
 	else if (req.type === 'household') await saveHousehold(req);
 	else if (req.type === 'householdChild') res['id'] = await saveKid(req);
-	else if (req.type === 'joinHousehold') {
+	else if (req.type === 'inviteToHousehold') {
 		const { err } = await createHouseholdInvite(req);
 		if (err)
 			throw error(400, {
 				message: err
 			});
+	} else if (req.type === 'schedule') {
+		await saveSchedule(req);
+	} else if (req.type === 'inviteToCircle') {
+		await createCircleInvite(req);
+	} else if (req.type === 'acceptFriendReq') {
+		await acceptFriendReq(req);
+	} else if (req.type === 'rejectFriendReq') {
+		await deleteFriendReq(req);
+	} else if (req.type === 'deleteFriend') {
+		await deleteFriend(req);
 	}
 
 	return json(res);
@@ -70,6 +80,125 @@ export async function PATCH({
 	return json('success');
 }
 
+async function createCircleInvite(req: {
+	targetPhone: string;
+	fromUserId: number;
+	fromHouseholdId: number;
+}) {
+	const { targetPhone, fromUserId, fromHouseholdId } = req;
+
+	const existingInvites = await prisma.friendRequest.findMany({
+		where: {
+			targetPhone,
+			fromHouseholdId
+		}
+	});
+	if (existingInvites.length)
+		return {
+			err: 'The user associated with this number has already been invited to this circle.'
+		};
+	const now = new Date();
+	const expires = now;
+	expires.setDate(now.getDate() + 7); // expire 1 week from now
+	await prisma.friendRequest.create({
+		data: {
+			expires,
+			targetPhone,
+			fromUserId,
+			fromHouseholdId
+		}
+	});
+}
+
+async function deleteFriend(req: { connectionId: number }) {
+	await prisma.householdConnection.delete({
+		where: {
+			id: req.connectionId
+		}
+	});
+}
+
+async function acceptFriendReq(req: {
+	householdId: number;
+	friendHouseholdId: number;
+	friendReqId: number;
+}) {
+	const { householdId, friendHouseholdId, friendReqId } = req;
+	// add to user's circle
+	await prisma.householdConnection.create({
+		data: {
+			householdId,
+			friendHouseholdId
+		}
+	});
+
+	// delete friend req
+	await deleteFriendReq({ reqId: friendReqId });
+}
+
+function deleteFriendReq(req: { reqId: number }) {
+	return prisma.friendRequest.delete({
+		where: {
+			id: req.reqId
+		}
+	});
+}
+
+async function saveSchedule(req: {
+	monthDay: string;
+	status: AvailabilityStatus;
+	notes: string | undefined;
+	emoticons: string | undefined;
+	householdId: number;
+	startHr: number;
+	startMin: number;
+	endHr: number;
+	endMin: number;
+}) {
+	const { monthDay, status, notes, emoticons, householdId } = req;
+	let { startHr, startMin, endHr, endMin } = req;
+
+	if (startHr === undefined) startHr = 0;
+	if (startMin === undefined) startMin = 0;
+	if (endHr === undefined) endHr = 0;
+	if (endMin === undefined) endMin = 0;
+	const date = new Date(monthDay);
+	const startTime = new Date(date);
+	const endTime = new Date(date);
+
+	startTime.setHours(startHr);
+	startTime.setMinutes(startMin);
+	endTime.setHours(endHr);
+	endTime.setMinutes(endMin);
+
+	// if an entry for this date already exists in the db, then patch it
+	// otherwise create it
+	await prisma.availabilityDate.upsert({
+		where: {
+			householdId_date: {
+				householdId,
+				date
+			}
+		},
+		update: {
+			status,
+			notes,
+			emoticons,
+			startTime,
+			endTime
+		},
+		create: {
+			householdId,
+			date,
+			status,
+			notes,
+			emoticons,
+			startTime,
+			endTime
+		}
+	});
+}
+
 async function createHouseholdInvite(req: {
 	targetPhone: string;
 	householdId: number;
@@ -99,8 +228,7 @@ async function createHouseholdInvite(req: {
 			expires,
 			targetPhone,
 			householdId,
-			fromUserId,
-			createdAt: now
+			fromUserId
 		}
 	});
 	return {};

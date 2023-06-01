@@ -6,8 +6,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_PRISMA_URL") // uses connection pooling
-  directUrl = env("DATABASE_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
+  // directUrl = env("DATABASE_URL_NON_POOLING") // uses a direct connection
+  // shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
 }
  
 
@@ -138,8 +138,8 @@ model AvailabilityDate {
   childId     Int?
   date        DateTime
   status      AvailabilityStatus @default(UNSPECIFIED)
-  startTime   DateTime
-  endTime     DateTime
+  startTime   DateTime?
+  endTime     DateTime?
   notes       String?
   emoticons   String?
   updatedAt   DateTime           @updatedAt
@@ -147,6 +147,7 @@ model AvailabilityDate {
   child       HouseholdChild?    @relation(fields: [childId], references: [id])
   household   Household          @relation(fields: [householdId], references: [id])
   parent      User?              @relation(fields: [parentId], references: [id])
+  @@unique([householdId, date])
 }
 
 model HouseholdConnection {

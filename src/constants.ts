@@ -1,3 +1,5 @@
+export const DAYS = ['Sun.', 'Mon.', 'Tues.', 'Wed.', 'Thur.', 'Fri.', 'Sat.'];
+
 export const PRONOUNS = {
 	FAE_FAER_FAERS: '(f)ae, (f)aer, (f)aers',
 	EEY_EM_EIRS: 'e/ey, em, eirs',
@@ -154,3 +156,34 @@ export const LANGUAGES = [
 	{ name: 'Yoruba - Èdè Yorùbá', code: 'yo' },
 	{ name: 'Zulu - isiZulu', code: 'zu' }
 ];
+
+export const EMOTICONS_REVERSE: { [key: string]: string } = {
+	house: '🏠',
+	car: '🚗',
+	person: '👤',
+	people: '👥',
+	school: '🏫',
+	star1: '⭐️',
+	star2: '🌟',
+	star3: '🙏'
+};
+
+export type DateDetails = {
+	englishDay: string;
+	monthDay: string;
+	availRange: string;
+	notes: string | null;
+	emoticons: string;
+	startHr: number;
+	startMin: number;
+	endHr: number;
+	endMin: number;
+	householdId: number;
+	status?: string;
+};
+
+export type BusyDetails = {
+	status: 'Busy';
+	availRange: string;
+};
+export type Dates = { [key: string]: DateDetails[] };

@@ -119,8 +119,8 @@ CREATE TABLE "AvailabilityDate" (
     "childId" INTEGER,
     "date" TIMESTAMP(3) NOT NULL,
     "status" "AvailabilityStatus" NOT NULL DEFAULT 'UNSPECIFIED',
-    "startTime" TIMESTAMP(3) NOT NULL,
-    "endTime" TIMESTAMP(3) NOT NULL,
+    "startTime" TIMESTAMP(3),
+    "endTime" TIMESTAMP(3),
     "notes" TEXT,
     "emoticons" TEXT,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -153,6 +153,9 @@ CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 
 -- CreateIndex
 CREATE INDEX "User_phone_idx" ON "User"("phone");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AvailabilityDate_householdId_date_key" ON "AvailabilityDate"("householdId", "date");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "HouseholdConnection_householdId_key" ON "HouseholdConnection"("householdId");

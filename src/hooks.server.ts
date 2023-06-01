@@ -12,6 +12,7 @@ const setLocal = async (
 ) => {
 	const userInfo: { [key: string]: string | number | null | boolean } = {
 		household: 'N/A',
+		phone: '',
 		firstName: '',
 		lastName: '',
 		pronouns: '',
@@ -33,6 +34,7 @@ const setLocal = async (
 		for (const key of Object.keys(userInfo)) {
 			if (key in user) userInfo[key] = user[key];
 		}
+		userInfo.phone = user.phone;
 		userInfo.notifFreq = user.reminderIntervalDays;
 		userInfo.notifStartDay = user.reminderDatetime.getDay();
 		userInfo.notifHr = user.reminderDatetime.getHours();
@@ -60,12 +62,12 @@ const redirectOrContinue = (
 		opts?: ResolveOptions | undefined
 	) => MaybePromise<Response>
 ) => {
+	console.log('REDIRECT OR CONT', event.url.pathname, path);
 	if (event.url.pathname !== path) throw redirect(308, path);
 	return resolve(event);
 };
 
 export const handle = (async ({ event, resolve }) => {
-
 	// // log env var from sveltekit server side
 	// console.log('DATABASE_PRISMA_URL', process.env.DATABASE_PRISMA_URL);
 
@@ -73,7 +75,6 @@ export const handle = (async ({ event, resolve }) => {
 	// if (!process.env['DATABASE_PRISMA_URL']) {
 	// 	throw new Error('DATABASE_PRISMA_URL is not set');
 	// }
-
 
 	const cookie = event.cookies.get('session');
 
@@ -94,7 +95,8 @@ export const handle = (async ({ event, resolve }) => {
 					phone: session.phone
 				},
 				include: {
-					phonePermissions: true
+					phonePermissions: true,
+					AvailabilityDate: true
 				}
 			});
 
@@ -114,6 +116,7 @@ export const handle = (async ({ event, resolve }) => {
 
 		// F-D if there is no household associated
 		if (!user.householdId) {
+			console.log('1');
 			return redirectOrContinue(event, '/household', resolve);
 		}
 
@@ -124,6 +127,7 @@ export const handle = (async ({ event, resolve }) => {
 		});
 		// F-D if there is no household associated
 		if (!household) {
+			console.log('2');
 			return redirectOrContinue(event, '/household', resolve);
 		}
 		const kids = await prisma.householdChild.findMany({
@@ -134,6 +138,7 @@ export const handle = (async ({ event, resolve }) => {
 		// F-E if the associated household has no nickname
 		// F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
 		if (!household.name || !household.name.length || !kids.length) {
+			console.log('3', !household.name, !household.name.length, !kids.length);
 			return redirectOrContinue(event, '/household', resolve);
 		}
 
@@ -143,6 +148,7 @@ export const handle = (async ({ event, resolve }) => {
 		If all of these are complete, the user will go to the default dashboard page F-H
 		*/
 	}
+	console.log('DOWN HERE');
 	const response = await resolve(event);
 	return response;
 }) satisfies Handle;

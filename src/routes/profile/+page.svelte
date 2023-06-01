@@ -4,6 +4,8 @@
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import NavBar from '../NavBar.svelte';
+	import { POST_Req } from '../../utils';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,
@@ -30,6 +32,7 @@
 		allowInvites,
 		allowReminders
 	} = $page.data.user;
+	let doNotDisturb = !allowInvites;
 
 	let showModal = !acceptedTermsAt;
 
@@ -64,25 +67,23 @@
 	}
 
 	async function saveToDB() {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'user',
-				firstName,
-				lastName,
-				pronouns,
-				timeZone,
-				locale,
-				email,
-				notifFreq,
-				notifStartDay,
-				notifHr,
-				notifMin,
-				acceptedTermsAt,
-				allowInvites,
-				allowReminders
-			})
+		const response = await POST_Req('/db', {
+			type: 'user',
+			firstName,
+			lastName,
+			pronouns,
+			timeZone,
+			locale,
+			email,
+			notifFreq,
+			notifStartDay,
+			notifHr,
+			notifMin,
+			acceptedTermsAt,
+			allowInvites: !doNotDisturb,
+			allowReminders
 		});
+
 		if (response.status == 200) {
 			if ($page.data.user.household === 'N/A') {
 				goto('/household');
@@ -118,7 +119,7 @@
 		</div>
 	</Modal>
 
-	<h1>Profile</h1>
+	<NavBar pageName="Profile" />
 	<p class="subtitle" style="text-align: center">Part of Household</p>
 	<p style="text-align: center;font-size: 24px;color: #5A5A5A;margin-bottom: 0.5rem;">
 		{$page.data.user.household}
@@ -200,7 +201,7 @@
 		<div class="switch-container" style="margin-bottom: 15px;">
 			<label class="thin-label" for="invite-consent">Do not disturb</label>
 			<label class="switch">
-				<input name="invite-consent" type="checkbox" bind:checked={allowInvites} />
+				<input name="invite-consent" type="checkbox" bind:checked={doNotDisturb} />
 				<span class="slider round" />
 			</label>
 		</div>

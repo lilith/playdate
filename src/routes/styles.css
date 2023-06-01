@@ -10,7 +10,7 @@
 	--color-bg-0: rgb(202, 216, 228);
 	--color-bg-1: hsl(209, 36%, 86%);
 	--color-bg-2: hsl(224, 44%, 95%);
-	--color-theme-1: #ff3e00;
+	--color-theme-1: black;
 	--color-theme-2: #4075a6;
 	--color-text: rgba(0, 0, 0, 0.7);
 	--column-width: 42rem;
@@ -142,4 +142,73 @@ textarea {
 	background: #73a4eb;
 	color: white;
 	font-size: 26px;
+}
+
+.tooltip {
+	position: relative;
+	display: inline-flex;
+	justify-content: center;
+	width: 50%;
+}
+
+.tooltip p {
+	border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+	width: fit-content;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+	visibility: hidden;
+	width: 133px;
+	background-color: black;
+	color: #fff;
+	text-align: left;
+	padding: 5px 0;
+	border-radius: 6px;
+	position: absolute;
+	z-index: 1;
+	left: 50%;
+	bottom: 110%;
+	transform: translateX(-50%);
+	padding-left: 0.5rem;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+	content: ' ';
+	position: absolute;
+	top: 100%; /* At the bottom of the tooltip */
+	left: 50%;
+	margin-left: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black transparent transparent transparent;
+}
+
+.card {
+	font-weight: 400;
+	font-size: 1.5rem;
+	display: flex;
+	align-items: center;
+	text-align: center;
+
+	color: #797979;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #d9d9d9;
+	width: 80%;
+	padding: 38px 35px;
+	border-radius: 6px;
+	margin: 1rem auto;
+	gap: 20px;
+	background: white;
+}
+.card button hr {
+	width: 40%;
+	border-top: 3px solid #5a5a5a;
+	margin: 30%;
 }

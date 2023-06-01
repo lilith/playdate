@@ -2,6 +2,7 @@
 	import PhoneInput from './PhoneInput.svelte';
 	import Button from './Button.svelte';
 	import logo from '$lib/images/logo.png';
+	import { POST_Req } from '../utils';
 
 	let phoneInput: object;
 	let loginSuccess = false;
@@ -11,11 +12,8 @@
 			return;
 		}
 
-		const response = await fetch('/login', {
-			method: 'POST',
-			body: JSON.stringify({
-				phone: phoneInput.getNumber()
-			})
+		const response = await POST_Req('/login', {
+			phone: phoneInput.getNumber()
 		});
 		if (response.status == 200) {
 			const thing = await response.json();

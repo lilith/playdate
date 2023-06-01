@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { PRONOUNS } from '../../../constants';
+	import NavBar from '../../NavBar.svelte';
 
 	export let data: PageData;
 	const { householdInfo: household } = data;
@@ -11,13 +12,10 @@
 	<meta name="description" content="Playdate app" />
 </svelte:head>
 <div style="margin-bottom: 2rem;">
-	<div id="dashboard-btn">
-		<a href="/dashboard">🏠</a>
-	</div>
-	<h1>{household.name}</h1>
+	<NavBar pageName={household.name} />
 	<p class="subtitle">FAQ</p>
 	<div class="faq">
-		{household.publicNotes}
+		{household.publicNotes.length ? household.publicNotes : 'Nothing of note'}
 	</div>
 
 	<p class="subtitle">Kids</p>
@@ -46,19 +44,7 @@
 	a {
 		color: #5a5a5a;
 	}
-	#dashboard-btn {
-		position: fixed;
-		font-size: 1.9rem;
-		background: white;
-		border-radius: 50%;
-		width: 10rem;
-		height: 6rem;
-		text-align: center;
-		border: 1px solid #d9d9d9;
-		bottom: 0;
-		right: 50%;
-		transform: translate(50%, 50%);
-	}
+
 	.faq {
 		margin: 1rem auto;
 		width: 80%;
@@ -68,22 +54,5 @@
 	}
 	.small-font {
 		font-size: 1.2rem;
-	}
-	.card {
-		font-weight: 400;
-		font-size: 1.5rem;
-		display: flex;
-		align-items: center;
-		text-align: center;
-
-		color: #797979;
-		display: flex;
-		flex-direction: column;
-		border: 1px solid #d9d9d9;
-		width: 80%;
-		padding: 38px 35px;
-		border-radius: 6px;
-		margin: 1rem auto;
-		background: white;
 	}
 </style>
