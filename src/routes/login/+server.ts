@@ -105,7 +105,7 @@ export async function POST({ request }: { request: Request }) {
 			body: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
 				1
 			)}/${token}`,
-			from: '+15005550006',
+			from: private_env.TWILIO_PHONE_NUMBER || '+15005550006',
 			to: phone
 		});
 		console.log(message);
