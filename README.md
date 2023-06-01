@@ -103,6 +103,9 @@ Got a simple query to run (saving and retrieving a magicLink)
 8. vercel link
 9. deploy
 
+vercel env pull --environment production .env
+yarn run prisma migrate reset
+
 Both locally and when deployed the issues is that env vars are not populated.
 
 Ex. npm run dev or npx yarn run dev-> Error: PRISMA_DATABASE_URL is not set
