@@ -1,5 +1,5 @@
 [build]
-buildCommand = "yarn nodebuild"
+buildCommand = "yarn postinstall && yarn nodebuild"
 
 [deploy]
 startCommand = "node build/index.js"
