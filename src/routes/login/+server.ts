@@ -91,8 +91,18 @@ export async function POST({ request }: { request: Request }) {
 	}
 	let message;
 	try {
+
+		// In development, use the path the request was sent to and the port
+		//  - it's not trustworthy, clients can set it to whatever they want in the http request
+		// But for development, it's fine
+		// In production, use the deployed url from env vars
+		//  - it's trustworthy, because it's set by the server
+		if (import.meta.env.PROD && !private_env.PLAYDATE_URL) console.error('PLAYDATE_URL is not set, required in production. Ex https://playdate.help');
+		
+		const url = import.meta.env.PROD ? private_env.PLAYDATE_URL : request.headers.get('host');
+
 		message = await client.messages.create({
-			body: `Your login link to playdate.help will expire at ${time}: http://localhost:5173/login/${phone.slice(
+			body: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
 				1
 			)}/${token}`,
 			from: '+15005550006',
