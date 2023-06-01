@@ -63,7 +63,6 @@ For now, we default to "US" as the country, and reject non-US numbers. We'll use
 
 In years, if this goes international, we can extract the country from the phone number with libphonenumber, and use that to determine if a caller's country is different than the friend's country, and adapt display to include country code information.
 
-
 ## Setting Up Local DB on GitPod
 
 If the Postgre image isn't auto-starting (i.e., `pg_start` is not a recognized command), then I suggest running `gp rebuild`. This will point you towards a GitPod workspace whose URL looks like `https://debug-lilith-playdate-kvvsqrmwmqz.ws-us89b.gitpod.io/`. I've found that `pg_start` is recognized in this new workspace. Don't worry if `pg_start` says that the server is already up.
@@ -73,6 +72,7 @@ Next, you'll need to set the following in your `.env` in order to connect with P
 ```
 DATABASE_PRISMA_URL="postgresql://gitpod@localhost:5432/dev?schema=public"
 ```
+
 **This has changes from DATABASE_URL due to vercel and prisma limitations**
 
 Then to start querying the db, do `npx prisma generate` to gen the Prisma Client.
@@ -91,12 +91,11 @@ Got rid of errors in auto-generated schema and generated PostgreSQL schema from 
 To make it work, got rid of MagicLink foreign key constraint
 Got a simple query to run (saving and retrieving a magicLink)
 
-
 ## Deployment to vercel
 
 1. Imported github with defaults to vercel
 2. Added env vars for TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, separaete dev/preview and prod api keys
-2. Created a postgres "playdate_beta" and "playdate_prod" and connected it, specified "DATABASE_" prefix, updated prisma schema to use direct and shadow connection strings to allow serverless deploy style, set _beta for dev and preview
+3. Created a postgres "playdate*beta" and "playdate_prod" and connected it, specified "DATABASE*" prefix, updated prisma schema to use direct and shadow connection strings to allow serverless deploy style, set \_beta for dev and preview
 4. npm add @vercel/postgres and dotenv
 5. npm audit fix
 6. npm i -g vercel
@@ -104,12 +103,11 @@ Got a simple query to run (saving and retrieving a magicLink)
 8. vercel link
 9. deploy
 
-Both locally and when deployed the issues is that env vars are not populated. 
+Both locally and when deployed the issues is that env vars are not populated.
 
 Ex. npm run dev or npx yarn run dev-> Error: PRISMA_DATABASE_URL is not set
 
 Ex. PRISMA_DATABASE_URL=1 npm run dev -> WORKS!
-
 
 ### Draft schema
 

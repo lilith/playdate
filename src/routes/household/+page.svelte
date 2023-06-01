@@ -6,6 +6,7 @@
 	import Modal from '../Modal.svelte';
 	import { invalidate, invalidateAll } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
+	import { POST_Req } from '../../utils';
 
 	enum ModalReason {
 		DISCONNECT_ADULT,
@@ -43,15 +44,12 @@
 	});
 
 	async function saveToDB() {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'household',
-				id: householdId,
-				userId: $page.data.user.id,
-				name: name,
-				publicNotes: publicNotes
-			})
+		const response = await POST_Req('/db', {
+			type: 'household',
+			id: householdId,
+			userId: $page.data.user.id,
+			name: name,
+			publicNotes: publicNotes
 		});
 		if (response.status == 200) {
 			alert('Successfully saved household info');
@@ -62,17 +60,14 @@
 	}
 
 	async function addKid(e: SubmitEvent) {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'householdChild',
-				householdId: householdId,
-				founderId: $page.data.user.id,
-				firstName: e.target[0].value,
-				pronouns: e.target[2].value,
-				lastName: e.target[1].value,
-				dateOfBirth: new Date(e.target[3].value)
-			})
+		const response = await POST_Req('/db', {
+			type: 'householdChild',
+			householdId: householdId,
+			founderId: $page.data.user.id,
+			firstName: e.target[0].value,
+			pronouns: e.target[2].value,
+			lastName: e.target[1].value,
+			dateOfBirth: new Date(e.target[3].value)
 		});
 		if (response.status == 200) {
 			await invalidate('data:householdId');
@@ -172,14 +167,11 @@
 			alert('You have entered an invalid contact number.');
 			return;
 		}
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'inviteToHousehold',
-				targetPhone: phoneInput.getNumber(),
-				householdId: householdId,
-				fromUserId: $page.data.user.id
-			})
+		const response = await POST_Req('/db', {
+			type: 'inviteToHousehold',
+			targetPhone: phoneInput.getNumber(),
+			householdId: householdId,
+			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
 			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);

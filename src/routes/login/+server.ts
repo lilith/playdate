@@ -19,7 +19,7 @@ const generate = async () => {
 			token: null
 		};
 	}
-	let token = crypto.randomBytes(8).toString('hex');
+	const token = crypto.randomBytes(8).toString('hex');
 	return {
 		token,
 		createdAt,
@@ -40,7 +40,7 @@ async function save(token: string, phone: string, createdAt: Date, expires: Date
 
 export async function POST({ request }: { request: Request }) {
 	const { phone } = await request.json();
-	if (!phone){
+	if (!phone) {
 		return new Response(
 			JSON.stringify({
 				message: 'Missing a phone number'
@@ -53,8 +53,8 @@ export async function POST({ request }: { request: Request }) {
 
 	const { token, createdAt, expires } = await generate();
 
-	if (!token){
-		console.error("token generation failed")
+	if (!token) {
+		console.error('token generation failed');
 		return new Response(
 			JSON.stringify({
 				message: 'Token generation failed'
@@ -86,7 +86,7 @@ export async function POST({ request }: { request: Request }) {
 		client = Twilio(private_env.TWILIO_API_KEY, private_env.TWILIO_AUTH_TOKEN, {
 			accountSid: private_env.TWILIO_ACCOUNT_SID
 		});
-	}else{ 
+	} else {
 		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN);
 	}
 	let message;

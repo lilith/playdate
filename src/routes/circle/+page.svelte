@@ -6,6 +6,7 @@
 	import AcceptIcon from '../../Icons/checkIcon.svelte';
 	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
+	import { POST_Req } from '../../utils';
 
 	let phoneInput: object;
 	let { friendReqsInfo, circleInfo, user } = $page.data;
@@ -30,14 +31,11 @@
 			alert('You have entered an invalid contact number.');
 			return;
 		}
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'inviteToCircle',
-				targetPhone: phoneInput.getNumber(),
-				fromHouseholdId: $page.data.user.householdId,
-				fromUserId: $page.data.user.id
-			})
+		const response = await POST_Req('/db', {
+			type: 'inviteToCircle',
+			targetPhone: phoneInput.getNumber(),
+			fromHouseholdId: $page.data.user.householdId,
+			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
 			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);
@@ -49,12 +47,9 @@
 	}
 
 	async function deleteFriend(connectionId: number) {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'deleteFriend',
-				connectionId
-			})
+		const response = await POST_Req('/db', {
+			type: 'deleteFriend',
+			connectionId
 		});
 		if (response.status == 200) {
 			await invalidate('data:circle');
@@ -64,14 +59,11 @@
 	}
 
 	async function acceptFriendReq(friendReqId: number, friendHouseholdId: number) {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'acceptFriendReq',
-				householdId: $page.data.user.householdId,
-				friendHouseholdId,
-				friendReqId
-			})
+		const response = await POST_Req('/db', {
+			type: 'acceptFriendReq',
+			householdId: $page.data.user.householdId,
+			friendHouseholdId,
+			friendReqId
 		});
 		if (response.status == 200) {
 			await invalidate('data:circle');
@@ -81,12 +73,9 @@
 	}
 
 	async function rejectFriendReq(reqId: number) {
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'rejectFriendReq',
-				reqId
-			})
+		const response = await POST_Req('/db', {
+			type: 'rejectFriendReq',
+			reqId
 		});
 		if (response.status == 200) {
 			await invalidate('data:circle');

@@ -7,6 +7,7 @@
 	import { page } from '$app/stores';
 	import { AvailabilityStatus } from '@prisma/client';
 	import NavBar from '../NavBar.svelte';
+	import { POST_Req } from '../../utils';
 
 	let { availabilityDates, user, kidNames } = $page.data;
 
@@ -180,20 +181,17 @@
 				return;
 			}
 		}
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'schedule',
-				monthDay: rows[i].monthDay,
-				status,
-				notes: rows[i].notes,
-				emoticons: Array.from(rows[i].emoticons).join(','),
-				householdId: user.householdId,
-				startHr: rows[i].startHr,
-				startMin: rows[i].startMin,
-				endHr: rows[i].endHr,
-				endMin: rows[i].endMin
-			})
+		const response = await POST_Req('/db', {
+			type: 'schedule',
+			monthDay: rows[i].monthDay,
+			status,
+			notes: rows[i].notes,
+			emoticons: Array.from(rows[i].emoticons).join(','),
+			householdId: user.householdId,
+			startHr: rows[i].startHr,
+			startMin: rows[i].startMin,
+			endHr: rows[i].endHr,
+			endMin: rows[i].endMin
 		});
 		if (response.status == 200) {
 			await invalidate('data:calendar');

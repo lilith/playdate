@@ -5,6 +5,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
+	import { POST_Req } from '../../utils';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,
@@ -66,26 +67,23 @@
 	}
 
 	async function saveToDB() {
-		console.log('ALLoW INVITES', !doNotDisturb);
-		const response = await fetch('/db', {
-			method: 'POST',
-			body: JSON.stringify({
-				type: 'user',
-				firstName,
-				lastName,
-				pronouns,
-				timeZone,
-				locale,
-				email,
-				notifFreq,
-				notifStartDay,
-				notifHr,
-				notifMin,
-				acceptedTermsAt,
-				allowInvites: !doNotDisturb,
-				allowReminders
-			})
+		const response = await POST_Req('/db', {
+			type: 'user',
+			firstName,
+			lastName,
+			pronouns,
+			timeZone,
+			locale,
+			email,
+			notifFreq,
+			notifStartDay,
+			notifHr,
+			notifMin,
+			acceptedTermsAt,
+			allowInvites: !doNotDisturb,
+			allowReminders
 		});
+
 		if (response.status == 200) {
 			if ($page.data.user.household === 'N/A') {
 				goto('/household');

@@ -68,7 +68,6 @@ const redirectOrContinue = (
 };
 
 export const handle = (async ({ event, resolve }) => {
-
 	// // log env var from sveltekit server side
 	// console.log('DATABASE_PRISMA_URL', process.env.DATABASE_PRISMA_URL);
 
@@ -76,7 +75,6 @@ export const handle = (async ({ event, resolve }) => {
 	// if (!process.env['DATABASE_PRISMA_URL']) {
 	// 	throw new Error('DATABASE_PRISMA_URL is not set');
 	// }
-
 
 	const cookie = event.cookies.get('session');
 
