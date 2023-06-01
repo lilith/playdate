@@ -1,7 +1,6 @@
 import type { Handle, RequestEvent } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
-import dotenv from 'dotenv';
 const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
