@@ -5,11 +5,10 @@
 	import { invalidate } from '$app/navigation';
 	import { afterUpdate, onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { AvailabilityStatus } from '@prisma/client';
 	import NavBar from '../NavBar.svelte';
 	import { POST_Req } from '../../utils';
 
-	let { availabilityDates, user, kidNames } = $page.data;
+	let { availabilityDates, user, kidNames, AvailabilityStatus } = $page.data;
 
 	let rows: {
 		englishDay: string;

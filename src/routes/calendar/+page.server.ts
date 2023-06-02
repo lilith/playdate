@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, AvailabilityStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 export const load = (async ({ parent, depends }) => {
@@ -74,6 +74,7 @@ export const load = (async ({ parent, depends }) => {
 			.join(' and ');
 
 		return {
+			AvailabilityStatus,
 			availabilityDates,
 			kidNames
 		};
