@@ -6,7 +6,7 @@
 	import { afterUpdate, onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
-	import { POST_Req } from '../../utils';
+	import { writeReq } from '../../utils';
 
 	let { availabilityDates, user, kidNames, AvailabilityStatus } = $page.data;
 
@@ -180,7 +180,7 @@
 				return;
 			}
 		}
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'schedule',
 			monthDay: rows[i].monthDay,
 			status,

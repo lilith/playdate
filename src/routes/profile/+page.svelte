@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
-	import { POST_Req } from '../../utils';
+	import { writeReq } from '../../utils';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,
@@ -67,7 +67,7 @@
 	}
 
 	async function saveToDB() {
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'user',
 			firstName,
 			lastName,
@@ -109,8 +109,14 @@
 		<div slot="close" let:dialog>
 			<button
 				autofocus
-				on:click={() => {
+				on:click={async () => {
 					acceptedTermsAt = new Date();
+
+					const url = import.meta.env.PROD ? $page.data.PUBLIC_URL : location.host;
+					await writeReq('/twilio', {
+						msg: `Thanks for subscribing to reminders and friend availability notifications from ${url}! You can disable this at any time on your Profile page or by responding STOP.`,
+						phone: $page.data.user.phone
+					});
 					dialog.close();
 				}}
 			>

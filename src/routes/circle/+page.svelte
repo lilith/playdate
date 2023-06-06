@@ -6,7 +6,7 @@
 	import AcceptIcon from '../../Icons/checkIcon.svelte';
 	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
-	import { POST_Req } from '../../utils';
+	import { writeReq } from '../../utils';
 
 	let phoneInput: object;
 	let { friendReqsInfo, circleInfo, user } = $page.data;
@@ -31,7 +31,7 @@
 			alert('You have entered an invalid contact number.');
 			return;
 		}
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'inviteToCircle',
 			targetPhone: phoneInput.getNumber(),
 			fromHouseholdId: $page.data.user.householdId,
@@ -47,7 +47,7 @@
 	}
 
 	async function deleteFriend(connectionId: number) {
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'deleteFriend',
 			connectionId
 		});
@@ -59,7 +59,7 @@
 	}
 
 	async function acceptFriendReq(friendReqId: number, friendHouseholdId: number) {
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'acceptFriendReq',
 			householdId: $page.data.user.householdId,
 			friendHouseholdId,
@@ -73,7 +73,7 @@
 	}
 
 	async function rejectFriendReq(reqId: number) {
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'rejectFriendReq',
 			reqId
 		});

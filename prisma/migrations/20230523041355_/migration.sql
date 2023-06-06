@@ -158,13 +158,7 @@ CREATE INDEX "User_phone_idx" ON "User"("phone");
 CREATE UNIQUE INDEX "AvailabilityDate_householdId_date_key" ON "AvailabilityDate"("householdId", "date");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "HouseholdConnection_householdId_key" ON "HouseholdConnection"("householdId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "HouseholdConnection_friendHouseholdId_key" ON "HouseholdConnection"("friendHouseholdId");
-
--- AddForeignKey
-ALTER TABLE "Household" ADD CONSTRAINT "Household_id_fkey" FOREIGN KEY ("id") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+CREATE UNIQUE INDEX "HouseholdConnection_householdId_friendHouseholdId_key" ON "HouseholdConnection"("householdId", "friendHouseholdId");
 
 -- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_fromHouseholdId_fkey" FOREIGN KEY ("fromHouseholdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -197,7 +191,7 @@ ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_householdId_fkey
 ALTER TABLE "AvailabilityDate" ADD CONSTRAINT "AvailabilityDate_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_friendHouseholdId_fkey" FOREIGN KEY ("friendHouseholdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "HouseholdConnection" ADD CONSTRAINT "HouseholdConnection_friendHouseholdId_fkey" FOREIGN KEY ("friendHouseholdId") REFERENCES "Household"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

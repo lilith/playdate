@@ -157,6 +157,9 @@
 			<p class="parent">{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></p>
 		{/each}
 
+		{#if !scheds.length}
+			<p class="default">Empty for the next 21 days</p>
+		{/if}
 		{#each scheds as sched}
 			<div class="summary">
 				{#if sched.status === 'Busy'}
