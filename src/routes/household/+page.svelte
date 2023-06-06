@@ -6,7 +6,7 @@
 	import Modal from '../Modal.svelte';
 	import { invalidate, invalidateAll } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
-	import { POST_Req } from '../../utils';
+	import { writeReq } from '../../utils';
 
 	enum ModalReason {
 		DISCONNECT_ADULT,
@@ -14,11 +14,15 @@
 	}
 
 	let phoneInput: object;
-	let { householdId, name, publicNotes, kids, adults } = $page.data;
+	let { householdId, name, publicNotes, kids, adults } = $page.data.householdInfo;
+	let { householdInvites } = $page.data;
 	afterUpdate(() => {
-		householdId = $page.data.householdId;
-		kids = $page.data.kids;
-		adults = $page.data.adults;
+		householdId = $page.data.householdInfo.householdId;
+		name = $page.data.householdInfo.name;
+		publicNotes = $page.data.householdInfo.publicNotes;
+		kids = $page.data.householdInfo.kids;
+		adults = $page.data.householdInfo.adults;
+		householdInvites = $page.data.householdInvites;
 	});
 
 	const now = new Date();
@@ -43,8 +47,19 @@
 		if (!$page.data.user.id) await invalidateAll();
 	});
 
+	async function schedTipMsg() {
+		const twoWeeksLater = new Date();
+		twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
+
+		await writeReq('/twilio', {
+			msg: "Tip: Add this number to your contacts as Playdate Help to prevent impersonation - we'll only ever contact you from this number.",
+			phone: $page.data.user.phone,
+			sendAt: twoWeeksLater,
+		});
+	}
+
 	async function saveToDB() {
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'household',
 			id: householdId,
 			userId: $page.data.user.id,
@@ -53,14 +68,17 @@
 		});
 		if (response.status == 200) {
 			alert('Successfully saved household info');
-			if (!householdId) await invalidate('data:householdId');
+			if (!householdId) {
+				await invalidate('data:householdId');
+				schedTipMsg();
+			}
 		} else {
 			alert('Something went wrong with saving');
 		}
 	}
 
 	async function addKid(e: SubmitEvent) {
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'householdChild',
 			householdId: householdId,
 			founderId: $page.data.user.id,
@@ -70,6 +88,7 @@
 			dateOfBirth: new Date(e.target[3].value)
 		});
 		if (response.status == 200) {
+			if (!householdId) schedTipMsg();
 			await invalidate('data:householdId');
 			const { id } = await response.json();
 			kids = [
@@ -104,15 +123,17 @@
 	}
 
 	async function disconnectAdult() {
-		const response = await fetch('/db', {
-			method: 'PATCH',
-			body: JSON.stringify({
+		const response = await writeReq(
+			'/db',
+			{
 				type: 'householdAdult',
 				id: adults[adultInd].id
-			})
-		});
+			},
+			'PATCH',
+		);
 		if (response.status == 200) {
 			adults = adults.slice(0, adultInd).concat(adults.slice(adultInd + 1));
+			await invalidate('data:householdId');
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -122,12 +143,12 @@
 		switch (type) {
 			case ModalReason.DISCONNECT_ADULT:
 				if (ind !== undefined) {
+					adultInd = ind;
 					if (adults[ind].id === $page.data.user.id) {
 						modalText.heading = 'Disconnect From Household';
 						modalText.content =
 							"Are you sure that you'd like to disconnect from this household? The household's info will be saved, but you won't be able to access it until another adult in the household sends you an invite.";
 					} else {
-						adultInd = ind;
 						modalText.heading = 'Disconnect Adult';
 						modalText.content =
 							"Are you sure that you'd like to disconnect this adult from this household?";
@@ -167,19 +188,44 @@
 			alert('You have entered an invalid contact number.');
 			return;
 		}
-		const response = await POST_Req('/db', {
+		const response = await writeReq('/db', {
 			type: 'inviteToHousehold',
 			targetPhone: phoneInput.getNumber(),
 			householdId: householdId,
 			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
-			
 			alert(`The user with phone # ${phoneInput.getNumber()} has been authorized to manage this household. Please ask them to log in and accept.`);
-			if (!householdId) await invalidate('data:householdId');
+			if (!householdId) {
+				await invalidate('data:householdId');
+				schedTipMsg();
+			}
+			phoneInput.telInput.value='';
 		} else {
 			const { message } = await response.json();
 			alert(message);
+		}
+	}
+
+	async function joinHousehold(householdId: number, id: number) {
+		const response = await writeReq('/db', {
+			type: 'acceptHouseholdInvite',
+			phone: $page.data.user.phone,
+			householdId,
+			id
+		});
+		if (response.status == 200) {
+			await invalidate('data:householdId');
+		}
+	}
+
+	async function rejectHouseholdInvite(id: number) {
+		const response = await writeReq('/db', {
+			type: 'rejectHouseholdInvite',
+			id,
+		});
+		if (response.status == 200) {
+			await invalidate('data:householdId');
 		}
 	}
 </script>
@@ -189,7 +235,59 @@
 	<meta name="description" content="Playdate app" />
 </svelte:head>
 <div>
+	{#key householdId}
 	<NavBar pageName="Household" />
+	{/key}
+
+	{#key householdInvites}
+	{#if householdInvites.length && !householdId}
+	<Modal
+		showModal={householdInvites.length && !householdId}
+	>
+		<h2 slot="header" class="center-text">Household Invite</h2>
+
+
+		<p class="center-text" style="margin-top: 1rem;">You have been invited to join the following household:</p>
+
+		<div style="display: flex; flex-direction: column; margin-bottom: 1rem;" class="center-text">
+			<p class="subtitle">{ householdInvites[0].household.name }</p>
+
+			<h4 class="subtitle-3">Sender</h4>
+			<p class="subtitle-2" style="display: inline; color: black; font-weight: 500;">
+				{ householdInvites[0].fromUser.firstName } { householdInvites[0].fromUser.lastName }
+			</p>
+			<span style="padding: 0 0.5rem; font-size: 15px;">({householdInvites[0].fromUser.phone})</span>
+			
+
+			<h4 class="subtitle-3">Kids</h4>
+			<ul>
+				{#each householdInvites[0].household.children as kid}
+				<li style="font-size: 18px;">{kid.firstName} {kid.lastName}</li>
+				{/each}
+			</ul>
+		</div>
+		
+		<div slot="close" let:dialog>
+			<button
+				on:click={async () => {
+					await joinHousehold(householdInvites[0].household.id, householdInvites[0].id);
+					dialog.close();
+				}}
+			>
+				Join
+			</button>
+			<button
+				on:click={async () => {
+					await rejectHouseholdInvite(householdInvites[0].id)
+					dialog.close();
+				}}
+			>
+				Reject
+			</button>
+		</div>
+	</Modal>
+	{/if}
+	{/key}
 
 	<Modal bind:showModal>
 		<h2 slot="header">{modalText.heading}</h2>
@@ -198,7 +296,7 @@
 
 		<div slot="close" let:dialog>
 			<button
-				on:click={() => {
+				on:click={async () => {
 					if (modalReason === ModalReason.DISCONNECT_ADULT) disconnectAdult();
 					else if (modalReason === ModalReason.DELETE_HOUSEHOLD) deleteHousehold();
 					dialog.close();
@@ -227,8 +325,12 @@
 			bind:value={publicNotes}
 		/>
 
-		<hr class="section" />
+		<div class="btn-container-1">
+			<button class="btn save-btn" type="submit">Save Basic Info</button>
+		</div>
 
+		{#if householdId}
+		<hr class="section" />
 		<p class="subtitle">Kids</p>
 		{#each kids as kid, ind}
 			<div class="card">
@@ -260,7 +362,7 @@
 				max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
 			/>
 
-			<div id="btn-container"><button class="text-btn">Save & Add Child</button></div>
+			<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
 		</form>
 
 		<hr class="section" />
@@ -277,15 +379,17 @@
 			</div>
 			<hr class="inner-section" />
 		{/each}
-		You can authorize other guardians to manage this household by entering their phone number.
-		After authorizing them, ask them to log in and accept the invite.
-		<div style="display: flex; gap: 20px;">
-			<PhoneInput bind:phoneInput />
-			<button class="text-btn" on:click|preventDefault={inviteAdult}>Authorize Adult</button>
-		</div>
+		<p>
+			You can authorize other guardians to manage this household by entering their phone number.
+			After authorizing them, ask them to log in and accept the invite.
+		</p>
+		<div id="phone-input-container"><PhoneInput bind:phoneInput /></div>
+		<div id="btn-container-2"><button class="text-btn" on:click|preventDefault={inviteAdult}>Authorize Adult</button></div>
 
-		<div class="delete-btn-container">
-			<button class="btn save-btn" type="submit">Save</button>
+		<hr class="section" />
+		{/if}
+
+		<div class="btn-container-1">
 			{#if householdId}
 				<button	
 					class="btn important-delete-btn"
@@ -298,10 +402,31 @@
 </div>
 
 <style>
-	#btn-container {
+	.subtitle-3 {
+		font-size: 15px;
+		margin: 2rem 0 0;
+	}
+	.center-text {
+		text-align: center;
+	}
+	#household-form {
+		margin: 2rem 0;
+	}
+	#phone-input-container {
+		display: flex;
+		justify-content: center;
+		width: 80%;
+		margin: auto;
+		padding: 1rem;
+	}
+	#btn-container-2 {
 		display: flex;
 		justify-content: center;
 		margin: 1rem auto 2rem;
+	}
+	#btn-container-2 button {
+		padding: 0 1rem;
+		height: 45px;
 	}
 	textarea {
 		height: 200px;
@@ -320,8 +445,7 @@
 		margin-bottom: 1rem;
 	}
 
-	.delete-btn,
-	.add-btn {
+	.delete-btn {
 		background: #fce9be;
 		border: 1.5px solid #5a5a5a;
 		border-radius: 50%;
@@ -349,7 +473,7 @@
 		color: #5a5a5a;
 	}
 
-	.delete-btn-container {
+	.btn-container-1 {
 		display: flex;
 		flex-direction: column;
 		margin: 3rem 3rem 4rem;

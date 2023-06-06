@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["jsonProtocol"]
 }
 
@@ -10,7 +10,6 @@ datasource db {
 //  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
 }
  
-
 enum Pronoun {
   FAE_FAER_FAERS
   EEY_EM_EIRS
@@ -24,20 +23,18 @@ enum Pronoun {
 }
 
 model Household {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  publicNotes          String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  AvailabilityDate     AvailabilityDate[]
-  FriendRequest        FriendRequest[]
-  user                 Household              @relation("householdFriends", fields: [id], references: [id])
-  friends              Household?             @relation("householdFriends")
-  children             HouseholdChild[]
-  friendsHousehold     HouseholdConnection?   @relation("friendHousehold")
-  usersHousehold       HouseholdConnection?   @relation("household")
-  JoinHouseholdRequest JoinHouseholdRequest[]
-  parents              User[]
+  id                      Int                    @id @default(autoincrement())
+  name                    String
+  publicNotes             String?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  AvailabilityDate        AvailabilityDate[]
+  FriendRequest           FriendRequest[]
+  children                HouseholdChild[]
+  connectionsAsHouseholdA HouseholdConnection[]  @relation("HouseholdAConnection")
+  connectionsAsHouseholdB HouseholdConnection[]  @relation("HouseholdBConnection")
+  JoinHouseholdRequest    JoinHouseholdRequest[]
+  parents                 User[]
 }
 
 model FriendRequest {
@@ -147,16 +144,19 @@ model AvailabilityDate {
   child       HouseholdChild?    @relation(fields: [childId], references: [id])
   household   Household          @relation(fields: [householdId], references: [id])
   parent      User?              @relation(fields: [parentId], references: [id])
+
   @@unique([householdId, date])
 }
 
 model HouseholdConnection {
   id                Int       @id @default(autoincrement())
-  householdId       Int       @unique
-  friendHouseholdId Int       @unique
+  householdId       Int
+  friendHouseholdId Int
   createdAt         DateTime  @default(now())
-  friendHousehold   Household @relation("friendHousehold", fields: [friendHouseholdId], references: [id])
-  household         Household @relation("household", fields: [householdId], references: [id])
+  household     Household @relation("HouseholdAConnection", fields: [householdId], references: [id])
+  friendHousehold   Household @relation("HouseholdBConnection", fields: [friendHouseholdId], references: [id])
+
+  @@unique([householdId, friendHouseholdId])
 }
 
 enum AvailabilityStatus {

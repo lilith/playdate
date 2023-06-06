@@ -8,11 +8,12 @@ import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal'
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
+	phone: string,
 	event: RequestEvent<Partial<Record<string, string>>, string | null>
 ) => {
 	const userInfo: { [key: string]: string | number | null | boolean } = {
 		household: 'N/A',
-		phone: '',
+		phone,
 		firstName: '',
 		lastName: '',
 		pronouns: '',
@@ -107,7 +108,12 @@ export const handle = (async ({ event, resolve }) => {
 			return response;
 		}
 
-		await setLocal(user, event);
+		if (event.url.pathname === '/twilio') {
+			const response = await resolve(event);
+			return response;
+		}
+
+		await setLocal(user, session.phone, event);
 
 		// F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification
 		if (!user) {

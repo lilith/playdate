@@ -3,9 +3,9 @@ export const formatMin = (min: number) => {
 	return min;
 };
 
-export const POST_Req = (path: string, body: { [key: string]: any }) => {
+export const writeReq = (path: string, body: { [key: string]: any }, method = 'POST') => {
 	return fetch(path, {
-		method: 'POST',
+		method,
 		headers: {
 			'Content-Type': 'application/json'
 		},

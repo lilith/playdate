@@ -61,5 +61,33 @@ export const load = (async ({ parent, depends }) => {
 			});
 		}
 	}
-	return householdInfo;
+
+	const householdInvites = await prisma.joinHouseholdRequest.findMany({
+		where: {
+			targetPhone: user.phone,
+		},
+		select: {
+			id: true,
+			household: {
+				select: {
+					id: true,
+					name: true,
+					children: {
+						select: {
+							firstName: true,
+							lastName: true,
+						}
+					}
+				}
+			},
+			fromUser: {
+				select: {
+					firstName: true,
+					lastName: true,
+					phone: true,
+				}
+			}
+		}
+	});
+	return { householdInfo, householdInvites };
 }) satisfies PageServerLoad;

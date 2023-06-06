@@ -35,13 +35,21 @@ export async function POST({
 	} else if (req.type === 'schedule') {
 		await saveSchedule(req);
 	} else if (req.type === 'inviteToCircle') {
-		await createCircleInvite(req);
+		const { err } = await createCircleInvite(req);
+		if (err)
+			throw error(400, {
+				message: err
+			});
 	} else if (req.type === 'acceptFriendReq') {
 		await acceptFriendReq(req);
 	} else if (req.type === 'rejectFriendReq') {
 		await deleteFriendReq(req);
 	} else if (req.type === 'deleteFriend') {
 		await deleteFriend(req);
+	} else if (req.type === 'acceptHouseholdInvite') {
+		await acceptHouseholdInvite(req);
+	} else if (req.type === 'rejectHouseholdInvite') {
+		await deleteHouseholdInvite(req);
 	}
 
 	return json(res);
@@ -80,6 +88,35 @@ export async function PATCH({
 	return json('success');
 }
 
+async function deleteHouseholdInvite(req: {
+	id: number;
+}) {
+	const { id } = req;
+	await prisma.joinHouseholdRequest.delete({
+		where: {
+			id,
+		}
+	});
+}
+
+async function acceptHouseholdInvite(req: {
+	phone: string;
+	householdId: number;
+	id: number;
+}) {
+	const { phone, householdId, id } = req;
+	await prisma.user.update({
+		where: {
+			phone,
+		},
+		data: {
+			householdId,
+		}
+	});
+
+	await deleteHouseholdInvite({ id });
+}
+
 async function createCircleInvite(req: {
 	targetPhone: string;
 	fromUserId: number;
@@ -97,6 +134,36 @@ async function createCircleInvite(req: {
 		return {
 			err: 'The user associated with this number has already been invited to this circle.'
 		};
+
+	const targetUser = await prisma.user.findUnique({
+		where: {
+			phone: targetPhone
+		},
+		select: {
+			householdId: true,
+		}
+	});
+	if (targetUser && targetUser.householdId) {
+		const existingFriend = await prisma.householdConnection.findMany({
+			where: {
+				OR: [
+					{
+						householdId: fromHouseholdId,
+						friendHouseholdId: targetUser.householdId
+					},
+					{
+						friendHouseholdId: fromHouseholdId,
+						householdId: targetUser.householdId
+					}
+				]
+			}
+		});
+		if (existingFriend)
+			return {
+				err: 'The user associated with this number is already in your circle.'
+			};
+	}
+
 	const now = new Date();
 	const expires = now;
 	expires.setDate(now.getDate() + 7); // expire 1 week from now
@@ -108,6 +175,7 @@ async function createCircleInvite(req: {
 			fromHouseholdId
 		}
 	});
+	return {};
 }
 
 async function deleteFriend(req: { connectionId: number }) {
@@ -329,10 +397,10 @@ async function saveUser(
 	return updatedUser.id;
 }
 
-async function createHousehold(userId: number) {
+async function createHousehold(userId: number, data?: {name: string, publicNotes: string, updatedAt: Date }) {
 	// create household
 	const household = await prisma.household.create({
-		data: {
+		data: data ?? {
 			name: '',
 			publicNotes: '',
 			updatedAt: new Date()
@@ -345,7 +413,7 @@ async function createHousehold(userId: number) {
 			id: userId
 		},
 		data: {
-			householdId: household.id
+			householdId: household.id,
 		}
 	});
 
@@ -366,7 +434,7 @@ async function saveHousehold(req: {
 	};
 
 	if (!householdId) {
-		await createHousehold(userId);
+		await createHousehold(userId, data);
 	} else {
 		await prisma.household.update({
 			where: {
