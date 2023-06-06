@@ -18,8 +18,6 @@
 	let { householdInvites } = $page.data;
 	afterUpdate(() => {
 		householdId = $page.data.householdInfo.householdId;
-		name = $page.data.householdInfo.name;
-		publicNotes = $page.data.householdInfo.publicNotes;
 		kids = $page.data.householdInfo.kids;
 		adults = $page.data.householdInfo.adults;
 		householdInvites = $page.data.householdInvites;
@@ -134,6 +132,9 @@
 		if (response.status == 200) {
 			adults = adults.slice(0, adultInd).concat(adults.slice(adultInd + 1));
 			await invalidate('data:householdId');
+			// handle name and publicNotes separately here so that we only hard-reset them here
+			name = $page.data.householdInfo.name;
+			publicNotes = $page.data.householdInfo.publicNotes;
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -216,6 +217,9 @@
 		});
 		if (response.status == 200) {
 			await invalidate('data:householdId');
+			// handle name and publicNotes separately here so that we only hard-reset them here
+			name = $page.data.householdInfo.name;
+			publicNotes = $page.data.householdInfo.publicNotes;
 		}
 	}
 
