@@ -52,7 +52,7 @@
 		await writeReq('/twilio', {
 			msg: "Tip: Add this number to your contacts as Playdate Help to prevent impersonation - we'll only ever contact you from this number.",
 			phone: $page.data.user.phone,
-			sendAt: twoWeeksLater,
+			sendAt: twoWeeksLater
 		});
 	}
 
@@ -127,7 +127,7 @@
 				type: 'householdAdult',
 				id: adults[adultInd].id
 			},
-			'PATCH',
+			'PATCH'
 		);
 		if (response.status == 200) {
 			adults = adults.slice(0, adultInd).concat(adults.slice(adultInd + 1));
@@ -196,12 +196,14 @@
 			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
-			alert(`The user with phone # ${phoneInput.getNumber()} has been authorized to manage this household. Please ask them to log in and accept.`);
+			alert(
+				`The user with phone # ${phoneInput.getNumber()} has been authorized to manage this household. Please ask them to log in and accept.`
+			);
 			if (!householdId) {
 				await invalidate('data:householdId');
 				schedTipMsg();
 			}
-			phoneInput.telInput.value='';
+			phoneInput.telInput.value = '';
 		} else {
 			const { message } = await response.json();
 			alert(message);
@@ -226,7 +228,7 @@
 	async function rejectHouseholdInvite(id: number) {
 		const response = await writeReq('/db', {
 			type: 'rejectHouseholdInvite',
-			id,
+			id
 		});
 		if (response.status == 200) {
 			await invalidate('data:householdId');
@@ -240,57 +242,61 @@
 </svelte:head>
 <div>
 	{#key householdId}
-	<NavBar pageName="Household" />
+		<NavBar pageName="Household" />
 	{/key}
 
 	{#key householdInvites}
-	{#if householdInvites.length && !householdId}
-	<Modal
-		showModal={householdInvites.length && !householdId}
-	>
-		<h2 slot="header" class="center-text">Household Invite</h2>
+		{#if householdInvites.length && !householdId}
+			<Modal showModal={householdInvites.length && !householdId}>
+				<h2 slot="header" class="center-text">Household Invite</h2>
 
+				<p class="center-text" style="margin-top: 1rem;">
+					You have been invited to join the following household:
+				</p>
 
-		<p class="center-text" style="margin-top: 1rem;">You have been invited to join the following household:</p>
+				<div
+					style="display: flex; flex-direction: column; margin-bottom: 1rem;"
+					class="center-text"
+				>
+					<p class="subtitle">{householdInvites[0].household.name}</p>
 
-		<div style="display: flex; flex-direction: column; margin-bottom: 1rem;" class="center-text">
-			<p class="subtitle">{ householdInvites[0].household.name }</p>
+					<h4 class="subtitle-3">Sender</h4>
+					<p class="subtitle-2" style="display: inline; color: black; font-weight: 500;">
+						{householdInvites[0].fromUser.firstName}
+						{householdInvites[0].fromUser.lastName}
+					</p>
+					<span style="padding: 0 0.5rem; font-size: 15px;"
+						>({householdInvites[0].fromUser.phone})</span
+					>
 
-			<h4 class="subtitle-3">Sender</h4>
-			<p class="subtitle-2" style="display: inline; color: black; font-weight: 500;">
-				{ householdInvites[0].fromUser.firstName } { householdInvites[0].fromUser.lastName }
-			</p>
-			<span style="padding: 0 0.5rem; font-size: 15px;">({householdInvites[0].fromUser.phone})</span>
-			
+					<h4 class="subtitle-3">Kids</h4>
+					<ul>
+						{#each householdInvites[0].household.children as kid}
+							<li style="font-size: 18px;">{kid.firstName} {kid.lastName}</li>
+						{/each}
+					</ul>
+				</div>
 
-			<h4 class="subtitle-3">Kids</h4>
-			<ul>
-				{#each householdInvites[0].household.children as kid}
-				<li style="font-size: 18px;">{kid.firstName} {kid.lastName}</li>
-				{/each}
-			</ul>
-		</div>
-		
-		<div slot="close" let:dialog>
-			<button
-				on:click={async () => {
-					await joinHousehold(householdInvites[0].household.id, householdInvites[0].id);
-					dialog.close();
-				}}
-			>
-				Join
-			</button>
-			<button
-				on:click={async () => {
-					await rejectHouseholdInvite(householdInvites[0].id)
-					dialog.close();
-				}}
-			>
-				Reject
-			</button>
-		</div>
-	</Modal>
-	{/if}
+				<div slot="close" let:dialog>
+					<button
+						on:click={async () => {
+							await joinHousehold(householdInvites[0].household.id, householdInvites[0].id);
+							dialog.close();
+						}}
+					>
+						Join
+					</button>
+					<button
+						on:click={async () => {
+							await rejectHouseholdInvite(householdInvites[0].id);
+							dialog.close();
+						}}
+					>
+						Reject
+					</button>
+				</div>
+			</Modal>
+		{/if}
 	{/key}
 
 	<Modal bind:showModal>
@@ -334,68 +340,70 @@
 		</div>
 
 		{#if householdId}
-		<hr class="section" />
-		<p class="subtitle">Kids</p>
-		{#each kids as kid, ind}
-			<div class="card">
-				<p>{kid.firstName} {kid.lastName}</p>
-				<button class="delete-btn" on:click|preventDefault={() => deleteKid(ind)}><hr /></button>
+			<hr class="section" />
+			<p class="subtitle">Kids</p>
+			{#each kids as kid, ind}
+				<div class="card">
+					<p>{kid.firstName} {kid.lastName}</p>
+					<button class="delete-btn" on:click|preventDefault={() => deleteKid(ind)}><hr /></button>
+				</div>
+				<hr class="inner-section" />
+			{/each}
+
+			<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
+				<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
+				<input type="text" name="first-name" required />
+
+				<label class="subtitle-2" for="last-name">Last Name</label>
+				<input type="text" name="last-name" />
+
+				<label class="subtitle-2" for="pronouns">Pronouns<span class="red">*</span></label>
+				<select name="pronouns" required>
+					<option value="" />
+					{#each Object.entries(PRONOUNS) as pronoun}
+						<option value={pronoun[0]}>{pronoun[1]}</option>
+					{/each}
+				</select>
+
+				<label class="subtitle-2" for="dob">Date of Birth</label>
+				<input
+					type="date"
+					name="dob"
+					max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
+				/>
+
+				<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
+			</form>
+
+			<hr class="section" />
+
+			<p class="subtitle">Adult (Household managers)</p>
+			{#each adults as adult, ind}
+				<div class="card">
+					<p>{adult.firstName} {adult.lastName}</p>
+					<button
+						class="delete-btn"
+						on:click|preventDefault={() => openModal(ModalReason.DISCONNECT_ADULT, ind)}
+						><hr /></button
+					>
+				</div>
+				<hr class="inner-section" />
+			{/each}
+			<p>
+				You can authorize other guardians to manage this household by entering their phone number.
+				After authorizing them, ask them to log in and accept the invite.
+			</p>
+			<div id="phone-input-container"><PhoneInput bind:phoneInput /></div>
+			<div id="btn-container-2">
+				<button class="text-btn" on:click|preventDefault={inviteAdult}>Authorize Adult</button>
 			</div>
-			<hr class="inner-section" />
-		{/each}
 
-		<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
-			<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
-			<input type="text" name="first-name" required />
-
-			<label class="subtitle-2" for="last-name">Last Name</label>
-			<input type="text" name="last-name" />
-
-			<label class="subtitle-2" for="pronouns">Pronouns<span class="red">*</span></label>
-			<select name="pronouns" required>
-				<option value="" />
-				{#each Object.entries(PRONOUNS) as pronoun}
-					<option value={pronoun[0]}>{pronoun[1]}</option>
-				{/each}
-			</select>
-
-			<label class="subtitle-2" for="dob">Date of Birth</label>
-			<input
-				type="date"
-				name="dob"
-				max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
-			/>
-
-			<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
-		</form>
-
-		<hr class="section" />
-
-		<p class="subtitle">Adult (Household managers)</p>
-		{#each adults as adult, ind}
-			<div class="card">
-				<p>{adult.firstName} {adult.lastName}</p>
-				<button
-					class="delete-btn"
-					on:click|preventDefault={() => openModal(ModalReason.DISCONNECT_ADULT, ind)}
-					><hr /></button
-				>
-			</div>
-			<hr class="inner-section" />
-		{/each}
-		<p>
-			You can authorize other guardians to manage this household by entering their phone number.
-			After authorizing them, ask them to log in and accept the invite.
-		</p>
-		<div id="phone-input-container"><PhoneInput bind:phoneInput /></div>
-		<div id="btn-container-2"><button class="text-btn" on:click|preventDefault={inviteAdult}>Authorize Adult</button></div>
-
-		<hr class="section" />
+			<hr class="section" />
 		{/if}
 
 		<div class="btn-container-1">
 			{#if householdId}
-				<button	
+				<button
 					class="btn important-delete-btn"
 					on:click|preventDefault={() => openModal(ModalReason.DELETE_HOUSEHOLD)}
 					>Delete Household</button
@@ -457,8 +465,8 @@
 		height: 40px;
 		font-size: 26px;
 	}
-	
-	.text-btn{
+
+	.text-btn {
 		background: #fce9be;
 		border: 1.5px solid #5a5a5a;
 		border-radius: 0.5rem;

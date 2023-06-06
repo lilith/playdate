@@ -88,29 +88,23 @@ export async function PATCH({
 	return json('success');
 }
 
-async function deleteHouseholdInvite(req: {
-	id: number;
-}) {
+async function deleteHouseholdInvite(req: { id: number }) {
 	const { id } = req;
 	await prisma.joinHouseholdRequest.delete({
 		where: {
-			id,
+			id
 		}
 	});
 }
 
-async function acceptHouseholdInvite(req: {
-	phone: string;
-	householdId: number;
-	id: number;
-}) {
+async function acceptHouseholdInvite(req: { phone: string; householdId: number; id: number }) {
 	const { phone, householdId, id } = req;
 	await prisma.user.update({
 		where: {
-			phone,
+			phone
 		},
 		data: {
-			householdId,
+			householdId
 		}
 	});
 
@@ -140,7 +134,7 @@ async function createCircleInvite(req: {
 			phone: targetPhone
 		},
 		select: {
-			householdId: true,
+			householdId: true
 		}
 	});
 	if (targetUser && targetUser.householdId) {
@@ -397,7 +391,10 @@ async function saveUser(
 	return updatedUser.id;
 }
 
-async function createHousehold(userId: number, data?: {name: string, publicNotes: string, updatedAt: Date }) {
+async function createHousehold(
+	userId: number,
+	data?: { name: string; publicNotes: string; updatedAt: Date }
+) {
 	// create household
 	const household = await prisma.household.create({
 		data: data ?? {
@@ -413,7 +410,7 @@ async function createHousehold(userId: number, data?: {name: string, publicNotes
 			id: userId
 		},
 		data: {
-			householdId: household.id,
+			householdId: household.id
 		}
 	});
 

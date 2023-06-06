@@ -115,7 +115,7 @@
 					const url = import.meta.env.PROD ? $page.data.PUBLIC_URL : location.host;
 					await writeReq('/twilio', {
 						msg: `Thanks for subscribing to reminders and friend availability notifications from ${url}! You can disable this at any time on your Profile page or by responding STOP.`,
-						phone: $page.data.user.phone,
+						phone: $page.data.user.phone
 					});
 					dialog.close();
 				}}

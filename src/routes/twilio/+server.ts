@@ -17,15 +17,16 @@ export async function POST({ request }: { request: Request }) {
 
 	let client;
 	// So far Twilio API keys cause an internal server error on their end, https://www.twilio.com/docs/errors/20500
-	const useApiKey = false; 
+	const useApiKey = false;
 	if (useApiKey && private_env.TWILIO_API_KEY && private_env.TWILIO_API_SECRET) {
 		client = Twilio(private_env.TWILIO_API_KEY, private_env.TWILIO_API_SECRET, {
 			accountSid: private_env.TWILIO_ACCOUNT_SID,
-			logLevel: 'debug',
+			logLevel: 'debug'
 		});
 	} else {
-		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN, 
-			{logLevel: 'debug'});
+		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN, {
+			logLevel: 'debug'
+		});
 	}
 	let message;
 	let createMessageRequest;
@@ -33,21 +34,23 @@ export async function POST({ request }: { request: Request }) {
 		createMessageRequest = {
 			body: msg,
 			to: phone,
-			...sendAt ? {
-				scheduleType: 'fixed' as 'fixed',
-				sendAt,
-				from: private_env.TWILIO_MESSAGING_SERVICE_SID,
-			} : {
-				from: private_env.TWILIO_PHONE_NUMBER || '+15005550006',
-				messagingServiceSid: private_env.TWILIO_MESSAGING_SERVICE_SID,
-			},
+			...(sendAt
+				? {
+						scheduleType: 'fixed',
+						sendAt,
+						from: private_env.TWILIO_MESSAGING_SERVICE_SID
+				  }
+				: {
+						from: private_env.TWILIO_PHONE_NUMBER || '+15005550006',
+						messagingServiceSid: private_env.TWILIO_MESSAGING_SERVICE_SID
+				  })
 		};
 
 		message = await client.messages.create(createMessageRequest);
 		console.log(message);
 	} catch (err) {
 		console.error(err);
-		console.error("message create request parameters:");
+		console.error('message create request parameters:');
 		console.error(createMessageRequest);
 		return new Response(
 			JSON.stringify({

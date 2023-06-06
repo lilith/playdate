@@ -35,7 +35,7 @@
 			type: 'inviteToCircle',
 			targetPhone: phoneInput.getNumber(),
 			fromHouseholdId: $page.data.user.householdId,
-			fromUserId: $page.data.user.id,
+			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
 			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);

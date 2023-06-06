@@ -4,8 +4,8 @@ import Twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-	log: ['query', 'info', 'warn', 'error'],
-  });
+	log: ['query', 'info', 'warn', 'error']
+});
 
 const generate = async () => {
 	const createdAt = new Date();
@@ -85,27 +85,28 @@ export async function POST({ request }: { request: Request }) {
 
 	let client;
 	// So far Twilio API keys cause an internal server error on their end, https://www.twilio.com/docs/errors/20500
-	const useApiKey = false; 
+	const useApiKey = false;
 	if (useApiKey && private_env.TWILIO_API_KEY && private_env.TWILIO_API_SECRET) {
 		client = Twilio(private_env.TWILIO_API_KEY, private_env.TWILIO_API_SECRET, {
 			accountSid: private_env.TWILIO_ACCOUNT_SID,
-			logLevel: 'debug',
+			logLevel: 'debug'
 		});
 	} else {
-		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN, 
-			{logLevel: 'debug'});
+		client = Twilio(private_env.TWILIO_ACCOUNT_SID, private_env.TWILIO_AUTH_TOKEN, {
+			logLevel: 'debug'
+		});
 	}
 	let message;
 	let createMessageRequest;
 	try {
-
 		// In development, use the path the request was sent to and the port
 		//  - it's not trustworthy, clients can set it to whatever they want in the http request
 		// But for development, it's fine
 		// In production, use the deployed url from env vars
 		//  - it's trustworthy, because it's set by the server
-		if (import.meta.env.PROD && !private_env.PLAYDATE_URL) console.error('PLAYDATE_URL is not set, required in production. Ex https://playdate.help');
-		
+		if (import.meta.env.PROD && !private_env.PLAYDATE_URL)
+			console.error('PLAYDATE_URL is not set, required in production. Ex https://playdate.help');
+
 		const url = import.meta.env.PROD ? private_env.PLAYDATE_URL : request.headers.get('host');
 
 		createMessageRequest = {
@@ -121,7 +122,7 @@ export async function POST({ request }: { request: Request }) {
 		console.log(message);
 	} catch (err) {
 		console.error(err);
-		console.error("message create request parameters:");
+		console.error('message create request parameters:');
 		console.error(createMessageRequest);
 		return new Response(
 			JSON.stringify({

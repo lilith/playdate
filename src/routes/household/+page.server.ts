@@ -64,7 +64,7 @@ export const load = (async ({ parent, depends }) => {
 
 	const householdInvites = await prisma.joinHouseholdRequest.findMany({
 		where: {
-			targetPhone: user.phone,
+			targetPhone: user.phone
 		},
 		select: {
 			id: true,
@@ -75,7 +75,7 @@ export const load = (async ({ parent, depends }) => {
 					children: {
 						select: {
 							firstName: true,
-							lastName: true,
+							lastName: true
 						}
 					}
 				}
@@ -84,7 +84,7 @@ export const load = (async ({ parent, depends }) => {
 				select: {
 					firstName: true,
 					lastName: true,
-					phone: true,
+					phone: true
 				}
 			}
 		}
