@@ -104,10 +104,10 @@ export async function POST({ request }: { request: Request }) {
 		// But for development, it's fine
 		// In production, use the deployed url from env vars
 		//  - it's trustworthy, because it's set by the server
-		if (import.meta.env.PROD && !private_env.PLAYDATE_URL)
-			console.error('PLAYDATE_URL is not set, required in production. Ex https://playdate.help');
+		if (import.meta.env.PROD && !private_env.PUBLIC_URL)
+			console.error('PUBLIC_URL is not set, required in production. Ex https://playdate.help');
 
-		const url = import.meta.env.PROD ? private_env.PLAYDATE_URL : request.headers.get('host');
+		const url = import.meta.env.PROD ? private_env.PUBLIC_URL : request.headers.get('host');
 
 		createMessageRequest = {
 			body: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(

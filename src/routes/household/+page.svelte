@@ -99,6 +99,7 @@
 				}
 			];
 			e.target.reset();
+			alert("Successfully saved child. We suggest moving onto the dashboard if you're done.");
 		} else {
 			alert('Something went wrong with saving');
 		}

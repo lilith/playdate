@@ -78,7 +78,7 @@ export const handle = (async ({ event, resolve }) => {
 	// }
 
 	const cookie = event.cookies.get('session');
-
+	console.log(event.url.pathname);
 	// check whether authenticated
 	if (event.url.pathname !== '/' && event.url.pathname.slice(0, 6) !== '/login') {
 		if (!cookie) throw redirect(303, '/');
@@ -88,6 +88,11 @@ export const handle = (async ({ event, resolve }) => {
 			}
 		});
 		if (!session || session.expires < new Date()) throw redirect(303, '/');
+
+		// if (event.url.origin === 'http://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us99.gitpod.io' && event.url.pathname !== '/dashboard') {
+		// 	// return redirectOrContinue(event, '/dashboard', resolve);
+		// 	event.url.pathname = '/dashboard'
+		// }
 
 		// from hereon, it's a valid req with a cookie / session
 		const user: (User & { phonePermissions: PhoneContactPermissions }) | null =
