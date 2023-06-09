@@ -384,7 +384,6 @@
 	// "On Load" animation.
 	// Create load handler.
 	var loadHandler = function () {
-		console.log('LOAD HANDLER');
 		setTimeout(function () {
 			// Unmark as loading.
 			$body.classList.remove('is-loading');
@@ -802,7 +801,6 @@
 			// Default to index.
 			initialScrollPoint = null;
 			initialSection = $('#' + 'home' + '-section');
-			console.log('INITIAL SECTION', initialSection);
 			initialId = initialSection.id;
 
 			// Clear index URL hash.

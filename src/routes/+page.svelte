@@ -205,8 +205,8 @@
 								<li>
 									<!-- svelte-ignore a11y-invalid-attribute -->
 									<a href="#" class="button n01"
-										><svg><use xlink:href="/icons.svg#arrow-right-light" /></svg><span
-											class="label">Continue</span
+										><svg><use xlink:href="/icons.svg#arrow-right-light" /></svg><span class="label"
+											>Continue</span
 										></a
 									>
 								</li>
@@ -218,6 +218,7 @@
 		</div>
 	</div>
 </div>
+
 <style>
 	a {
 		color: white;
