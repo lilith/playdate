@@ -1,6 +1,6 @@
 import { json, redirect, error } from '@sveltejs/kit';
 
-import { type AvailabilityStatus, PrismaClient, Pronoun } from '@prisma/client';
+import { type AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
