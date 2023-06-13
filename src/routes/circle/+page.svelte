@@ -116,54 +116,6 @@
 		</div>
 	{/each}
 
-	<p class="subtitle">Invites</p>
-	<p>
-		If you accept an invitation, you and your new friend will be added to each other's circle. No
-		info outside of your profile (e.g., other households in your circle) will be conveyed to your
-		new friend.
-		<br /><br />
-		If you reject an invitation, the other party will not be notified.
-	</p>
-	{#if !friendReqsInfo.length}
-		<p class="subtitle-2">No invites at this time</p>
-	{/if}
-
-	{#each friendReqsInfo as household}
-		<div class="card">
-			<p class="household-name">{household.name}</p>
-			<div>
-				{#each household.parents as parent}
-					<p>{parent.firstName} {parent.lastName}</p>
-				{/each}
-			</div>
-			<a href="tel:{household.phone}">{household.phone}</a>
-			<div class="w-full">
-				<div style="display: flex;">
-					<div
-						class="btn-wrapper delete w-half"
-						on:click={() => rejectFriendReq(household.reqId)}
-						on:keyup={() => rejectFriendReq(household.reqId)}
-					>
-						<RejectIcon />
-					</div>
-					<div
-						class="btn-wrapper success w-half"
-						on:click={() => acceptFriendReq(household.reqId, household.id)}
-						on:keyup={() => acceptFriendReq(household.reqId, household.id)}
-					>
-						<AcceptIcon />
-					</div>
-				</div>
-				<!-- <div
-					class="btn-wrapper w-full alarm"
-					style="height: 55px;"
-				>
-					<ReportIcon />
-				</div> -->
-			</div>
-		</div>
-	{/each}
-
 	<p class="subtitle">Send a friend request!</p>
 	<div style="display: flex; gap: 20px; margin-bottom: 2rem;">
 		<PhoneInput bind:phoneInput />
@@ -172,9 +124,6 @@
 </div>
 
 <style>
-	.w-half {
-		width: 50%;
-	}
 	.w-full {
 		width: 100%;
 	}
@@ -202,12 +151,6 @@
 	.delete {
 		background: rgba(255, 233, 184, 0.55);
 	}
-	.success {
-		background: rgba(127, 250, 122, 0.74);
-	}
-	/* .alarm {
-		background: rgba(241, 0, 0, 0.62);
-	} */
 
 	.household-name {
 		text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
@@ -222,9 +165,6 @@
 	}
 	.card button hr {
 		border-top: 2px solid #5a5a5a;
-	}
-	a {
-		font-size: 1.2rem;
 	}
 
 	.subtitle-2 {

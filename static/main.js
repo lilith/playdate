@@ -2,6 +2,7 @@
 /* Carrd Site JS | carrd.co | License: MIT */
 
 (function () {
+	if (window.location.pathname !== '/') return;
 	// Main.
 	var on = addEventListener,
 		off = removeEventListener,

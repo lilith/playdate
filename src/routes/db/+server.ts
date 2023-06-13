@@ -138,21 +138,28 @@ async function createCircleInvite(req: {
 		}
 	});
 	if (targetUser && targetUser.householdId) {
-		const existingFriend = await prisma.householdConnection.findMany({
+		const existingFriend1 = await prisma.householdConnection.findUnique({
 			where: {
-				OR: [
-					{
-						householdId: fromHouseholdId,
-						friendHouseholdId: targetUser.householdId
-					},
-					{
-						friendHouseholdId: fromHouseholdId,
-						householdId: targetUser.householdId
-					}
-				]
+				householdId_friendHouseholdId: {
+					householdId: fromHouseholdId,
+					friendHouseholdId: targetUser.householdId
+				}
 			}
 		});
-		if (existingFriend)
+		if (existingFriend1)
+			return {
+				err: 'The user associated with this number is already in your circle.'
+			};
+
+		const existingFriend2 = await prisma.householdConnection.findUnique({
+			where: {
+				householdId_friendHouseholdId: {
+					friendHouseholdId: fromHouseholdId,
+					householdId: targetUser.householdId
+				}
+			}
+		});
+		if (existingFriend2)
 			return {
 				err: 'The user associated with this number is already in your circle.'
 			};

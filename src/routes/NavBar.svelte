@@ -32,6 +32,9 @@
 			{#if !path.includes('household') && user.householdId}
 				<a href="/household">Household</a>
 			{/if}
+			{#if !path.includes('invites') && user.householdId}
+				<a href="/invites">Invites</a>
+			{/if}
 			{#if !path.includes('calendar') && user.householdId}
 				<a href="/calendar">Calendar</a>
 			{/if}
