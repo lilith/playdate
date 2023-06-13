@@ -37,8 +37,10 @@
 			/**
 			 * TODO: to be deleted once toll-free number verified
 			 */
-			alert(thing.body);
-			// loginSuccess = true;
+			// if thing.body isn't empty
+			if (thing.body && thing.body.length > 0) {
+				alert(thing.body);
+			}
 		}
 	}
 </script>
