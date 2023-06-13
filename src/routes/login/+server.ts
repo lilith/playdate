@@ -137,13 +137,13 @@ export async function POST({ request }: { request: Request }) {
 
 	// It's a security issue to share the auth link with the client. Don't do this if 
 	// import.meta.env.PROD OR public_env.PUBLIC_URL are set
-	if (import.meta.env.PROD || public_env.PUBLIC_URL) {
+	if (import.meta.env.DEV && !public_env.PUBLIC_URL){
+		return json(message);
+	} else {
 		return new Response(null,
 			{
 				status: 200
 			}
 		);
-	}else{
-		return json(message);
 	}
 }
