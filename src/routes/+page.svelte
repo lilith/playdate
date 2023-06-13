@@ -64,7 +64,7 @@
 
 <div id="wrapper">
 	<div id="main">
-		<div class="inner">
+		<div class="inner" style="padding:0">
 			<section id="home-section">
 				<div id="container04" class="style1 container default full">
 					<div class="wrapper">
