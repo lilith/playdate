@@ -205,14 +205,14 @@
 		</div>
 
 		<div class="switch-container" style="margin-bottom: 15px;">
-			<label class="thin-label" for="invite-consent">Do not disturb</label>
+			<label class="thin-label" for="invite-consent">Block messages from friends</label>
 			<label class="switch">
 				<input name="invite-consent" type="checkbox" bind:checked={doNotDisturb} />
 				<span class="slider round" />
 			</label>
 		</div>
 		<p id="descrip">
-			Disallow other parents from sending you availability updates. If selected, your name will have
+			Block other parents from sending you availability updates. If selected, your name will have
 			a strikethrough to others in your circle, (e.g., <span style="text-decoration: line-through;"
 				>Jane Doe</span
 			>).
