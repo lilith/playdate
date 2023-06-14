@@ -28,6 +28,7 @@
 		notifStartDay,
 		notifHr,
 		notifMin,
+		notifMeridiem,
 		acceptedTermsAt,
 		allowInvites,
 		allowReminders
@@ -46,6 +47,17 @@
 		notifStartDay =
 			WEEKDAYS[formattedDate[formattedDate.findIndex((x) => x.type === 'weekday')].value];
 		notifHr = parseInt(formattedDate[formattedDate.findIndex((x) => x.type === 'hour')].value);
+		if (notifHr > 12) {
+			notifHr = notifHr - 12;
+			notifMeridiem = 'PM';
+		} else if (notifHr === 0) {
+			notifHr = 12;
+			notifMeridiem = 'AM';
+		} else if (notifHr === 12) {
+			notifMeridiem = 'PM';
+		} else {
+			notifMeridiem = 'AM';
+		}
 		timeZone = zone;
 	}
 
@@ -77,7 +89,12 @@
 			email,
 			notifFreq,
 			notifStartDay,
-			notifHr,
+			notifHr:
+				notifHr === 12 && notifMeridiem === 'AM'
+					? notifHr - 12
+					: notifHr !== 12 && notifMeridiem === 'PM'
+					? notifHr + 12
+					: notifHr,
 			notifMin,
 			acceptedTermsAt,
 			allowInvites: !doNotDisturb,
@@ -165,7 +182,7 @@
 		<input type="text" name="email" bind:value={email} />
 
 		<div class="switch-container">
-			<label class="thin-label" for="reminder-consent">Periodic reminder notifications</label>
+			<label class="thin-label" for="reminder-consent">Remind me to update my schedule</label>
 			<label class="switch">
 				<input name="reminder-consent" type="checkbox" bind:checked={allowReminders} />
 				<span class="slider round" />
@@ -173,16 +190,16 @@
 		</div>
 
 		<div class="switch-container">
-			<label class="thin-label" for="notif-freq">Notification frequency (days)</label>
+			<label class="thin-label" for="notif-freq">Remind me every (days)</label>
 			<select name="notif-freq" bind:value={notifFreq}>
-				{#each [...Array(7).keys()] as interval}
-					<option value={interval + 1}>{interval + 1}</option>
+				{#each [21, 14, 7, 6, 5, 4, 3, 2, 1] as interval}
+					<option value={interval}>{interval}</option>
 				{/each}
 			</select>
 		</div>
 
 		<div class="switch-container">
-			<label class="thin-label" for="notif-start-day">Notification start day</label>
+			<label class="thin-label" for="notif-start-day">First remind me on</label>
 			<select name="notif-start-day" bind:value={notifStartDay}>
 				{#each Object.entries(WEEKDAYS) as [day, ind]}
 					<option value={ind}>{day}</option>
@@ -191,10 +208,10 @@
 		</div>
 
 		<div class="switch-container">
-			<label class="thin-label" for="notif-hr">Notification time</label>
+			<label class="thin-label" for="notif-hr">Text reminders at</label>
 			<select name="notif-hr" bind:value={notifHr}>
-				{#each [...Array(31).keys()] as hr}
-					<option value={hr}>{hr}</option>
+				{#each [...Array(12).keys()] as hr}
+					<option value={hr + 1}>{hr + 1}</option>
 				{/each}
 			</select>:
 			<select name="notif-min" bind:value={notifMin}>
@@ -202,18 +219,23 @@
 					<option value={min}>{min < 10 ? `0${min}` : min}</option>
 				{/each}
 			</select>
+			<select name="notif-am-pm" bind:value={notifMeridiem}>
+				{#each ['AM', 'PM'] as meridiem}
+					<option value={meridiem}>{meridiem}</option>
+				{/each}
+			</select>
 		</div>
 
 		<div class="switch-container" style="margin-bottom: 15px;">
-			<label class="thin-label" for="invite-consent">Do not disturb</label>
+			<label class="thin-label" for="invite-consent">Block messages from friends</label>
 			<label class="switch">
 				<input name="invite-consent" type="checkbox" bind:checked={doNotDisturb} />
 				<span class="slider round" />
 			</label>
 		</div>
 		<p id="descrip">
-			Disallow other parents from sending you availability updates. If selected, your name will have
-			a strikethrough to others in your circle, (e.g., <span style="text-decoration: line-through;"
+			Block other parents from sending you availability updates. If selected, your name will have a
+			strikethrough to others in your circle, (e.g., <span style="text-decoration: line-through;"
 				>Jane Doe</span
 			>).
 		</p>
@@ -233,8 +255,8 @@
 	}
 	.switch-container select {
 		width: fit-content;
-		padding: 0 10px;
-		margin: auto 0;
+		padding: 0 2px;
+		margin: auto 3px;
 	}
 	.switch-container {
 		display: flex;

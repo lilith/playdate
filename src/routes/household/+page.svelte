@@ -4,7 +4,7 @@
 	import { onMount, afterUpdate } from 'svelte';
 	import { PRONOUNS } from '../../constants';
 	import Modal from '../Modal.svelte';
-	import { invalidate, invalidateAll } from '$app/navigation';
+	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '../../utils';
 
@@ -65,7 +65,7 @@
 			publicNotes: publicNotes
 		});
 		if (response.status == 200) {
-			alert('Successfully saved household info');
+			goto('/dashboard');
 			if (!householdId) {
 				await invalidate('data:householdId');
 				schedTipMsg();
@@ -99,7 +99,6 @@
 				}
 			];
 			e.target.reset();
-			alert("Successfully saved child. We suggest moving onto the dashboard if you're done.");
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -326,55 +325,60 @@
 	</Modal>
 
 	<form method="POST" action="/db" id="household-form" on:submit|preventDefault={saveToDB}>
-		<label class="subtitle" for="nickname">Household Nickname<span class="red">*</span></label>
-		<input type="text" name="nickname" required bind:value={name} />
+		<p class="subtitle-2" style="margin-bottom: 1rem;">
+			Everything you enter on this page is shared with your Circle. Don't enter sensitive
+			information.
+		</p>
+		<p class="subtitle">Kids</p>
+		{#each kids as kid, ind}
+			<div class="card">
+				<p>{kid.firstName} {kid.lastName}</p>
+				<button class="delete-btn" on:click|preventDefault={() => deleteKid(ind)}><hr /></button>
+			</div>
+			<hr class="inner-section" />
+		{/each}
 
-		<label class="subtitle" for="faq">FAQ</label>
-		<textarea
-			name="faq"
-			placeholder="e.g. work hours, school, allergies, or address"
-			bind:value={publicNotes}
-		/>
+		<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
+			<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
+			<input type="text" name="first-name" required />
 
-		<div class="btn-container-1">
-			<button class="btn save-btn" type="submit">Save Basic Info</button>
-		</div>
+			<label class="subtitle-2" for="last-name">Last Name</label>
+			<input type="text" name="last-name" />
+
+			<label class="subtitle-2" for="pronouns">Pronouns<span class="red">*</span></label>
+			<select name="pronouns" required>
+				<option value="" />
+				{#each Object.entries(PRONOUNS) as pronoun}
+					<option value={pronoun[0]}>{pronoun[1]}</option>
+				{/each}
+			</select>
+
+			<label class="subtitle-2" for="dob">Date of Birth</label>
+			<input
+				type="date"
+				name="dob"
+				max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
+			/>
+
+			<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
+		</form>
 
 		{#if householdId}
 			<hr class="section" />
-			<p class="subtitle">Kids</p>
-			{#each kids as kid, ind}
-				<div class="card">
-					<p>{kid.firstName} {kid.lastName}</p>
-					<button class="delete-btn" on:click|preventDefault={() => deleteKid(ind)}><hr /></button>
-				</div>
-				<hr class="inner-section" />
-			{/each}
 
-			<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
-				<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
-				<input type="text" name="first-name" required />
+			<label class="subtitle" for="nickname">Household Nickname<span class="red">*</span></label>
+			<input type="text" name="nickname" required bind:value={name} />
 
-				<label class="subtitle-2" for="last-name">Last Name</label>
-				<input type="text" name="last-name" />
+			<label class="subtitle" for="faq">FAQ</label>
+			<textarea
+				name="faq"
+				placeholder="e.g. work hours, school, allergies, or address"
+				bind:value={publicNotes}
+			/>
 
-				<label class="subtitle-2" for="pronouns">Pronouns<span class="red">*</span></label>
-				<select name="pronouns" required>
-					<option value="" />
-					{#each Object.entries(PRONOUNS) as pronoun}
-						<option value={pronoun[0]}>{pronoun[1]}</option>
-					{/each}
-				</select>
-
-				<label class="subtitle-2" for="dob">Date of Birth</label>
-				<input
-					type="date"
-					name="dob"
-					max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
-				/>
-
-				<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
-			</form>
+			<div class="btn-container-1">
+				<button class="btn save-btn" type="submit">Save Basic Info</button>
+			</div>
 
 			<hr class="section" />
 
