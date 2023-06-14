@@ -21,6 +21,7 @@ const setLocal = async (
 		locale: null,
 		email: '',
 		notifFreq: 7,
+		notifMeridiem: null,
 		notifStartDay: null,
 		notifHr: null,
 		notifMin: 0,
@@ -38,7 +39,21 @@ const setLocal = async (
 		userInfo.phone = user.phone;
 		userInfo.notifFreq = user.reminderIntervalDays;
 		userInfo.notifStartDay = user.reminderDatetime.getDay();
-		userInfo.notifHr = user.reminderDatetime.getHours();
+		const notifHr = user.reminderDatetime.getHours();
+		if (notifHr > 12) {
+			userInfo.notifHr = notifHr - 12;
+			userInfo.notifMeridiem = 'PM';
+		} else if (notifHr === 0) {
+			userInfo.notifHr = 12;
+			userInfo.notifMeridiem = 'AM';
+		} else if (notifHr === 12) {
+			userInfo.notifHr = 12;
+			userInfo.notifMeridiem = 'PM';
+		} else {
+			userInfo.notifHr = notifHr;
+			userInfo.notifMeridiem = 'AM';
+		}
+		// userInfo.notifMeridiem = notifHr > 12 ? 'PM' : 'AM';
 		userInfo.notifMin = user.reminderDatetime.getMinutes();
 		userInfo.allowReminders = user.phonePermissions.allowReminders;
 		userInfo.allowInvites = user.phonePermissions.allowInvites;
@@ -153,7 +168,6 @@ export const handle = (async ({ event, resolve }) => {
 		If all of these are complete, the user will go to the default dashboard page F-H
 		*/
 	}
-	console.log('DOWN HERE');
 	const response = await resolve(event);
 	return response;
 }) satisfies Handle;
