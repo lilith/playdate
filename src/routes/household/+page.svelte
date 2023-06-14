@@ -325,6 +325,10 @@
 	</Modal>
 
 	<form method="POST" action="/db" id="household-form" on:submit|preventDefault={saveToDB}>
+		<p class="subtitle-2" style="margin-bottom: 1rem;">
+			Everything you enter on this page is shared with your Circle. Don't enter sensitive
+			information.
+		</p>
 		<p class="subtitle">Kids</p>
 		{#each kids as kid, ind}
 			<div class="card">
