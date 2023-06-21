@@ -102,7 +102,7 @@
 		});
 
 		if (response.status == 200) {
-			if ($page.data.user.household === 'N/A') {
+			if ($page.data.user.household === null) {
 				goto('/household');
 			}
 		} else {
@@ -143,10 +143,16 @@
 	</Modal>
 
 	<NavBar pageName="Profile" />
-	<p class="subtitle" style="text-align: center">Part of Household</p>
-	<p style="text-align: center;font-size: 24px;color: #5A5A5A;margin-bottom: 0.5rem;">
-		{$page.data.user.household}
-	</p>
+	<p class="subtitle-2" style="margin-top: 2rem;">Your phone</p>
+	<p class="subtitle" style="text-align: center; margin-top: 0.1rem;">{$page.data.user.phone}</p>
+	{#if $page.data.user.household === null}
+		<p class="subtitle-2">You have not joined or created a household yet</p>
+	{:else}
+		<p class="subtitle-2">You are managing household</p>
+		<p class="subtitle" style="text-align: center; margin-top: 0.1rem;">
+			{$page.data.user.household}
+		</p>
+	{/if}
 
 	<form method="POST" action="/db" on:submit|preventDefault={saveToDB}>
 		<label class="subtitle" for="first-name">First Name<span class="red">*</span></label>
@@ -245,6 +251,11 @@
 </div>
 
 <style>
+	.subtitle-2 {
+		text-align: center;
+		font-size: 24px;
+		color: #5a5a5a;
+	}
 	#descrip {
 		font-style: normal;
 		font-weight: 400;
