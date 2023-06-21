@@ -12,7 +12,7 @@ const setLocal = async (
 	event: RequestEvent<Partial<Record<string, string>>, string | null>
 ) => {
 	const userInfo: { [key: string]: string | number | null | boolean } = {
-		household: 'N/A',
+		household: null,
 		phone,
 		firstName: '',
 		lastName: '',

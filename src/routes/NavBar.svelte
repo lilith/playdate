@@ -8,9 +8,10 @@
 	const { user } = $page.data;
 
 	export let pageName: string;
-	function logout() {
+	async function logout() {
 		document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-		goto('/');
+		await goto('/');
+		location.reload();
 	}
 </script>
 
