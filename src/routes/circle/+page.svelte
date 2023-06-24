@@ -2,16 +2,16 @@
 	import PhoneInput from '../PhoneInput.svelte';
 	import { onMount, afterUpdate } from 'svelte';
 	import { page } from '$app/stores';
-	import RejectIcon from '../../Icons/xIcon.svelte';
-	import AcceptIcon from '../../Icons/checkIcon.svelte';
 	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
 	import { writeReq } from '../../utils';
+	import Modal from '../Modal.svelte';
+	import { PRONOUNS, type PRONOUNS_ENUM } from '../../constants';
 
 	let phoneInput: object;
-	let { friendReqsInfo, circleInfo, user } = $page.data;
+	let inviteesPhone: string;
+	let { circleInfo, user, kidNames } = $page.data;
 	afterUpdate(() => {
-		friendReqsInfo = $page.data.friendReqsInfo;
 		circleInfo = $page.data.circleInfo;
 	});
 
@@ -26,6 +26,7 @@
 		}, 1000);
 	});
 
+	let showClickToTextLink = false;
 	async function invite() {
 		if (!phoneInput.isValidNumber() || phoneInput.getNumber() === user.phone) {
 			alert('You have entered an invalid contact number.');
@@ -38,8 +39,9 @@
 			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
-			alert(`Successfully invited the user with the number ${phoneInput.getNumber()}`);
+			inviteesPhone = phoneInput.getNumber();
 			phoneInput.telInput.value = '';
+			showClickToTextLink = true;
 		} else {
 			const { message } = await response.json();
 			alert(message);
@@ -58,34 +60,29 @@
 		}
 	}
 
-	async function acceptFriendReq(friendReqId: number, friendHouseholdId: number) {
-		const response = await writeReq('/db', {
-			type: 'acceptFriendReq',
-			householdId: $page.data.user.householdId,
-			friendHouseholdId,
-			friendReqId
-		});
-		if (response.status == 200) {
-			await invalidate('data:circle');
-		} else {
-			alert('Something went wrong with accepting this connection');
-		}
-	}
-
-	async function rejectFriendReq(reqId: number) {
-		const response = await writeReq('/db', {
-			type: 'rejectFriendReq',
-			reqId
-		});
-		if (response.status == 200) {
-			await invalidate('data:circle');
-		} else {
-			alert('Something went wrong with rejecting this connection');
-		}
+	function smsInvite(inviteesPhone: string) {
+		const objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
+		const msg = `${user.firstName} (parent of ${kidNames}) has invited you to ${objectivePronoun} circle at playdate.help to simplify scheduling and social time. First, verify ${objectivePronoun} real phone number is ${user.phone} for safety. If it is valid, click https://playdate.help/${inviteesPhone} to join.`;
+		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;
 	}
 </script>
 
 <div>
+	<Modal showModal={showClickToTextLink}>
+		<h2 slot="header">Pre-filled SMS Invite</h2>
+
+		<p>Open a pre-filled SMS invite for the person you're inviting!</p>
+
+		<div slot="close" let:dialog>
+			<button
+				on:click={async () => {
+					dialog.close();
+				}}
+			>
+				<a href={smsInvite(inviteesPhone)} style="color: white;"> Open pre-filled SMS </a>
+			</button>
+		</div>
+	</Modal>
 	<NavBar pageName="Circle" />
 	<p class="subtitle">Your Circle</p>
 	<p>Names that are crossed out indicate friends who have turned off their notifications.</p>

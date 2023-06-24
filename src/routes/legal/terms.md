@@ -2,22 +2,21 @@
 
 ### Helpful links
 
-* Contact lilith@imazen.io if you have any questions related to this Service or the Terms of Use and Privacy Policy.
-* [Current Privacy Policy](/legal/privacy)
-* [Current Terms Of Use](/legal/terms)
-* [Access previous versions of this document on GitHub](https://github.com/lilith/playdate/commits/main/src/routes/legal/terms.md)
-* [Summarized](/legal/summary)
-
+- Contact lilith@imazen.io if you have any questions related to this Service or the Terms of Use and Privacy Policy.
+- [Current Privacy Policy](/legal/privacy)
+- [Current Terms Of Use](/legal/terms)
+- [Access previous versions of this document on GitHub](https://github.com/lilith/playdate/commits/main/src/routes/legal/terms.md)
+- [Summarized](/legal/summary)
 
 ## Terms of Use 1.0
 
-*Last updated on June 12th, 2023*
+_Last updated on June 12th, 2023_
 
 ### 1. Definitions
 
 1. "Services" shall collectively mean the Playdate.help application or any of our services.
 2. "Service" shall mean the Playdate.help web application and its SMS and e-mail functions.
-3. "We", "Us", "PlayDateOrg", and "Our" shall refer to the Organizations and individuals providing the Service to You, including Lilith River. 
+3. "We", "Us", "PlayDateOrg", and "Our" shall refer to the Organizations and individuals providing the Service to You, including Lilith River.
 4. "Agreement" shall refer to these Terms Of Use
 
 ### 2. Acceptance of Terms
@@ -34,18 +33,18 @@
 
 ### 3. Contact Information
 
-If you have any questions about this Agreement, please contact us via e-mail at lilith@imazen.io. 
+If you have any questions about this Agreement, please contact us via e-mail at lilith@imazen.io.
 
 Physical mail can be sent to the following mail forwarding service:
 
->    Imazen LLC
->    ATTN: Playdate.HELP
->    2093 PHILADELPHIA PIKE #1555
->    CLAYMONT, DE 19703
+> Imazen LLC
+> ATTN: Playdate.HELP
+> 2093 PHILADELPHIA PIKE #1555
+> CLAYMONT, DE 19703
 
 ### 4. Description Of Services
 
-We are providing an application (the "Service") aimed at simplifying the process of sharing schedules by making it quick to 
+We are providing an application (the "Service") aimed at simplifying the process of sharing schedules by making it quick to
 broadcast (via SMS) your availability to friends you've added to your circle.
 By automating some of the awkward away, we hope to promote more social time for children.
 
@@ -71,7 +70,7 @@ Our Service includes the following key features:
 
 ### 5. Registration
 
-1. During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy.  The Services are exclusively for the use of adults and guardians and may not be used by minors. 
+1. During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy. The Services are exclusively for the use of adults and guardians and may not be used by minors.
 
 2. To use the Service, you are required to register an account. When you register for an account, you may be required to provide us with some information about yourself, such as your phone number, first and last name, and other contact information. You agree that the information you provide to us is accurate, and that you will not register for an account on behalf of an individual other than yourself or otherwise impersonate any other person.
 
@@ -83,10 +82,9 @@ Our Service includes the following key features:
 
 6. We reserve the right to suspend or terminate your account if any information provided during the registration process or thereafter proves to be inaccurate, false, or misleading, or to reclaim any username that you create through the Service that violates our Terms of Use. If you have any questions about your account setup or the registration process, please contact us at the email address provided on our website.
 
-
 ### 6. User Responsibilities
 
-As a user of the Services, you have a responsibility to maintain the integrity and safety of our community. By agreeing to these Terms, you commit to a conduct that fosters a positive, respectful, and inclusive environment. 
+As a user of the Services, you have a responsibility to maintain the integrity and safety of our community. By agreeing to these Terms, you commit to a conduct that fosters a positive, respectful, and inclusive environment.
 
 Your responsibilities include:
 
@@ -118,7 +116,7 @@ Please note that even after your account is terminated some information may rema
 
 3. **Effect of Termination**: Upon termination of your account, all licenses and rights to use the Service will immediately terminate. You will no longer be able to access your account or retrieve any of the content or data you have added.
 
-4. **Agreement Remains in Effect**: Even after termination of your account, certain terms will remain in effect, including but not limited to, the sections related to content ownership, dispute resolution, limitation of liability, and general legal terms. 
+4. **Agreement Remains in Effect**: Even after termination of your account, certain terms will remain in effect, including but not limited to, the sections related to content ownership, dispute resolution, limitation of liability, and general legal terms.
 
 By using the Services, you consent to the terms of this Termination policy.
 
@@ -135,6 +133,7 @@ By using the Services, you consent to the terms of this Termination policy.
 By using the Services, you agree to the following:
 
 1. **Limitation of Liability**: To the maximum extent permitted by applicable law, we, including its developers, administrators, and affiliates, shall not be held liable for any indirect, punitive, incidental, special, consequential, or exemplary damages, including without limitation damages for loss of profits, goodwill, use, data or other intangible losses, arising out of or relating to the use of, or inability to use, the Service. This includes, but is not limited to:
+
    - The use or inability to use the Service
    - Unauthorized access to or alteration of your information
    - Any content or conduct of any third party on the Service
@@ -177,7 +176,6 @@ This Agreement and your use of the Service shall be governed by and construed in
 
 By using the Service, you acknowledge that you have read, understand, and agree to this Dispute Resolution policy. If you do not agree, please do not use the Service.
 
-
 ### Changes to Our Terms of Use and Privacy Policy
 
 Our Terms of Use and Privacy Policy may change from time to time. We will post any privacy policy changes on this page. We will also keep prior versions of this document in an archive for your review.
@@ -186,4 +184,4 @@ By continuing to use the Service after those changes become effective, you agree
 
 ### Your Acceptance
 
-By using or accessing the Services in any manner, you acknowledge that you accept the practices and policies outlined in this Terms of Use and Privacy Policy, and you hereby consent that we will collect, use, and share your information as described herein. If you have any questions about these Terms of Use and Privacy Policy, please contact us. 
+By using or accessing the Services in any manner, you acknowledge that you accept the practices and policies outlined in this Terms of Use and Privacy Policy, and you hereby consent that we will collect, use, and share your information as described herein. If you have any questions about these Terms of Use and Privacy Policy, please contact us.

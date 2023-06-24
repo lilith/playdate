@@ -1,8 +1,8 @@
 # Summary of policies
 
-The following summaries are not legally binding in any way and should not be relied upon as they are AI-generated. 
+The following summaries are not legally binding in any way and should not be relied upon as they are AI-generated.
 
-## Summary of Terms Of Use 
+## Summary of Terms Of Use
 
 It is important to read and understand the full Terms of Use before using the Playdate.help Services. This is an incomplete AI-generated summary and should not be relied upon
 

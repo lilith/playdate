@@ -32,16 +32,6 @@
 		const response = await writeReq('/login', {
 			phone: phoneInput.getNumber()
 		});
-		if (response.status == 200) {
-			const thing = await response.json();
-			/**
-			 * TODO: to be deleted once toll-free number verified
-			 */
-			// if thing.body isn't empty
-			if (thing.body && thing.body.length > 0) {
-				alert(thing.body);
-			}
-		}
 	}
 </script>
 
