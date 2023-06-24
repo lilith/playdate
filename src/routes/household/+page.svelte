@@ -2,7 +2,7 @@
 	import PhoneInput from '../PhoneInput.svelte';
 	import { page } from '$app/stores';
 	import { onMount, afterUpdate } from 'svelte';
-	import { PRONOUNS } from '../../constants';
+	import { PRONOUNS, type PRONOUNS_ENUM } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
@@ -15,7 +15,7 @@
 
 	let phoneInput: object;
 	let { householdId, name, publicNotes, kids, adults } = $page.data.householdInfo;
-	let { householdInvites } = $page.data;
+	let { householdInvites, user } = $page.data;
 	afterUpdate(() => {
 		householdId = $page.data.householdInfo.householdId;
 		kids = $page.data.householdInfo.kids;
@@ -31,6 +31,7 @@
 		content: ''
 	};
 	let modalReason: ModalReason;
+	let inviteesPhone: string;
 
 	function stylePhoneInput() {
 		const input: HTMLElement | null = document.querySelector('.iti');
@@ -196,13 +197,12 @@
 			fromUserId: $page.data.user.id
 		});
 		if (response.status == 200) {
-			alert(
-				`The user with phone # ${phoneInput.getNumber()} has been authorized to manage this household. Please ask them to log in and accept.`
-			);
 			if (!householdId) {
 				await invalidate('data:householdId');
 				schedTipMsg();
 			}
+			inviteesPhone = phoneInput.getNumber();
+			showClickToTextLink = true;
 			phoneInput.telInput.value = '';
 		} else {
 			const { message } = await response.json();
@@ -234,6 +234,20 @@
 			await invalidate('data:householdId');
 		}
 	}
+
+	let showClickToTextLink = false;
+	function smsInvite(inviteesPhone: string) {
+		const kidNames = kids
+			.map(
+				(kid: { firstName: string; lastName: string }) =>
+					`${kid.firstName}${kid.lastName ? ` ${kid.lastName}` : ''}`
+			)
+			.join(', ');
+		const objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
+		const msg = `${user.firstName} (parent of ${kidNames}) has invited you as a parent in ${objectivePronoun} household at playdate.help to simplify scheduling and social time. First, verify ${objectivePronoun} real phone number is ${user.phone} for safety. If it is valid, click https://playdate.help/home/${inviteesPhone} to join.`;
+
+		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;
+	}
 </script>
 
 <svelte:head>
@@ -241,6 +255,21 @@
 	<meta name="description" content="Playdate app" />
 </svelte:head>
 <div>
+	<Modal showModal={showClickToTextLink}>
+		<h2 slot="header">Pre-filled SMS Invite</h2>
+
+		<p>Open a pre-filled SMS invite for the person you're inviting!</p>
+
+		<div slot="close" let:dialog>
+			<button
+				on:click={async () => {
+					dialog.close();
+				}}
+			>
+				<a href={smsInvite(inviteesPhone)} style="color: white;"> Open pre-filled SMS </a>
+			</button>
+		</div>
+	</Modal>
 	{#key householdId}
 		<NavBar pageName="Household" />
 	{/key}

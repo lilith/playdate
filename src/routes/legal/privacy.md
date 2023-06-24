@@ -1,17 +1,16 @@
-
 # Privacy Policy
 
 ### Helpful links
 
-* Contact lilith@imazen.io if you have any questions related to this Service or the Terms of Use and Privacy Policy.
-* [Current Privacy Policy](/legal/privacy)
-* [Current Terms Of Use](/legal/terms)
-* [Access previous versions of this document on GitHub](https://github.com/lilith/playdate/commits/main/src/routes/legal/privacy.md)
-* [Summarized](/legal/summary)
+- Contact lilith@imazen.io if you have any questions related to this Service or the Terms of Use and Privacy Policy.
+- [Current Privacy Policy](/legal/privacy)
+- [Current Terms Of Use](/legal/terms)
+- [Access previous versions of this document on GitHub](https://github.com/lilith/playdate/commits/main/src/routes/legal/privacy.md)
+- [Summarized](/legal/summary)
 
-# Privacy Policy 1.0 
+# Privacy Policy 1.0
 
-*Last updated on June 12th, 2023* 
+_Last updated on June 12th, 2023_
 
 ## 1. Purpose
 
@@ -21,27 +20,27 @@ The purpose of this privacy policy is to inform you about the types of informati
 
 1. "Services" shall collectively mean the Playdate.help application or any of our services.
 2. "Service" shall mean the Playdate.help web application and its SMS and e-mail functions.
-3. "We", "Us", "PlayDateOrg", and "Our" shall refer to the Organizations and individuals providing the Service to You, including Lilith River. 
+3. "We", "Us", "PlayDateOrg", and "Our" shall refer to the Organizations and individuals providing the Service to You, including Lilith River.
 4. "Agreement" shall refer to this Privacy Policy
 
 ### 3. Age Restriction
 
-During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy.  The Services are exclusively for the use of adults and guardians and may not be used by minors. 
+During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy. The Services are exclusively for the use of adults and guardians and may not be used by minors.
 
 ### 4. Contact Information
 
-If you have any questions about this Agreement, please contact us via e-mail at lilith@imazen.io. 
+If you have any questions about this Agreement, please contact us via e-mail at lilith@imazen.io.
 
 Physical mail can be sent to the following mail forwarding service:
 
->    Imazen LLC
->    ATTN: Playdate.HELP
->    2093 PHILADELPHIA PIKE #1555
->    CLAYMONT, DE 19703
+> Imazen LLC
+> ATTN: Playdate.HELP
+> 2093 PHILADELPHIA PIKE #1555
+> CLAYMONT, DE 19703
 
 ### 5. Description Of Services
 
-We are providing an application (the "Service") aimed at simplifying the process of sharing schedules by making it quick to 
+We are providing an application (the "Service") aimed at simplifying the process of sharing schedules by making it quick to
 broadcast (via SMS) your availability to friends you've added to your circle.
 By automating some of the awkward away, we hope to promote more social time for children.
 
@@ -65,8 +64,7 @@ Our Service includes the following key features:
 
 8. **Password-free security** The Service exclusively uses SMS-based authentication (Magic Links) and does not use or store passwords, in order to keep user data safe. Using a login link sent to your phone will open your browser and set a cookie that will keep you logged in. This cookie is not accessible to other websites and is only used to keep you logged in to the Service.
 
-
-### 6. Information Collected 
+### 6. Information Collected
 
 By using the Service, you represent and warrant that you are 18 years of age or older.
 
@@ -74,13 +72,13 @@ By using the Service, you represent and warrant that you are 18 years of age or 
 
 2. **Household Information**: For your household, the app collects the name of the household, public notes that you might add (optional), and the names of other members you've added to the household (optional).
 
-3. **Child Information**: For each child in the household, the app collects their first name, pronouns, and optionally their last name and date of birth as well as their association with the household. 
+3. **Child Information**: For each child in the household, the app collects their first name, pronouns, and optionally their last name and date of birth as well as their association with the household.
 
 4. **Contact Permissions**: The app keeps track of your phone contact permissions such as blocked status, whether you allow invites and reminders. It also notes the date and time you accepted these terms (optional).
 
 5. **Availability**: The app collects information about your availability and that of each child in the household, including dates, start and end times (optional), availability status, and any notes or emoticons you add.
 
-6. **Friend Requests and Household Connections**: The app collects information about friend requests you send or receive, as well as any other households you're connected with as a friend. 
+6. **Friend Requests and Household Connections**: The app collects information about friend requests you send or receive, as well as any other households you're connected with as a friend.
 
 7. **Invitations to manage the household**: The app collects information about household management requests you send or receive.
 
@@ -88,50 +86,49 @@ By using the Service, you represent and warrant that you are 18 years of age or 
 
 9. **User-provided Notes**: The app allows users to enter arbitrary text into their Household notes, FAQ and schedule. This information is stored and shared with other households in the user's circle. The Service does not review or moderate this information. The User takes full responsibility for ensuring that this information is appropriate and does not contain any sensitive information they don't want accessible.
 
-
 ### 7. Who Can Access This Information
 
 1. **Anonymous Users**:
-    a. By SMS: Households in your circle (and all adult phone numbers associated with them) may receive SMSes including some or all information you provide to the Service.
-    b. Via Browser: If you're not logged in, you can only enter your phone number to receive a login link. You can't access or edit any user information in the app, although you can still receive notifications to your phone number that may include all the information otherwise accessible via the application.
+   a. By SMS: Households in your circle (and all adult phone numbers associated with them) may receive SMSes including some or all information you provide to the Service.
+   b. Via Browser: If you're not logged in, you can only enter your phone number to receive a login link. You can't access or edit any user information in the app, although you can still receive notifications to your phone number that may include all the information otherwise accessible via the application.
 
-2. **Logged-in Members**: Once you're logged in, you can edit your own profile or delete it. 
+2. **Logged-in Members**: Once you're logged in, you can edit your own profile or delete it.
 
 3. **Household Adult Members**: As an adult member of a household, you have access to several privileges. You can:
-    a. Edit the household nickname or FAQ and notes
-    b. Add, view, remove, or edit children's information
-    c. Invite other adults to manage the household or remove them
-    d. Delete the household
-    e. Invite friends to join the household Circle or remove them
-    f. Edit the household's schedule
-    g. Broadcast the household schedule and information to the Circle
-    h. View your dashboard / overview
+   a. Edit the household nickname or FAQ and notes
+   b. Add, view, remove, or edit children's information
+   c. Invite other adults to manage the household or remove them
+   d. Delete the household
+   e. Invite friends to join the household Circle or remove them
+   f. Edit the household's schedule
+   g. Broadcast the household schedule and information to the Circle
+   h. View your dashboard / overview
 
-4. **Friends of the Household**: If you've been added to a household's Circle, you can access shared information such as household notes, children's info (including first name, last name, date of birth, and pronouns), availability schedules, and availability notes. You can also see if household's and users you are connected to have disabled their notifications. 
+4. **Friends of the Household**: If you've been added to a household's Circle, you can access shared information such as household notes, children's info (including first name, last name, date of birth, and pronouns), availability schedules, and availability notes. You can also see if household's and users you are connected to have disabled their notifications.
 
-5. **Service administration**: We and Administrators we assign have access to all the information in the Services, including the ability to delete users and household. 
+5. **Service administration**: We and Administrators we assign have access to all the information in the Services, including the ability to delete users and household.
 
-6. **Third-party services**: The app uses third-party services to provide its functionality. These services may have access to your information. See the section on third-party services for more information. 
+6. **Third-party services**: The app uses third-party services to provide its functionality. These services may have access to your information. See the section on third-party services for more information.
 
 7. As our platform evolves, we may add new services or features to our platform. These Terms will apply to all new services and features unless we note otherwise.
 
 ### 8. How We Use This Information
 
-1. We collect and use this information in order to provide, maintain, protect, and improve the Service, to develop new ones, and to protect Us and our users. 
+1. We collect and use this information in order to provide, maintain, protect, and improve the Service, to develop new ones, and to protect Us and our users.
 
 2. **Service Provision**: We use your information to deliver our Services, like processing the terms you search for in order to offer schedule management and friends circle features, or using your phone number for account authentication and communication.
 
 3. **Service Improvement**: We use the information we collect from all our services for the following purposes:
-    - To ensure our services continue to meet your needs and wants. 
-    - To offer you customized content – like giving you more relevant search results and recommendations.
-    - To understand how you use our services, so we can improve them.
-  
-4. **Communication**: We may use your contact information to send you announcements related to our Services when we feel they may be of interest to you, with your consent where required. These might include updates to our Services, changes to our Terms of Use or Privacy Policy, or information about security issues. 
+
+   - To ensure our services continue to meet your needs and wants.
+   - To offer you customized content – like giving you more relevant search results and recommendations.
+   - To understand how you use our services, so we can improve them.
+
+4. **Communication**: We may use your contact information to send you announcements related to our Services when we feel they may be of interest to you, with your consent where required. These might include updates to our Services, changes to our Terms of Use or Privacy Policy, or information about security issues.
 
 5. **Safety and Security**: We use the information we collect to make our services safe and secure, and to verify accounts and activity, combat harmful conduct, detect and prevent spam and other bad experiences, maintain the integrity of our services, and promote safety and security.
 
 6. We will ask for your consent before using information for a purpose other than those that are set out in this Terms of Use and Privacy Policy.
-
 
 ### 9. Information Sharing
 
@@ -139,16 +136,14 @@ We do not share your personal information with companies, organizations, or indi
 
 1. **With your consent**: We’ll share personal information outside of the Service when we have your consent. By adding a household to your circle, you consent for us to send all the information you enter in the application to all phone numbers associated with that household and to share all the information with users in that household.
 
-
-2. **For external processing**: We provide personal information to our affiliates and other trusted businesses or persons to store or process it for us, based on our instructions and in compliance with our Privacy Policy and any other appropriate confidentiality and security measures. For example, we use Twilio to send SMS messages to users, and Twilio may retain that data. See "Third Party Services" for more information. We use Railway and Supabase to store and run the application. 
-
+2. **For external processing**: We provide personal information to our affiliates and other trusted businesses or persons to store or process it for us, based on our instructions and in compliance with our Privacy Policy and any other appropriate confidentiality and security measures. For example, we use Twilio to send SMS messages to users, and Twilio may retain that data. See "Third Party Services" for more information. We use Railway and Supabase to store and run the application.
 
 3. **For legal reasons**: We will share personal information if we have a good-faith belief that access, use, preservation, or disclosure of the information is reasonably necessary to:
-    - Meet any applicable law, regulation, legal process, or enforceable governmental request.
-    - Enforce applicable Terms of Use, including investigation of potential violations.
-    - Detect, prevent, or otherwise address fraud, security, or technical issues.
-    - Protect against harm to the rights, property or safety of our users, Us, the Service, or the public as required or permitted by law.
 
+   - Meet any applicable law, regulation, legal process, or enforceable governmental request.
+   - Enforce applicable Terms of Use, including investigation of potential violations.
+   - Detect, prevent, or otherwise address fraud, security, or technical issues.
+   - Protect against harm to the rights, property or safety of our users, Us, the Service, or the public as required or permitted by law.
 
 4. **Non-identifiable information**: We may share non-personally identifiable information publicly and with our partners – like publishers, advertisers, developers, or rights holders. For example, we share information publicly to show trends about the general use of our services.
 
@@ -158,13 +153,11 @@ If PlayDateOrg is involved in a merger, acquisition, or sale of assets, we’ll 
 
 Users may delete their information from the app at any time. This information becomes immediately unavailable to others via the app. The data may remain accessible to administrators, third parties, and service providers in backups or other data stores for an indefinite amount of time. Information transmitted via SMS cannot be deleted or recalled. Users can control SMS notifications via the app or by replying STOP / UNSTOP.
 
-
 ### 11. Data Security
 
 The Service exclusively uses SMS-based authentication (Magic Links) and does not use or store passwords, in order to keep user data safe. If you lose access to your phone number, please contact us. If another user gains access to your phone or phone number, they can impersonate you on the Service an gain access to the information stored therein.
 
 The Service utilizes industry-standard measures to ensure the privacy and security of your personal information. However, we cannot guarantee that your communications with the Service will never be unlawfully intercepted or that your personal information will never be unlawfully accessed by third parties. Any transmission of personal information is at your own risk. We are not responsible for circumvention of any privacy settings or security measures contained on the Service. We hope you take comfort in how little information we store and how little of it is sensitive.
-
 
 ### 12. Third-Party Services
 
@@ -183,7 +176,7 @@ The Service is hosted within the United States and only accepts phone numbers fr
 
 The Service is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13. If you are under 13, please do not use the Service or provide any information to us.
 
-During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy.  The Services are exclusively for the use of adults and guardians and may not be used by minors. 
+During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy. The Services are exclusively for the use of adults and guardians and may not be used by minors.
 
 ### 15. Cookie Policy
 
@@ -211,14 +204,14 @@ We do not use "non-essential" cookies like analytics cookies or advertising cook
 
 Given our exclusive use of essential cookies, we do not require your explicit consent to place these cookies. However, you can set your browser to refuse all or some types of cookies or to alert you when websites set or access cookies. If you disable or refuse cookies, please note that some parts of our website may become inaccessible or not function properly.
 
-By using our Service, you acknowledge that you have read and understand this Cookie Policy. If you do not agree with this Cookie Policy, please do not use our Service. 
-
+By using our Service, you acknowledge that you have read and understand this Cookie Policy. If you do not agree with this Cookie Policy, please do not use our Service.
 
 ### 16. Limitation of Liability, Disclaimer of Warranties, and Indemnification
 
 By using the Services, you agree to the following:
 
 1. **Limitation of Liability**: To the maximum extent permitted by applicable law, we, including its developers, administrators, and affiliates, shall not be held liable for any indirect, punitive, incidental, special, consequential, or exemplary damages, including without limitation damages for loss of profits, goodwill, use, data or other intangible losses, arising out of or relating to the use of, or inability to use, the Service. This includes, but is not limited to:
+
    - The use or inability to use the Service
    - Unauthorized access to or alteration of your information
    - Any content or conduct of any third party on the Service
@@ -247,7 +240,7 @@ This Privacy Policy and your use of the Service shall be governed by and constru
 
 Our Terms of Use and Privacy Policy may change from time to time. We will post any privacy policy changes on this page. We will also keep prior versions of this Privacy Policy in an archive for your review.
 
-By continuing to use the Service after those changes become effective, you agree to be bound by the revised Terms of Use and Privacy Policy. If such changes 
+By continuing to use the Service after those changes become effective, you agree to be bound by the revised Terms of Use and Privacy Policy. If such changes
 
 ### 19. Your Acceptance
 

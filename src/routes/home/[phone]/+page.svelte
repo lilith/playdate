@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { writeReq } from '../utils';
+	import { writeReq } from '../../../utils';
 	import { onMount } from 'svelte';
 	import intlTelInput from 'intl-tel-input';
+	import { page } from '$app/stores';
 
 	let phoneInput: object;
+	const { phone } = $page.data;
 
 	function stylePhoneInput() {
 		const flag: HTMLElement | null = document.querySelector('.iti__flag-container');
@@ -21,6 +23,7 @@
 		setTimeout(() => {
 			stylePhoneInput();
 		}, 1000);
+		phoneInput.telInput.value = phone;
 	});
 
 	async function login() {

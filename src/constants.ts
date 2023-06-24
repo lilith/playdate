@@ -12,6 +12,8 @@ export const PRONOUNS = {
 	ZEZIE_HIR_HIRS: 'ze/zie, hir, hirs'
 };
 
+export type PRONOUNS_ENUM = keyof typeof PRONOUNS;
+
 export const LANGUAGES = [
 	{ name: 'Afrikaans', code: 'af' },
 	{ name: 'Albanian - shqip', code: 'sq' },
