@@ -6,9 +6,6 @@
 	let phoneInput: object;
 
 	function stylePhoneInput() {
-		const flag: HTMLElement | null = document.querySelector('.iti__flag-container');
-		if (flag && flag.style) flag.style.display = 'none';
-
 		const input: HTMLElement | null = document.querySelector('.iti');
 		if (input && input.style) input.style.width = '100%';
 	}
