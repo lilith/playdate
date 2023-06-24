@@ -62,7 +62,7 @@
 
 	function smsInvite(inviteesPhone: string) {
 		const objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
-		const msg = `${user.firstName} (parent of ${kidNames}) has invited you to ${objectivePronoun} circle at playdate.help to simplify scheduling and social time. First, verify ${objectivePronoun} real phone number is ${user.phone} for safety. If it is valid, click https://playdate.help/${inviteesPhone} to join.`;
+		const msg = `${user.firstName} (parent of ${kidNames}) has invited you to ${objectivePronoun} circle at playdate.help to simplify scheduling and social time. First, verify ${objectivePronoun} real phone number is ${user.phone} for safety. If it is valid, click https://playdate.help/home/${inviteesPhone} to join.`;
 		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;
 	}
 </script>

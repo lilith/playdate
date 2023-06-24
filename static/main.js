@@ -2,7 +2,7 @@
 /* Carrd Site JS | carrd.co | License: MIT */
 
 (function () {
-	if (window.location.pathname !== '/') return;
+	if (window.location.pathname !== '/' && !window.location.pathname.startsWith('/home/')) return;
 	// Main.
 	var on = addEventListener,
 		off = removeEventListener,

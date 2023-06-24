@@ -94,7 +94,11 @@ export const handle = (async ({ event, resolve }) => {
 
 	const cookie = event.cookies.get('session');
 	// check whether authenticated
-	if (event.url.pathname !== '/' && event.url.pathname.slice(0, 6) !== '/login') {
+	if (
+		event.url.pathname !== '/' &&
+		!event.url.pathname.startsWith('/home/') &&
+		event.url.pathname.slice(0, 6) !== '/login'
+	) {
 		if (!cookie) throw redirect(303, '/');
 		const session = await prisma.session.findUnique({
 			where: {
