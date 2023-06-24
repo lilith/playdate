@@ -5,6 +5,7 @@
 	import type { Dates, DateDetails, BusyDetails } from '../../constants';
 	import { formatMin } from '../../utils';
 	import type { Household } from './constants';
+	import { goto } from '$app/navigation';
 
 	type CircleMember = {
 		friendHouseholdId: number;
@@ -52,14 +53,14 @@
 	<div style="margin-bottom: 2rem;">
 		<p class="subtitle">Notices<span>{numNotices}</span></p>
 		{#if emptySchedule}
-			<div class="notice">
+			<div class="notice" on:click={() => goto('/calendar')} on:keyup={() => goto('/calendar')}>
 				<p>Empty Schedule</p>
 				<p>Please mark your tentative availability.</p>
 			</div>
 		{/if}
 
 		{#if noFriends}
-			<div class="notice">
+			<div class="notice" on:click={() => goto('/circle')} on:keyup={() => goto('/circle')}>
 				<p>Find your friends</p>
 				<p>Be sure to invite your friends to set up play dates!</p>
 			</div>
@@ -119,6 +120,7 @@
 	{/if}
 
 	<p class="subtitle">Your Schedule</p>
+	<p class="subtitle-2">Edit <a href="/calendar">here</a></p>
 	{#each userDatesArr as sched}
 		<div class="summary">
 			{#if sched.status === 'Busy'}
@@ -189,6 +191,12 @@
 </div>
 
 <style>
+	.subtitle-2 {
+		font-weight: 400;
+		font-size: 20px;
+		line-height: 30px;
+		margin-bottom: 0.5rem;
+	}
 	.default {
 		font-size: large;
 		text-align: center;
