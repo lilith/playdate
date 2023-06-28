@@ -97,6 +97,7 @@ export const handle = (async ({ event, resolve }) => {
 	if (
 		event.url.pathname !== '/' &&
 		!event.url.pathname.startsWith('/home/') &&
+		!event.url.pathname.startsWith('/legal/') &&
 		event.url.pathname.slice(0, 6) !== '/login'
 	) {
 		if (!cookie) throw redirect(303, '/');

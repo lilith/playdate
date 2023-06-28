@@ -21,9 +21,18 @@
 </dialog>
 
 <style>
+	#accept-terms-modal :global(ul),
+	:global(ol) {
+		list-style: revert;
+		padding-left: 1rem;
+	}
+	#accept-terms-modal :global(h1) {
+		text-align: left;
+	}
 	#accept-terms-modal :global(h2) {
 		font-size: 1.2rem;
 		margin-bottom: 0.5rem;
+		margin-top: 2rem;
 	}
 	#accept-terms-modal :global(p) {
 		margin: 0.5rem 0;

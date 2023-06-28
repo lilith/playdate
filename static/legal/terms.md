@@ -1,25 +1,13 @@
-# Terms of Use
+_v1.0 Last updated on June 12th, 2023_
 
-### Helpful links
-
-- Contact lilith@imazen.io if you have any questions related to this Service or the Terms of Use and Privacy Policy.
-- [Current Privacy Policy](/legal/privacy)
-- [Current Terms Of Use](/legal/terms)
-- [Access previous versions of this document on GitHub](https://github.com/lilith/playdate/commits/main/src/routes/legal/terms.md)
-- [Summarized](/legal/summary)
-
-## Terms of Use 1.0
-
-_Last updated on June 12th, 2023_
-
-### 1. Definitions
+## 1. Definitions
 
 1. "Services" shall collectively mean the Playdate.help application or any of our services.
 2. "Service" shall mean the Playdate.help web application and its SMS and e-mail functions.
 3. "We", "Us", "PlayDateOrg", and "Our" shall refer to the Organizations and individuals providing the Service to You, including Lilith River.
 4. "Agreement" shall refer to these Terms Of Use
 
-### 2. Acceptance of Terms
+## 2. Acceptance of Terms
 
 1. By accessing or using the Services, you agree to be bound by these Terms of Use and our [Privacy Policy]. These Terms affect your legal rights and obligations, so if you do not agree to these Terms, please do not use the Services.
 
@@ -31,7 +19,7 @@ _Last updated on June 12th, 2023_
 
 5. Please read these Terms carefully, and feel free to contact us if you have any questions. Welcome!
 
-### 3. Contact Information
+## 3. Contact Information
 
 If you have any questions about this Agreement, please contact us via e-mail at lilith@imazen.io.
 
@@ -42,7 +30,7 @@ Physical mail can be sent to the following mail forwarding service:
 > 2093 PHILADELPHIA PIKE #1555
 > CLAYMONT, DE 19703
 
-### 4. Description Of Services
+## 4. Description Of Services
 
 We are providing an application (the "Service") aimed at simplifying the process of sharing schedules by making it quick to
 broadcast (via SMS) your availability to friends you've added to your circle.
@@ -68,7 +56,7 @@ Our Service includes the following key features:
 
 8. **Password-free security** The Service exclusively uses SMS-based authentication (Magic Links) and does not use or store passwords, in order to keep user data safe. Using a login link sent to your phone will open your browser and set a cookie that will keep you logged in. This cookie is not accessible to other websites and is only used to keep you logged in to the Service.
 
-### 5. Registration
+## 5. Registration
 
 1. During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy. The Services are exclusively for the use of adults and guardians and may not be used by minors.
 
@@ -82,7 +70,7 @@ Our Service includes the following key features:
 
 6. We reserve the right to suspend or terminate your account if any information provided during the registration process or thereafter proves to be inaccurate, false, or misleading, or to reclaim any username that you create through the Service that violates our Terms of Use. If you have any questions about your account setup or the registration process, please contact us at the email address provided on our website.
 
-### 6. User Responsibilities
+## 6. User Responsibilities
 
 As a user of the Services, you have a responsibility to maintain the integrity and safety of our community. By agreeing to these Terms, you commit to a conduct that fosters a positive, respectful, and inclusive environment.
 
@@ -104,7 +92,7 @@ Breaches of these responsibilities and code of conduct may result in the termina
 
 Remember, your use of the Service is not only about adhering to these responsibilities but also about fostering a community of kindness and openness. We count on you to help us achieve this goal.
 
-### 7. Termination of Service
+## 7. Termination of Service
 
 1. **By User**: You may terminate your account and end your use of the Service at any time and for any reason by logging into the application and using the "Delete Household" and "Delete Profile" features. Please note that if you choose to delete your account, all of your data including your schedule, household information, children's information, and friend connections will be deleted from our servers and may not be recoverable in the future. You acknowledge that We are not liable to you or any third party for any losses or damages that may result from your termination of your account. You acknowledge that even after your account is terminated some information may remain in our records for some time for compliance with legal obligations or for administrative purposes to the extent permitted by law. You acknowledge that SMS messages sent to you or others cannot be deleted or recalled.
 
@@ -120,7 +108,7 @@ Please note that even after your account is terminated some information may rema
 
 By using the Services, you consent to the terms of this Termination policy.
 
-### 8. Intellectual Property Rights
+## 8. Intellectual Property Rights
 
 1. While the source code for some or all of the Service is released under the terms of the GNU Affero General Public License version 3.0 (AGPL-3.0), this does not give users the right to use the names, logo, or other intellectual property of the Services beyond the requirements of the license.
 
@@ -128,7 +116,7 @@ By using the Services, you consent to the terms of this Termination policy.
 
 3. While you have the freedom to modify and distribute any source code of the Services if such source code is provided under an open-source license, any product derived from that source code must not give the impression of being endorsed or maintained by Use, unless explicit permission is given. This means that you may not use the name or logo of the Services, or any other proprietary graphic or trademark as part of the link without Our express written permission.
 
-### 9. Limitation of Liability, Disclaimer of Warranties, and Indemnification
+## 9. Limitation of Liability, Disclaimer of Warranties, and Indemnification
 
 By using the Services, you agree to the following:
 
@@ -154,15 +142,15 @@ By using the Services, you agree to the following:
 
 By using the Services, you acknowledge and agree to the limitations of liability, disclaimer of warranties, and the indemnification provisions described above. If you do not agree to these terms, please refrain from using the Service.
 
-### Governing Law and Jurisdiction
+## Governing Law and Jurisdiction
 
 This Agreement and your use of the Service shall be governed by and construed in accordance with the laws of the state of Colorado, United States, without regard to its conflict of laws principles. Any legal action or proceeding arising out of or relating to this Agreement or the use of the Service shall be exclusively brought in the state or federal courts located in the state of Colorado, and you hereby consent to the personal jurisdiction and venue of such courts.
 
-### Dispute Resolution
+## Dispute Resolution
 
 **Informal Resolution**: Before filing a claim against Us, we encourage you to contact us directly to seek a resolution. We will attempt to resolve the issue and avoid unnecessary conflict.
 
-#### Arbitration Agreement:
+## Arbitration Agreement:
 
 1. **Agreement to Arbitrate**: You and PlayDateOrg agree to resolve any disputes relating to these Terms or the Service through final and binding arbitration, except as set forth under Exceptions to Agreement to Arbitrate below.
 
@@ -176,12 +164,12 @@ This Agreement and your use of the Service shall be governed by and construed in
 
 By using the Service, you acknowledge that you have read, understand, and agree to this Dispute Resolution policy. If you do not agree, please do not use the Service.
 
-### Changes to Our Terms of Use and Privacy Policy
+## Changes to Our Terms of Use and Privacy Policy
 
 Our Terms of Use and Privacy Policy may change from time to time. We will post any privacy policy changes on this page. We will also keep prior versions of this document in an archive for your review.
 
 By continuing to use the Service after those changes become effective, you agree to be bound by the revised Terms of Use and Privacy Policy.
 
-### Your Acceptance
+## Your Acceptance
 
 By using or accessing the Services in any manner, you acknowledge that you accept the practices and policies outlined in this Terms of Use and Privacy Policy, and you hereby consent that we will collect, use, and share your information as described herein. If you have any questions about these Terms of Use and Privacy Policy, please contact us.

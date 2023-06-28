@@ -1,33 +1,21 @@
-# Privacy Policy
-
-### Helpful links
-
-- Contact lilith@imazen.io if you have any questions related to this Service or the Terms of Use and Privacy Policy.
-- [Current Privacy Policy](/legal/privacy)
-- [Current Terms Of Use](/legal/terms)
-- [Access previous versions of this document on GitHub](https://github.com/lilith/playdate/commits/main/src/routes/legal/privacy.md)
-- [Summarized](/legal/summary)
-
-# Privacy Policy 1.0
-
-_Last updated on June 12th, 2023_
+_v1.0 Last updated on June 12th, 2023_
 
 ## 1. Purpose
 
 The purpose of this privacy policy is to inform you about the types of information we gather about you when you visit our website or use the application, how we may use that information, whether we disclose it to anyone, and the choices you have regarding our use of, and your ability to correct, the information.
 
-### 2. Definitions
+## 2. Definitions
 
 1. "Services" shall collectively mean the Playdate.help application or any of our services.
 2. "Service" shall mean the Playdate.help web application and its SMS and e-mail functions.
 3. "We", "Us", "PlayDateOrg", and "Our" shall refer to the Organizations and individuals providing the Service to You, including Lilith River.
 4. "Agreement" shall refer to this Privacy Policy
 
-### 3. Age Restriction
+## 3. Age Restriction
 
 During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy. The Services are exclusively for the use of adults and guardians and may not be used by minors.
 
-### 4. Contact Information
+## 4. Contact Information
 
 If you have any questions about this Agreement, please contact us via e-mail at lilith@imazen.io.
 
@@ -38,7 +26,7 @@ Physical mail can be sent to the following mail forwarding service:
 > 2093 PHILADELPHIA PIKE #1555
 > CLAYMONT, DE 19703
 
-### 5. Description Of Services
+## 5. Description Of Services
 
 We are providing an application (the "Service") aimed at simplifying the process of sharing schedules by making it quick to
 broadcast (via SMS) your availability to friends you've added to your circle.
@@ -64,7 +52,7 @@ Our Service includes the following key features:
 
 8. **Password-free security** The Service exclusively uses SMS-based authentication (Magic Links) and does not use or store passwords, in order to keep user data safe. Using a login link sent to your phone will open your browser and set a cookie that will keep you logged in. This cookie is not accessible to other websites and is only used to keep you logged in to the Service.
 
-### 6. Information Collected
+## 6. Information Collected
 
 By using the Service, you represent and warrant that you are 18 years of age or older.
 
@@ -86,7 +74,7 @@ By using the Service, you represent and warrant that you are 18 years of age or 
 
 9. **User-provided Notes**: The app allows users to enter arbitrary text into their Household notes, FAQ and schedule. This information is stored and shared with other households in the user's circle. The Service does not review or moderate this information. The User takes full responsibility for ensuring that this information is appropriate and does not contain any sensitive information they don't want accessible.
 
-### 7. Who Can Access This Information
+## 7. Who Can Access This Information
 
 1. **Anonymous Users**:
    a. By SMS: Households in your circle (and all adult phone numbers associated with them) may receive SMSes including some or all information you provide to the Service.
@@ -112,7 +100,7 @@ By using the Service, you represent and warrant that you are 18 years of age or 
 
 7. As our platform evolves, we may add new services or features to our platform. These Terms will apply to all new services and features unless we note otherwise.
 
-### 8. How We Use This Information
+## 8. How We Use This Information
 
 1. We collect and use this information in order to provide, maintain, protect, and improve the Service, to develop new ones, and to protect Us and our users.
 
@@ -130,7 +118,7 @@ By using the Service, you represent and warrant that you are 18 years of age or 
 
 6. We will ask for your consent before using information for a purpose other than those that are set out in this Terms of Use and Privacy Policy.
 
-### 9. Information Sharing
+## 9. Information Sharing
 
 We do not share your personal information with companies, organizations, or individuals outside of the Service except in the following cases:
 
@@ -149,17 +137,17 @@ We do not share your personal information with companies, organizations, or indi
 
 If PlayDateOrg is involved in a merger, acquisition, or sale of assets, we’ll continue to ensure the confidentiality of your personal information and give affected users notice before personal information is transferred or becomes subject to a different privacy policy.
 
-### 10. Data retention
+## 10. Data retention
 
 Users may delete their information from the app at any time. This information becomes immediately unavailable to others via the app. The data may remain accessible to administrators, third parties, and service providers in backups or other data stores for an indefinite amount of time. Information transmitted via SMS cannot be deleted or recalled. Users can control SMS notifications via the app or by replying STOP / UNSTOP.
 
-### 11. Data Security
+## 11. Data Security
 
 The Service exclusively uses SMS-based authentication (Magic Links) and does not use or store passwords, in order to keep user data safe. If you lose access to your phone number, please contact us. If another user gains access to your phone or phone number, they can impersonate you on the Service an gain access to the information stored therein.
 
 The Service utilizes industry-standard measures to ensure the privacy and security of your personal information. However, we cannot guarantee that your communications with the Service will never be unlawfully intercepted or that your personal information will never be unlawfully accessed by third parties. Any transmission of personal information is at your own risk. We are not responsible for circumvention of any privacy settings or security measures contained on the Service. We hope you take comfort in how little information we store and how little of it is sensitive.
 
-### 12. Third-Party Services
+## 12. Third-Party Services
 
 The Service uses third-party services to provide its functionality. These services may have access to your information.
 
@@ -168,45 +156,45 @@ The Service uses third-party services to provide its functionality. These servic
 3. **Cloudflare**: The Service uses Cloudflare to host the application. Cloudflare may retain information. See Cloudflare's privacy policy for more information.
 4. **Supabase**: The Service uses Supabase to store user data. Supabase may retain information. See Supabase's privacy policy for more information.
 
-### 13. International Data Transfers
+## 13. International Data Transfers
 
 The Service is hosted within the United States and only accepts phone numbers from the United States and Canada. Your information may be transferred to, and maintained on, computers located outside of your state, province, country, or other governmental jurisdiction where the privacy laws may not be as protective as those in your jurisdiction. If you’re located outside the United States and choose to provide your information to us, we may transfer your information to the United States and process it there.
 
-### 14. Children's Privacy
+## 14. Children's Privacy
 
 The Service is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13. If you are under 13, please do not use the Service or provide any information to us.
 
 During registration, you will be required to affirm that you are over 18 years of age and that you have read the Terms of Use and this Privacy Policy. The Services are exclusively for the use of adults and guardians and may not be used by minors.
 
-### 15. Cookie Policy
+## 15. Cookie Policy
 
 We believe in being clear and transparent about how we collect and use data related to you. This policy provides detailed information about how and when we use cookies.
 
-#### 15.2 What is a cookie?
+### 15.1 What is a cookie?
 
 Cookies are small text files that are placed on your device (computer/smartphone/tablet) by websites that you visit. They are widely used in order to make websites work, or work more efficiently, as well as to provide information to the owners of the website.
 
-#### 15.3 How do we use cookies?
+### 15.2 How do we use cookies?
 
 We use cookies to make the Services work effectively and to improve the user experience. We use cookies for the following purposes:
 
 1. **Authentication and security:** To log you into the Service; to protect your security; and to help us detect malicious activity and violations of our Terms of Use. These cookies help us keep your account safe and prevent unauthorized access to your data.
 
-#### 15.4 What cookies do we use?
+### 15.3 What cookies do we use?
 
 We use a type of cookie called "essential" cookies. These are necessary for the technical operation of our Service and to provide you with basic functionalities of our website. For example, they help to remember your consent decisions, they make the log-in and log-out possible and they help with the security of our Service and with the detection of irregular behavior on our website such as the unauthorized access or the posting of spam.
 
-#### 15.5 Cookies we do not use
+### 15.4 Cookies we do not use
 
 We do not use "non-essential" cookies like analytics cookies or advertising cookies, so we do not track information about your online activities over time and across different websites.
 
-#### 15.6 Your consent
+### 15.5 Your consent
 
 Given our exclusive use of essential cookies, we do not require your explicit consent to place these cookies. However, you can set your browser to refuse all or some types of cookies or to alert you when websites set or access cookies. If you disable or refuse cookies, please note that some parts of our website may become inaccessible or not function properly.
 
 By using our Service, you acknowledge that you have read and understand this Cookie Policy. If you do not agree with this Cookie Policy, please do not use our Service.
 
-### 16. Limitation of Liability, Disclaimer of Warranties, and Indemnification
+## 16. Limitation of Liability, Disclaimer of Warranties, and Indemnification
 
 By using the Services, you agree to the following:
 
@@ -232,16 +220,16 @@ By using the Services, you agree to the following:
 
 By using the Services, you acknowledge and agree to the limitations of liability, disclaimer of warranties, and the indemnification provisions described above. If you do not agree to these terms, please refrain from using the Service.
 
-### 17. Governing Law and Jurisdiction
+## 17. Governing Law and Jurisdiction
 
 This Privacy Policy and your use of the Service shall be governed by and construed in accordance with the laws of the state of Colorado, United States, without regard to its conflict of laws principles. Any legal action or proceeding arising out of or relating to this Privacy Policy or the use of the Service shall be exclusively brought in the state or federal courts located in the state of Colorado, and you hereby consent to the personal jurisdiction and venue of such courts.
 
-### 18. Changes to Our Terms of Use and Privacy Policy
+## 18. Changes to Our Terms of Use and Privacy Policy
 
 Our Terms of Use and Privacy Policy may change from time to time. We will post any privacy policy changes on this page. We will also keep prior versions of this Privacy Policy in an archive for your review.
 
 By continuing to use the Service after those changes become effective, you agree to be bound by the revised Terms of Use and Privacy Policy. If such changes
 
-### 19. Your Acceptance
+## 19. Your Acceptance
 
 By using or accessing the Services in any manner, you acknowledge that you accept the practices and policies outlined in this Terms of Use and Privacy Policy, and you hereby consent that we will collect, use, and share your information as described herein. If you have any questions about these Terms of Use and Privacy Policy, please contact us.

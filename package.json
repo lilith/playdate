@@ -17,7 +17,8 @@
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
 		"reset": "prisma migrate reset  && yarn dev",
-		"postinstall": "prisma generate"
+		"postinstall": "prisma generate",
+		"build:prev": "vite build && vite preview"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^5.0.2",
@@ -29,6 +30,7 @@
 		"@sveltejs/kit": "^1.20.0",
 		"@types/cookie": "^0.5.1",
 		"@types/jsonwebtoken": "^9.0.2",
+		"@types/marked": "^5.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.59.8",
 		"@typescript-eslint/parser": "^5.59.8",
 		"@vercel/postgres": "^0.3.0",
@@ -53,6 +55,7 @@
 	"dependencies": {
 		"@prisma/client": "^4.15.0",
 		"jsonwebtoken": "^9.0.0",
+		"marked": "^5.1.0",
 		"twilio": "^4.11.1"
 	}
 }

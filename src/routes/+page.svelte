@@ -101,8 +101,9 @@
 							</form>
 							<p id="text08" class="style3">
 								By submitting your phone number you consent to receive SMS messages from
-								Playdate.Help. You can opt out at any time via your account or by replying STOP.
-								playdate.help is open-source, non-commercial, and won&#39;t sell your info.
+								Playdate.Help and acknowledge our <a href="/legal/privacy">Privacy Policy</a>. You
+								can opt out at any time via your account or by replying STOP. playdate.help is
+								open-source, non-commercial, and won&#39;t sell your info.
 							</p>
 							<ul id="buttons03" class="style1 buttons">
 								<li>
@@ -207,11 +208,46 @@
 					</div>
 				</div>
 			</section>
+			<section id="footer">
+				<div
+					id="container09"
+					data-scroll-id="footer"
+					data-scroll-behavior="default"
+					data-scroll-offset="0"
+					data-scroll-speed="3"
+					data-scroll-invisible="1"
+					class="container default full screen s-y_bCXRrkrYfP"
+				>
+					<div class="wrapper s-y_bCXRrkrYfP">
+						<div class="inner s-y_bCXRrkrYfP" data-onvisible-trigger="1">
+							<h2 id="text40" class="style4" style="padding-bottom: 2rem;">Playdate</h2>
+							<h3 id="text41" class="style2">Legal</h3>
+							<p class="style6"><a href="/legal/privacy">Privacy</a></p>
+							<p class="style6"><a href="/legal/terms">Terms of Use</a></p>
+						</div>
+					</div>
+				</div>
+			</section>
 		</div>
 	</div>
 </div>
 
 <style>
+	#text41 {
+		padding-bottom: 0.8rem;
+	}
+	#text40 {
+		padding: var(--padding-vertical) var(--padding-horizontal);
+	}
+	p.style6 {
+		letter-spacing: 0.04375rem;
+		width: calc(100% + 0.04375rem);
+		font-size: 1em;
+		line-height: 2.375;
+	}
+	p.style6 a {
+		text-decoration: none;
+	}
 	a {
 		color: white;
 	}

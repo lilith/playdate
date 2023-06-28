@@ -33,6 +33,7 @@
 		allowInvites,
 		allowReminders
 	} = $page.data.user;
+	const { terms } = $page.data;
 	let doNotDisturb = !allowInvites;
 
 	let showModal = !acceptedTermsAt;
@@ -118,9 +119,9 @@
 			return;
 		}}
 	>
-		<h2 slot="header">Terms and Conditions</h2>
+		<h1 slot="header">Terms of Use</h1>
 
-		<p>Messaging rates, texting, etcetc</p>
+		{@html terms}
 
 		<!-- svelte-ignore a11y-autofocus -->
 		<div slot="close" let:dialog>

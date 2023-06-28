@@ -1,4 +1,4 @@
-# Summary of policies
+# Summaries of policies
 
 The following summaries are not legally binding in any way and should not be relied upon as they are AI-generated.
 
