@@ -56,6 +56,7 @@
 			<div class="notice" on:click={() => goto('/calendar')} on:keyup={() => goto('/calendar')}>
 				<p>Empty Schedule</p>
 				<p>Please mark your tentative availability.</p>
+				<p>Click <span class="underline">here</span> to go to your schedule editor.</p>
 			</div>
 		{/if}
 
@@ -63,6 +64,7 @@
 			<div class="notice" on:click={() => goto('/circle')} on:keyup={() => goto('/circle')}>
 				<p>Find your friends</p>
 				<p>Be sure to invite your friends to set up play dates!</p>
+				<p>Click <span class="underline">here</span> to go to your Circle page.</p>
 			</div>
 		{/if}
 
@@ -191,6 +193,10 @@
 </div>
 
 <style>
+	.underline {
+		text-decoration: underline;
+		color: #4578ff;
+	}
 	.subtitle-2 {
 		font-weight: 400;
 		font-size: 20px;
@@ -233,6 +239,7 @@
 
 	.notice,
 	.summary {
+		border: 1px solid #a6b6de;
 		box-shadow: 0px 4px 4px 1px #d9d9d9;
 		border-radius: 18px;
 		padding: 1rem;
