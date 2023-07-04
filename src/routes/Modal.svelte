@@ -11,7 +11,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <dialog bind:this={dialog} on:click|self={clickSelf} on:close={() => (showModal = false)}>
-	<div on:click|stopPropagation id="accept-terms-modal">
+	<div on:click|stopPropagation id="modal">
 		<slot name="header" />
 		<hr />
 		<slot />
@@ -21,27 +21,28 @@
 </dialog>
 
 <style>
-	#accept-terms-modal :global(ul),
+	#modal :global(ul),
 	:global(ol) {
 		list-style: revert;
 		padding-left: 1rem;
+		margin-left: 1rem;
 	}
-	#accept-terms-modal :global(h1) {
+	#modal :global(h1) {
 		text-align: left;
 	}
-	#accept-terms-modal :global(h2) {
+	#modal :global(h2) {
 		font-size: 1.2rem;
 		margin-bottom: 0.5rem;
 		margin-top: 2rem;
 	}
-	#accept-terms-modal :global(p) {
+	#modal :global(p) {
 		margin: 0.5rem 0;
 	}
-	#accept-terms-modal :global(div) {
+	#modal :global(div) {
 		margin-top: 1em;
 		display: flex;
 	}
-	#accept-terms-modal :global(button) {
+	#modal :global(button) {
 		background-color: #73a4eb;
 		padding: 0.5rem 1rem;
 		margin: auto;

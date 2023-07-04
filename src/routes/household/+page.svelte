@@ -201,13 +201,10 @@
 				await invalidate('data:householdId');
 				schedTipMsg();
 			}
-			inviteesPhone = phoneInput.getNumber();
-			showClickToTextLink = true;
-			phoneInput.telInput.value = '';
-		} else {
-			const { message } = await response.json();
-			alert(message);
 		}
+		inviteesPhone = phoneInput.getNumber();
+		showClickToTextLink = true;
+		phoneInput.telInput.value = '';
 	}
 
 	async function joinHousehold(householdId: number, id: number) {
@@ -243,9 +240,14 @@
 					`${kid.firstName}${kid.lastName ? ` ${kid.lastName}` : ''}`
 			)
 			.join(', ');
-		const objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
+		let objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
+		if (objectivePronoun === 'hers') objectivePronoun = objectivePronoun.slice(0, -1);
 		const msg = `${user.firstName} (parent of ${kidNames}) has invited you as a parent in ${objectivePronoun} household at playdate.help to simplify scheduling and social time. First, verify ${objectivePronoun} real phone number is ${user.phone} for safety. If it is valid, click https://playdate.help/home/${inviteesPhone} to join.`;
 
+		return msg;
+	}
+
+	function smsInviteEncoded(msg: string) {
 		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;
 	}
 </script>
@@ -258,7 +260,13 @@
 	<Modal showModal={showClickToTextLink}>
 		<h2 slot="header">Pre-filled SMS Invite</h2>
 
-		<p>Open a pre-filled SMS invite for the person you're inviting!</p>
+		<div style="display: flex; flex-direction: column; margin-bottom: 1rem;">
+			<p>
+				To invite someone to be a co-parent, you'll need to text them. We can pre-fill an SMS for
+				you with the following contents:
+			</p>
+			<p class="sms">{smsInvite(inviteesPhone)}</p>
+		</div>
 
 		<div slot="close" let:dialog>
 			<button
@@ -266,7 +274,8 @@
 					dialog.close();
 				}}
 			>
-				<a href={smsInvite(inviteesPhone)} style="color: white;"> Open pre-filled SMS </a>
+				<a href={smsInviteEncoded(smsInvite(inviteesPhone))} style="color: white;">Send a message</a
+				>
 			</button>
 		</div>
 	</Modal>
@@ -448,6 +457,17 @@
 </div>
 
 <style>
+	#modal-header {
+		font-size: 1.2rem;
+		margin-bottom: 0.5rem;
+		margin-top: 0px;
+	}
+	.sms {
+		background: #6ad36a;
+		color: white;
+		padding: 10px;
+		border-radius: 10px;
+	}
 	.subtitle-3 {
 		font-size: 15px;
 		margin: 2rem 0 0;
