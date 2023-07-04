@@ -228,7 +228,7 @@ This Privacy Policy and your use of the Service shall be governed by and constru
 
 Our Terms of Use and Privacy Policy may change from time to time. We will post any privacy policy changes on this page. We will also keep prior versions of this Privacy Policy in an archive for your review.
 
-By continuing to use the Service after those changes become effective, you agree to be bound by the revised Terms of Use and Privacy Policy. If such changes
+By continuing to use the Service after those changes become effective, you agree to be bound by the revised Terms of Use and Privacy Policy.
 
 ## 19. Your Acceptance
 
