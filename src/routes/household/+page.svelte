@@ -17,6 +17,7 @@
 	let { householdId, name, publicNotes, kids, adults } = $page.data.householdInfo;
 	let { householdInvites, user } = $page.data;
 	afterUpdate(() => {
+		user = $page.data.user;
 		householdId = $page.data.householdInfo.householdId;
 		kids = $page.data.householdInfo.kids;
 		adults = $page.data.householdInfo.adults;
@@ -66,11 +67,11 @@
 			publicNotes: publicNotes
 		});
 		if (response.status == 200) {
-			goto('/dashboard');
+			await invalidateAll();
 			if (!householdId) {
-				await invalidate('data:householdId');
 				schedTipMsg();
 			}
+			goto('/dashboard');
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -308,11 +309,9 @@
 					>
 
 					<h4 class="subtitle-3">Kids</h4>
-					<ul>
-						{#each householdInvites[0].household.children as kid}
-							<li style="font-size: 18px;">{kid.firstName} {kid.lastName}</li>
-						{/each}
-					</ul>
+					{#each householdInvites[0].household.children as kid}
+						<p style="font-size: 18px;">{kid.firstName} {kid.lastName}</p>
+					{/each}
 				</div>
 
 				<div slot="close" let:dialog>
@@ -457,11 +456,6 @@
 </div>
 
 <style>
-	#modal-header {
-		font-size: 1.2rem;
-		margin-bottom: 0.5rem;
-		margin-top: 0px;
-	}
 	.sms {
 		background: #6ad36a;
 		color: white;

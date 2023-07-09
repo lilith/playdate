@@ -3,7 +3,7 @@
 	import { PRONOUNS, LANGUAGES } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '../../utils';
 
@@ -104,6 +104,7 @@
 
 		if (response.status == 200) {
 			if ($page.data.user.household === null) {
+				await invalidateAll();
 				goto('/household');
 			}
 		} else {

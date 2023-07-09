@@ -36,7 +36,7 @@ export async function POST({ request }: { request: Request }) {
 			to: phone,
 			...(sendAt
 				? {
-						scheduleType: 'fixed',
+						scheduleType: 'fixed' as const,
 						sendAt,
 						from: private_env.TWILIO_MESSAGING_SERVICE_SID
 				  }

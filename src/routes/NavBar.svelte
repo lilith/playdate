@@ -30,7 +30,7 @@
 			{#if !path.includes('profile')}
 				<a href="/profile">Profile</a>
 			{/if}
-			{#if !path.includes('household') && user.householdId}
+			{#if !path.includes('household') && user.firstName}
 				<a href="/household">Household</a>
 			{/if}
 			{#if !path.includes('invites') && user.householdId}
