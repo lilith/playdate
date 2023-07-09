@@ -14,7 +14,7 @@
 		household: Household;
 	}[];
 	const {
-		overlaps: overlapDays,
+		overlaps: overlapMap,
 		households,
 		userDates,
 		circle,
@@ -40,7 +40,7 @@
 		};
 	};
 
-	const emptySchedule = Object.keys(userDates).length === 0;
+	const emptySchedule = Object.keys(userDatesArr).length === 0;
 	const noFriends = circle.length === 0;
 	const numNotices = [emptySchedule, noFriends].reduce(
 		(accumulator, currentValue) => accumulator + (currentValue ? 1 : 0),
@@ -56,7 +56,7 @@
 			<div class="notice" on:click={() => goto('/calendar')} on:keyup={() => goto('/calendar')}>
 				<p>Empty Schedule</p>
 				<p>Please mark your tentative availability.</p>
-				<p>Click <span class="underline">here</span> to go to your schedule editor.</p>
+				<p>Click <span class="link">here</span> to go to your schedule editor.</p>
 			</div>
 		{/if}
 
@@ -64,7 +64,7 @@
 			<div class="notice" on:click={() => goto('/circle')} on:keyup={() => goto('/circle')}>
 				<p>Find your friends</p>
 				<p>Be sure to invite your friends to set up play dates!</p>
-				<p>Click <span class="underline">here</span> to go to your Circle page.</p>
+				<p>Click <span class="link">here</span> to go to your Circle page.</p>
 			</div>
 		{/if}
 
@@ -75,9 +75,9 @@
 
 	<!-- planning on condensing range of contiguous days and hours overlapping into one summary -->
 	<p class="subtitle">Overlaps</p>
-	{#each Object.values(overlapDays) as overlapDay}
-		{#each overlapDay as overlap}
-			<p class="bold larger">{overlap.englishDay} {overlap.monthDay}</p>
+	{#each Object.entries(overlapMap) as [overlapDay, overlapArr]}
+		<p class="bold larger">{overlapDay}</p>
+		{#each overlapArr as overlap}
 			<div class="summary">
 				<a class="bold household" href="/household/{overlap.householdId}">
 					{households[overlap.householdId].name} (
@@ -117,37 +117,43 @@
 			</div>
 		{/each}
 	{/each}
-	{#if Object.keys(overlapDays).length === 0}
+	{#if Object.keys(overlapMap).length === 0}
 		<p class="default">No overlaps detected</p>
 	{/if}
 
-	<p class="subtitle">Your Schedule</p>
-	<p class="subtitle-2">Edit <a href="/calendar">here</a></p>
-	{#each userDatesArr as sched}
-		<div class="summary">
-			{#if sched.status === 'Busy'}
-				<p class="bold">{sched.availRange}</p>
-				<p class="bold">Busy</p>
-			{:else}
-				<p class="bold">
-					{'englishDay' in sched ? sched.englishDay : ''}
-					{'monthDay' in sched ? sched.monthDay : ''}
-				</p>
-				<p class="bold">{sched.availRange}</p>
-				<div class="tooltip">
-					<p>
-						{'emoticons' in sched ? sched.emoticons : 'N/A'}
-						<span class="tooltiptext">
-							<Legend />
-						</span>
-					</p>
-				</div>
-				{#if 'notes' in sched}
-					<p>{sched.notes}</p>
+	<p class="subtitle">
+		<a class="link" href="/calendar">Your Schedule</a>
+	</p>
+	<table class="schedule">
+		{#each userDatesArr as row}
+			<tr>
+				{#if row.status === 'Available'}
+					<td class="border-right">
+						<div class="flex">
+							{row.englishDay}
+							{row.monthDay}
+							{row.availRange}
+							<div class="tooltip w-fit">
+								<p>
+									{row.emoticons}
+									<span class="tooltiptext">
+										<Legend />
+									</span>
+								</p>
+							</div>
+						</div>
+						{#if row.notes}
+							{row.notes}
+						{/if}
+					</td>
+				{:else}
+					<td>
+						Busy {row.availRange}
+					</td>
 				{/if}
-			{/if}
-		</div>
-	{/each}
+			</tr>
+		{/each}
+	</table>
 	{#if userDatesArr.length === 0}
 		<p class="default">Empty for the next 21 days</p>
 	{/if}
@@ -164,28 +170,36 @@
 		{#if !scheds.length}
 			<p class="default">Empty for the next 21 days</p>
 		{/if}
-		{#each scheds as sched}
-			<div class="summary">
-				{#if sched.status === 'Busy'}
-					<p class="bold">{sched.availRange}</p>
-					<p class="bold">Busy</p>
-				{:else}
-					<p class="bold">
-						{'englishDay' in sched ? sched.englishDay : ''}
-						{'monthDay' in sched ? sched.monthDay : ''}
-					</p>
-					<p class="bold">{sched.availRange}</p>
-					<div class="tooltip">
-						<p>
-							{'emoticons' in sched ? sched.emoticons : ''}
-							<span class="tooltiptext">
-								<Legend />
-							</span>
-						</p>
-					</div>
-				{/if}
-			</div>
-		{/each}
+		<table class="schedule mb">
+			{#each scheds as row}
+				<tr>
+					{#if row.status === 'Available'}
+						<td class="border-right">
+							<div class="flex">
+								{row.englishDay}
+								{row.monthDay}
+								{row.availRange}
+								<div class="tooltip w-fit">
+									<p>
+										{row.emoticons}
+										<span class="tooltiptext">
+											<Legend />
+										</span>
+									</p>
+								</div>
+							</div>
+							{#if row.notes}
+								{row.notes}
+							{/if}
+						</td>
+					{:else}
+						<td>
+							Busy {row.availRange}
+						</td>
+					{/if}
+				</tr>
+			{/each}
+		</table>
 	{/each}
 	{#if Object.keys(circleDatesMap).length === 0}
 		<p class="default">Empty for the next 21 days</p>
@@ -193,15 +207,42 @@
 </div>
 
 <style>
-	.underline {
-		text-decoration: underline;
-		color: #4578ff;
+	.mb {
+		margin-bottom: 1rem;
 	}
-	.subtitle-2 {
-		font-weight: 400;
-		font-size: 20px;
-		line-height: 30px;
-		margin-bottom: 0.5rem;
+	.w-fit {
+		width: fit-content;
+	}
+	.flex {
+		display: flex;
+	}
+	.border-right {
+		border-right: 1px solid #dddddd;
+	}
+	table {
+		border-collapse: collapse;
+		border: 1px solid #dddddd;
+	}
+
+	.schedule {
+		width: 100%;
+	}
+	.schedule td {
+		padding: 0.4rem 0;
+		text-align: center;
+	}
+	.schedule td div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+	}
+	.schedule tr:nth-child(odd) {
+		background-color: #f2f2f2;
+	}
+	.link {
+		text-decoration: link;
+		color: #4578ff;
 	}
 	.default {
 		font-size: large;

@@ -132,6 +132,8 @@ const getFormattedAvailability = (
 
 				res.push({ ...payload, status: 'Available' });
 			}
+		} else {
+			lastIsBusy = false;
 		}
 	});
 
@@ -240,7 +242,7 @@ export const load = (async ({ parent }) => {
 		const yr = new Date().getFullYear();
 		Object.entries(userDates).map((x) => {
 			const [monthDay, details] = x;
-			const { startHr, startMin, endHr, endMin } = details[0];
+			const { startHr, startMin, endHr, endMin, englishDay } = details[0];
 			if (monthDay in circleDates) {
 				circleDates[monthDay].forEach((circleDateDetails) => {
 					const {
@@ -283,9 +285,9 @@ export const load = (async ({ parent }) => {
 						circleDateDetails.endMin = end.getMinutes();
 
 						if (monthDay in overlaps) {
-							overlaps[monthDay].push(circleDateDetails);
+							overlaps[`${englishDay} ${monthDay}`].push(circleDateDetails);
 						} else {
-							overlaps[monthDay] = [circleDateDetails];
+							overlaps[`${englishDay} ${monthDay}`] = [circleDateDetails];
 						}
 					}
 				});
