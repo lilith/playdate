@@ -216,13 +216,13 @@
 		<table id="schedule">
 			{#each rows as row, i}
 				<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
-					<td>
+					<td class:blue={shownRows.has(i)} class="left">
 						{row.englishDay}
 					</td>
-					<td>
+					<td class:blue={shownRows.has(i)} class="left">
 						{row.monthDay}
 					</td>
-					<td>
+					<td class="left">
 						{row.availRange}
 					</td>
 					{#if row.availRange === 'Unspecified'}
@@ -281,25 +281,6 @@
 				{#if shownRows.has(i)}
 					<tr style="background: #A0E3FF">
 						<td colspan="5" style="padding: 0.4rem;">
-							<div style="position: relative; margin: 0.8rem 1rem;">
-								<div style="margin-bottom: 0.5rem; font-size: large; font-weight: 600;">
-									{row.englishDay}
-									{row.monthDay}
-								</div>
-								<div
-									class="close-btn"
-									on:click={() => {
-										shownRows.delete(i);
-										shownRows = new Set(shownRows);
-									}}
-									on:keyup={() => {
-										shownRows.delete(i);
-										shownRows = new Set(shownRows);
-									}}
-								>
-									X
-								</div>
-							</div>
 							<form on:submit|preventDefault={() => markAs(i, AvailabilityStatus.AVAILABLE)}>
 								<div class="v-center-h-space">
 									<label class="thin-label" for="start-hr">Start</label>
@@ -350,18 +331,34 @@
 										</p>
 									</div>
 								</div>
-								<div class="v-center-h-space" style="gap: 0.5rem;">
+								<div class="v-center-h-space">
 									<textarea
 										bind:value={row.notes}
 										style="font-size: inherit;"
 										name="notes"
 										placeholder="(add notes)"
 									/>
+								</div>
+								<div class="editor-btns">
 									<Button
 										onClick={() => {}}
-										content={'✓'}
-										bgColor={'#73A4EB'}
-										padding="0.1rem 0.5rem"
+										content={'Save'}
+										bgColor={'#93FF8B'}
+										padding="0.1rem 0.7rem"
+										color={'black'}
+										fontSize={'larger'}
+									/>
+									<Button
+										onClick={(e) => {
+											e?.preventDefault();
+											shownRows.delete(i);
+											shownRows = new Set(shownRows);
+										}}
+										content={'Cancel'}
+										bgColor={'rgba(255, 233, 184, 0.78)'}
+										padding="0.1rem 0.7rem"
+										color={'black'}
+										fontSize={'larger'}
 									/>
 								</div>
 							</form>
@@ -398,6 +395,19 @@
 </div>
 
 <style>
+	#schedule .left {
+		text-align: left;
+		padding-left: 0.3rem;
+	}
+	.editor-btns {
+		gap: 0.5rem;
+		display: flex;
+		justify-content: center;
+		margin: 1rem auto 0.5rem;
+	}
+	.blue {
+		background: #a0e3ff;
+	}
 	.notif-btn {
 		padding: 0.2rem 1rem;
 		border-radius: 17px;
@@ -415,12 +425,6 @@
 		padding: 0.7rem 0.5rem;
 		border-radius: 6px;
 		background: white;
-	}
-	.close-btn {
-		position: absolute;
-		right: 0;
-		top: 0;
-		font-size: large;
 	}
 	.emoji.chosen {
 		border: 1px solid black;
@@ -461,7 +465,7 @@
 		width: 100%;
 	}
 	#schedule td {
-		padding: 0.4rem 0;
+		padding: 0.4rem 0rem;
 		text-align: center;
 		border-right: 1px solid #dddddd;
 	}

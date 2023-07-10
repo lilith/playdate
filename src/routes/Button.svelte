@@ -5,9 +5,10 @@
 	export let color = 'white';
 	export let margin = '';
 	export let padding = '0.4rem 2.8rem';
-	$: cssVarStyles = `--bg:${bgColor};--color:${color};--margin:${margin};--padding:${padding}`;
+	export let fontSize = 'x-large';
+	$: cssVarStyles = `--bg:${bgColor};--color:${color};--margin:${margin};--padding:${padding};--font-size:${fontSize}`;
 
-	export let onClick: () => void;
+	export let onClick: (e?: Event) => void;
 </script>
 
 <button
@@ -25,6 +26,6 @@
 		margin: var(--margin);
 
 		padding: var(--padding);
-		font-size: x-large;
+		font-size: var(--font-size);
 	}
 </style>
