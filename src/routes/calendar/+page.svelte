@@ -195,8 +195,10 @@
 		if (response.status == 200) {
 			await invalidate('data:calendar');
 			getSchedDiff();
+			return 'ok';
 		} else {
 			alert('Something went wrong with saving');
+			return 'err';
 		}
 	}
 
@@ -216,14 +218,57 @@
 		<table id="schedule">
 			{#each rows as row, i}
 				<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
-					<td class:blue={shownRows.has(i)} class="left">
+					<td
+						class:blue={shownRows.has(i)}
+						class="left"
+						on:click={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+						on:keyup={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+					>
 						{row.englishDay}
 					</td>
-					<td class:blue={shownRows.has(i)} class="left">
+					<td
+						class:blue={shownRows.has(i)}
+						class="left"
+						on:click={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+						on:keyup={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+					>
 						{row.monthDay}
 					</td>
-					<td class="left">
-						{row.availRange}
+					<td
+						colspan="2"
+						on:click={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+						on:keyup={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+					>
+						<p>{row.availRange}</p>
+						{#key row.emoticons}
+							<p>
+								{#each Array.from(row.emoticons) as emojiStr}
+									{EMOTICONS_REVERSE[emojiStr]}
+								{/each}
+							</p>
+						{/key}
+						{#if row.notes}
+							<p>{row.notes}</p>
+						{/if}
+						<p class="edit">EDIT</p>
 					</td>
 					{#if row.availRange === 'Unspecified'}
 						<td
@@ -233,22 +278,8 @@
 						>
 							Mark Busy
 						</td>
-						<td
-							class="edit"
-							on:click={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-							on:keyup={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-						>
-							Edit
-						</td>
 					{:else if row.availRange === 'Busy'}
 						<td
-							colspan="2"
 							class="clear"
 							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
 							on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
@@ -256,19 +287,6 @@
 							Clear
 						</td>
 					{:else}
-						<td
-							class="edit"
-							on:click={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-							on:keyup={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-						>
-							Edit
-						</td>
 						<td
 							class="clear"
 							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
@@ -281,7 +299,7 @@
 				{#if shownRows.has(i)}
 					<tr style="background: #A0E3FF">
 						<td colspan="5" style="padding: 0.4rem;">
-							<form on:submit|preventDefault={() => markAs(i, AvailabilityStatus.AVAILABLE)}>
+							<form on:submit|preventDefault={() => {}}>
 								<div class="v-center-h-space">
 									<label class="thin-label" for="start-hr">Start</label>
 									<div>
@@ -341,7 +359,14 @@
 								</div>
 								<div class="editor-btns">
 									<Button
-										onClick={() => {}}
+										onClick={async () => {
+											const res = await markAs(i, AvailabilityStatus.AVAILABLE);
+											if (res === 'ok') {
+												shownRows.delete(i);
+												shownRows = new Set(shownRows);
+											}
+										}}
+										btnType={'submit'}
 										content={'Save'}
 										bgColor={'#93FF8B'}
 										padding="0.1rem 0.7rem"
@@ -455,6 +480,7 @@
 	.edit,
 	.clear {
 		text-decoration: underline;
+		font-weight: 600;
 	}
 	table {
 		border-collapse: collapse;

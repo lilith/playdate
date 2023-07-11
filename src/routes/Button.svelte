@@ -6,6 +6,7 @@
 	export let margin = '';
 	export let padding = '0.4rem 2.8rem';
 	export let fontSize = 'x-large';
+	export let btnType: 'button' | 'submit' | 'reset' | null | undefined = 'button';
 	$: cssVarStyles = `--bg:${bgColor};--color:${color};--margin:${margin};--padding:${padding};--font-size:${fontSize}`;
 
 	export let onClick: (e?: Event) => void;
@@ -15,6 +16,7 @@
 	class="pretty-btn cursor-pointer rounded-md border-none"
 	style={cssVarStyles}
 	on:click={onClick}
+	type={btnType}
 >
 	{content}
 </button>
