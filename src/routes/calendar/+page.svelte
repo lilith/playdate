@@ -51,7 +51,7 @@
 			const date = new Date(new Date().setDate(now.getDate() + x));
 			const englishDay = DAYS[date.getDay()];
 			const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
-			let availRange = 'Unspecified'; // one of 'BUSY', 'Unspecified', and some time range
+			let availRange; // one of 'BUSY', 'Unspecified', and some time range
 			let notes;
 			let startHr;
 			let startMin;
@@ -96,10 +96,11 @@
 		availabilityDates = $page.data.availabilityDates;
 		rows.forEach((x, i) => {
 			const { monthDay } = x;
-			let availRange = 'Unspecified'; // one of 'BUSY', 'Unspecified', and some time range
-
+			let availRange; // one of 'BUSY', 'Unspecified', and some time range
 			if (availabilityDates && monthDay in availabilityDates) {
 				availRange = availabilityDates[monthDay].availRange;
+			} else {
+				availRange = rows[i].availRange;
 			}
 			rows[i] = {
 				...rows[i],
@@ -109,6 +110,7 @@
 	});
 
 	let shownRows = new Set();
+	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
 	function getSchedDiff() {
 		const diffs: string[] = [];
@@ -119,7 +121,7 @@
 			if (newRow.availRange !== ogRow.availRange) {
 				let diff;
 				const busy = newRow.availRange === 'Busy';
-				const unspecified = newRow.availRange === 'Unspecified';
+				const unspecified = newRow.availRange === undefined;
 				if (busy || unspecified) diff = `${newRow.availRange} ${newRow.monthDay}`;
 				else diff = `${newRow.englishDay} ${newRow.monthDay} ${newRow.availRange}`;
 
@@ -158,22 +160,74 @@
 		});
 		schedDiffs = diffs;
 	}
+
+	function getAvailRange(i: number, status: string) {
+		if (status === AvailabilityStatus.UNSPECIFIED) return {};
+		// validator and formatter
+		const regexpRange =
+			/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm)?\s*/i;
+		const t = rows[i].availRange.match(regexpRange)?.groups;
+		if (!t) {
+			return {};
+		}
+		let { fromhalf, tohalf } = t;
+		let fromhr = parseInt(t.fromhr);
+		let tohr = parseInt(t.tohr);
+		let frommin = t.frommin ? parseInt(t.frommin) : 0;
+		let tomin = t.tomin ? parseInt(t.tomin) : 0;
+
+		if (!fromhr || fromhr > 12 || !tohr || tohr > 12 || frommin >= 60 || tomin >= 60) {
+			return {};
+		}
+
+		/**
+		When neither start nor stop time specifies am/pm:
+			We’ll assume that kids generally do afternoons together, and that start times will be before 7pm. 
+			If the start value is < 7, assume pm. If start value >= 7, assume am.
+		When only start time specifies am/pm, and stop value > start value, copy start time (am/pm), otherwise use opposite (am/pm)
+		When only stop time specifies am/pm, and start value < stop value, copy stop time (am/pm), otherwise use opposite
+		*/
+		if (!fromhalf && !tohalf) {
+			if (fromhr < 7) {
+				fromhalf = 'pm';
+			} else {
+				fromhalf = 'am';
+			}
+			tohalf = 'pm';
+		} else if (fromhalf) {
+			if (tohr * 100 + tomin > fromhr * 100 + frommin) tohalf = fromhalf;
+			else tohalf = fromhalf === 'am' ? 'pm' : 'am';
+		} else {
+			if (tohr * 100 + tomin > fromhr * 100 + frommin) fromhalf = tohalf;
+			else fromhalf = tohalf === 'am' ? 'pm' : 'am';
+		}
+		return {
+			startHr: fromhalf === 'pm' ? fromhr + 12 : fromhr,
+			startMin: frommin,
+			endHr: tohalf === 'pm' ? tohr + 12 : tohr,
+			endMin: tomin
+		};
+		// return `${fromhr}${frommin ? `:${frommin < 10 ? `0${frommin}` : frommin}` : ''}${fromhalf}-${tohr}${tomin ? `:${tomin < 10 ? `0${tomin}` : tomin}` : ''}${tohalf}`;
+	}
 	async function markAs(i: number, status: string) {
+		const availRange = getAvailRange(i, status);
+		const { startHr, startMin, endHr, endMin } = availRange;
 		if (status === AvailabilityStatus.UNSPECIFIED) {
 			rows[i].notes = '';
 			rows[i].emoticons = new Set();
-			rows[i].startHr = undefined;
-			rows[i].startMin = undefined;
-			rows[i].endHr = undefined;
-			rows[i].endMin = undefined;
 		} else if (status === AvailabilityStatus.AVAILABLE) {
+			if (Object.keys(availRange).length === 0) {
+				timeErrs.add(i);
+				timeErrs = new Set(timeErrs);
+				return;
+			}
 			// check whether the end time is greater than the start time
 			const tempStart = new Date();
 			const tempEnd = new Date(tempStart);
-			tempStart.setHours(rows[i].startHr ?? 0);
-			tempStart.setMinutes(rows[i].startMin ?? 0);
-			tempEnd.setHours(rows[i].endHr ?? 0);
-			tempEnd.setMinutes(rows[i].endMin ?? 0);
+			tempStart.setHours(startHr ?? 0);
+			tempStart.setMinutes(startMin ?? 0);
+			tempEnd.setHours(endHr ?? 0);
+			tempEnd.setMinutes(endMin ?? 0);
 
 			if (tempEnd.getTime() - tempStart.getTime() <= 0) {
 				alert('Please ensure that the difference in time is positive.');
@@ -187,16 +241,18 @@
 			notes: rows[i].notes,
 			emoticons: Array.from(rows[i].emoticons).join(','),
 			householdId: user.householdId,
-			startHr: rows[i].startHr,
-			startMin: rows[i].startMin,
-			endHr: rows[i].endHr,
-			endMin: rows[i].endMin
+			startHr,
+			startMin,
+			endHr,
+			endMin
 		});
 		if (response.status == 200) {
 			await invalidate('data:calendar');
 			getSchedDiff();
+			return 'ok';
 		} else {
 			alert('Something went wrong with saving');
+			return 'err';
 		}
 	}
 
@@ -216,16 +272,57 @@
 		<table id="schedule">
 			{#each rows as row, i}
 				<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
-					<td>
+					<td
+						class:blue={shownRows.has(i)}
+						class="left"
+						on:click={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+						on:keyup={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+					>
 						{row.englishDay}
 					</td>
-					<td>
+					<td
+						class:blue={shownRows.has(i)}
+						class="left"
+						on:click={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+						on:keyup={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+					>
 						{row.monthDay}
 					</td>
-					<td>
-						{row.availRange}
+					<td
+						colspan="2"
+						on:click={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+						on:keyup={() => {
+							shownRows.add(i);
+							shownRows = new Set(shownRows);
+						}}
+					>
+						<p>{row.availRange ? row.availRange : 'Unspecified'}</p>
+						<p>
+							{#each Array.from(row.emoticons) as emojiStr}
+								{EMOTICONS_REVERSE[emojiStr]}
+							{/each}
+						</p>
+						{#if row.notes}
+							<p>{row.notes}</p>
+						{/if}
+						<p class="edit">EDIT</p>
 					</td>
-					{#if row.availRange === 'Unspecified'}
+					{#if row.availRange === undefined}
 						<td
 							on:click={() => markAs(i, AvailabilityStatus.BUSY)}
 							on:keyup={() => markAs(i, AvailabilityStatus.BUSY)}
@@ -233,22 +330,8 @@
 						>
 							Mark Busy
 						</td>
-						<td
-							class="edit"
-							on:click={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-							on:keyup={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-						>
-							Edit
-						</td>
 					{:else if row.availRange === 'Busy'}
 						<td
-							colspan="2"
 							class="clear"
 							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
 							on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
@@ -256,19 +339,6 @@
 							Clear
 						</td>
 					{:else}
-						<td
-							class="edit"
-							on:click={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-							on:keyup={() => {
-								shownRows.add(i);
-								shownRows = new Set(shownRows);
-							}}
-						>
-							Edit
-						</td>
 						<td
 							class="clear"
 							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
@@ -280,54 +350,22 @@
 				</tr>
 				{#if shownRows.has(i)}
 					<tr style="background: #A0E3FF">
-						<td colspan="5" style="padding: 0.4rem;">
-							<div style="position: relative; margin: 0.8rem 1rem;">
-								<div style="margin-bottom: 0.5rem; font-size: large; font-weight: 600;">
-									{row.englishDay}
-									{row.monthDay}
-								</div>
-								<div
-									class="close-btn"
-									on:click={() => {
-										shownRows.delete(i);
-										shownRows = new Set(shownRows);
-									}}
-									on:keyup={() => {
-										shownRows.delete(i);
-										shownRows = new Set(shownRows);
-									}}
-								>
-									X
-								</div>
-							</div>
-							<form on:submit|preventDefault={() => markAs(i, AvailabilityStatus.AVAILABLE)}>
-								<div class="v-center-h-space">
-									<label class="thin-label" for="start-hr">Start</label>
-									<div>
-										<select name="start-hr" bind:value={row.startHr}>
-											{#each [...Array(24).keys()] as hr}
-												<option value={hr}>{hr}</option>
-											{/each}
-										</select>:
-										<select name="start-min" bind:value={row.startMin}>
-											{#each [...Array(60).keys()] as min}
-												<option value={min}>{min < 10 ? `0${min}` : min}</option>
-											{/each}
-										</select>
-									</div>
-									<label class="thin-label" for="end-hr">End</label>
-									<div>
-										<select name="end-hr" bind:value={row.endHr}>
-											{#each [...Array(24).keys()] as hr}
-												<option value={hr}>{hr}</option>
-											{/each}
-										</select>:
-										<select name="end-min" bind:value={row.endMin}>
-											{#each [...Array(60).keys()] as min}
-												<option value={min}>{min < 10 ? `0${min}` : min}</option>
-											{/each}
-										</select>
-									</div>
+						<td colspan="5" style="padding: 0.9rem 0.4rem;">
+							<form on:submit|preventDefault={() => {}}>
+								<div class="v-center-h-space flex-col" style="gap: 0.1rem;">
+									<!-- prettier-ignore -->
+									<textarea
+										class="text-inherit"
+										placeholder='Enter a valid time range. Ex. "2:30pm-7 or 5-6"'
+										bind:value={row.availRange}
+										on:keydown={() => {
+											timeErrs.delete(i);
+											timeErrs = new Set(timeErrs);
+										}}
+									/>
+									{#if timeErrs.has(i)}
+										<p class="red">Enter a valid time range. Ex. "2:30pm-7 or 5-6"</p>
+									{/if}
 								</div>
 								<div class="v-center-h-space">
 									{#key row.emoticons}
@@ -350,18 +388,41 @@
 										</p>
 									</div>
 								</div>
-								<div class="v-center-h-space" style="gap: 0.5rem;">
+								<div class="v-center-h-space">
 									<textarea
 										bind:value={row.notes}
-										style="font-size: inherit;"
+										class="text-inherit"
 										name="notes"
 										placeholder="(add notes)"
 									/>
+								</div>
+								<div class="editor-btns">
 									<Button
-										onClick={() => {}}
-										content={'✓'}
-										bgColor={'#73A4EB'}
-										padding="0.1rem 0.5rem"
+										onClick={async () => {
+											const res = await markAs(i, AvailabilityStatus.AVAILABLE);
+											if (res === 'ok') {
+												shownRows.delete(i);
+												shownRows = new Set(shownRows);
+											}
+										}}
+										disabled={timeErrs.has(i)}
+										content={'Save'}
+										bgColor={'#93FF8B'}
+										padding="0.1rem 0.7rem"
+										color={'black'}
+										fontSize={'larger'}
+									/>
+									<Button
+										onClick={(e) => {
+											e?.preventDefault();
+											shownRows.delete(i);
+											shownRows = new Set(shownRows);
+										}}
+										content={'Cancel'}
+										bgColor={'rgba(255, 233, 184, 0.78)'}
+										padding="0.1rem 0.7rem"
+										color={'black'}
+										fontSize={'larger'}
 									/>
 								</div>
 							</form>
@@ -398,6 +459,25 @@
 </div>
 
 <style>
+	.red {
+		color: #bd0000;
+	}
+	.text-inherit {
+		font-size: inherit;
+	}
+	#schedule .left {
+		text-align: left;
+		padding-left: 0.3rem;
+	}
+	.editor-btns {
+		gap: 0.5rem;
+		display: flex;
+		justify-content: center;
+		margin: 1rem auto 0;
+	}
+	.blue {
+		background: #a0e3ff;
+	}
 	.notif-btn {
 		padding: 0.2rem 1rem;
 		border-radius: 17px;
@@ -416,12 +496,6 @@
 		border-radius: 6px;
 		background: white;
 	}
-	.close-btn {
-		position: absolute;
-		right: 0;
-		top: 0;
-		font-size: large;
-	}
 	.emoji.chosen {
 		border: 1px solid black;
 	}
@@ -434,23 +508,17 @@
 		align-items: center;
 		justify-content: space-between;
 	}
-	label {
-		font-size: large;
+	.flex-col {
+		flex-direction: column;
 	}
 	.tooltip {
 		width: fit-content;
-	}
-	select {
-		margin: 0 0.1rem 0 0;
-		width: fit-content;
-		height: fit-content;
-		font-size: inherit;
-		padding: 0.3rem 3px;
 	}
 	.busy,
 	.edit,
 	.clear {
 		text-decoration: underline;
+		font-weight: 600;
 	}
 	table {
 		border-collapse: collapse;
@@ -461,7 +529,7 @@
 		width: 100%;
 	}
 	#schedule td {
-		padding: 0.4rem 0;
+		padding: 0.4rem 0rem;
 		text-align: center;
 		border-right: 1px solid #dddddd;
 	}
