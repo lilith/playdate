@@ -32,7 +32,7 @@ export const load = (async ({ parent, depends }) => {
 					availRange = 'Busy';
 					break;
 				case 'UNSPECIFIED':
-					availRange = 'Unspecified';
+					availRange = '';
 					break;
 				default: {
 					availRange = 'AVAILABLE'; // should never actually be rendered as such
