@@ -1,6 +1,6 @@
 import { json, redirect, error } from '@sveltejs/kit';
 
-import { type AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
+import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -240,6 +240,17 @@ async function saveSchedule(req: {
 	endTime.setHours(endHr);
 	endTime.setMinutes(endMin);
 
+	if (status === AvailabilityStatus.UNSPECIFIED) {
+		await prisma.availabilityDate.delete({
+			where: {
+				householdId_date: {
+					householdId,
+					date
+				}
+			}
+		});
+		return;
+	}
 	// if an entry for this date already exists in the db, then patch it
 	// otherwise create it
 	await prisma.availabilityDate.upsert({

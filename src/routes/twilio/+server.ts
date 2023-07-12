@@ -41,8 +41,13 @@ export async function POST({ request }: { request: Request }) {
 						from: private_env.TWILIO_MESSAGING_SERVICE_SID
 				  }
 				: {
-						from: private_env.TWILIO_PHONE_NUMBER || '+15005550006',
-						messagingServiceSid: private_env.TWILIO_MESSAGING_SERVICE_SID
+						from:
+							import.meta.env.DEV || !private_env.TWILIO_PHONE_NUMBER
+								? '+15005550006'
+								: private_env.TWILIO_PHONE_NUMBER,
+						messagingServiceSid: import.meta.env.DEV
+							? undefined
+							: private_env.TWILIO_MESSAGING_SERVICE_SID
 				  })
 		};
 
