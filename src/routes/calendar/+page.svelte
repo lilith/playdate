@@ -3,12 +3,12 @@
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
 	import { invalidate } from '$app/navigation';
-	import { afterUpdate, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '../../utils';
 
-	let { availabilityDates, user, kidNames, AvailabilityStatus } = $page.data;
+	let { availabilityDates, user, kidNames, AvailabilityStatus, circleInfo } = $page.data;
 
 	let rows: {
 		englishDay: string;
@@ -92,22 +92,6 @@
 		});
 		ogRows = [...rows];
 	});
-	afterUpdate(() => {
-		availabilityDates = $page.data.availabilityDates;
-		rows.forEach((x, i) => {
-			const { monthDay } = x;
-			let availRange; // one of 'BUSY', 'Unspecified', and some time range
-			if (availabilityDates && monthDay in availabilityDates) {
-				availRange = availabilityDates[monthDay].availRange;
-			} else {
-				availRange = rows[i].availRange;
-			}
-			rows[i] = {
-				...rows[i],
-				availRange
-			};
-		});
-	});
 
 	let shownRows = new Set();
 	let timeErrs = new Set();
@@ -122,7 +106,8 @@
 				let diff;
 				const busy = newRow.availRange === 'Busy';
 				const unspecified = newRow.availRange === undefined;
-				if (busy || unspecified) diff = `${newRow.availRange} ${newRow.monthDay}`;
+				if (busy) diff = `${newRow.availRange} ${newRow.monthDay}`;
+				else if (unspecified) diff = `Unspecified ${newRow.monthDay}`;
 				else diff = `${newRow.englishDay} ${newRow.monthDay} ${newRow.availRange}`;
 
 				if (newRow.emoticons.size) {
@@ -162,7 +147,7 @@
 	}
 
 	function getAvailRange(i: number, status: string) {
-		if (status === AvailabilityStatus.UNSPECIFIED) return {};
+		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
 		// validator and formatter
 		const regexpRange =
 			/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm)?\s*/i;
@@ -212,7 +197,7 @@
 	async function markAs(i: number, status: string) {
 		const availRange = getAvailRange(i, status);
 		const { startHr, startMin, endHr, endMin } = availRange;
-		if (status === AvailabilityStatus.UNSPECIFIED) {
+		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) {
 			rows[i].notes = '';
 			rows[i].emoticons = new Set();
 		} else if (status === AvailabilityStatus.AVAILABLE) {
@@ -248,6 +233,18 @@
 		});
 		if (response.status == 200) {
 			await invalidate('data:calendar');
+			availabilityDates = $page.data.availabilityDates;
+			rows.forEach((x, i) => {
+				const { monthDay } = x;
+				let availRange; // one of 'BUSY', 'Unspecified', and some time range
+				if (availabilityDates && monthDay in availabilityDates) {
+					availRange = availabilityDates[monthDay].availRange;
+				}
+				rows[i] = {
+					...rows[i],
+					availRange
+				};
+			});
 			getSchedDiff();
 			return 'ok';
 		} else {
@@ -263,6 +260,41 @@
 			rows[i].emoticons.add(emoticon);
 		}
 		rows[i].emoticons = new Set(rows[i].emoticons);
+	}
+
+	let notified = new Set();
+	function sms() {
+		let objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
+		if (objectivePronoun === 'hers') objectivePronoun = objectivePronoun.slice(0, -1);
+		const msg = `${user.firstName}${
+			user.lastName && user.lastName.length ? ` ${user.lastName}` : ''
+		} (parent of ${kidNames}) has updated ${
+			PRONOUNS[user.pronouns].split(',')[1]
+		} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)\n\n${schedDiffs.join(
+			'\n'
+		)}`;
+		return msg;
+	}
+	type Parent = {
+		phone: string;
+		phonePermissions: { allowReminders: boolean };
+	};
+	async function notify(p: Parent) {
+		const { phone, phonePermissions } = p;
+		const { allowReminders } = phonePermissions;
+		if (allowReminders) {
+			await writeReq('/twilio', {
+				msg: sms(),
+				phone
+			});
+			notified.add(phone);
+			notified = new Set(notified);
+		}
+	}
+	function notifyAll() {
+		circleInfo.forEach((c: { parents: Parent[] }) => {
+			c.parents.forEach((p: Parent) => notify(p));
+		});
 	}
 </script>
 
@@ -311,7 +343,7 @@
 							shownRows = new Set(shownRows);
 						}}
 					>
-						<p>{row.availRange ? row.availRange : 'Unspecified'}</p>
+						<p>{row.availRange ?? 'Unspecified'}</p>
 						<p>
 							{#each Array.from(row.emoticons) as emojiStr}
 								{EMOTICONS_REVERSE[emojiStr]}
@@ -322,7 +354,7 @@
 						{/if}
 						<p class="edit">EDIT</p>
 					</td>
-					{#if row.availRange === undefined}
+					{#if !row.availRange}
 						<td
 							on:click={() => markAs(i, AvailabilityStatus.BUSY)}
 							on:keyup={() => markAs(i, AvailabilityStatus.BUSY)}
@@ -447,11 +479,28 @@
 					{/each}
 				</div>
 
+				<button class="notif-btn" style="margin: 1rem;" on:click={notifyAll}>Notify All</button>
 				<table id="notif-table">
-					<tr style="display: flex; justify-content: flex-end;">
-						<!-- TODO: make this functional and do a #each on all circle members user can notify -->
-						<td colspan="2"><button class="notif-btn">Notify All</button></td>
-					</tr>
+					{#each circleInfo as c}
+						{#each c.parents as p}
+							<tr>
+								<td>
+									{c.name}
+								</td>
+								<td>
+									{#if notified.has(p.phone)}
+										<p>Notified!</p>
+									{:else}
+										<button class="notif-btn" on:click={() => notify(p)}
+											>Notify <span class:strike={!p.phonePermissions.allowReminders}
+												>{p.firstName} {p.lastName}</span
+											></button
+										>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					{/each}
 				</table>
 			{/if}
 		{/key}
@@ -459,6 +508,9 @@
 </div>
 
 <style>
+	.strike {
+		text-decoration: line-through;
+	}
 	.red {
 		color: #bd0000;
 	}
@@ -546,6 +598,9 @@
 	}
 	#notif-table tr {
 		margin: 0.5rem;
+	}
+	#notif-table td {
+		padding: 0.4rem 0;
 	}
 	.tooltiptext {
 		left: 0;

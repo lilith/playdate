@@ -17,6 +17,37 @@ export const load = (async ({ parent, depends }) => {
 	//          AVAILABILITY, // BUSY / UNSPECIFIED / TIME RANGE + EMOTICONS
 	//          NOTES,
 	//      }
+	let circleInfo: {
+		connectionId: number;
+		id: number;
+		name: string;
+		parents: {
+			firstName: string;
+			lastName: string | null;
+			phone: string;
+			phonePermissions: {
+				allowReminders: boolean;
+			};
+		}[];
+	}[] = [];
+	const clause = {
+		select: {
+			id: true,
+			name: true,
+			parents: {
+				select: {
+					firstName: true,
+					lastName: true,
+					phone: true,
+					phonePermissions: {
+						select: {
+							allowReminders: true
+						}
+					}
+				}
+			}
+		}
+	};
 	if (householdId) {
 		const rawAvailabilityDates = await prisma.availabilityDate.findMany({
 			where: {
@@ -58,8 +89,6 @@ export const load = (async ({ parent, depends }) => {
 			};
 		});
 
-		console.log(availabilityDates);
-
 		const kids = await prisma.householdChild.findMany({
 			where: {
 				householdId
@@ -73,10 +102,47 @@ export const load = (async ({ parent, depends }) => {
 			})
 			.join(' and ');
 
+		const circle = await prisma.householdConnection.findMany({
+			where: {
+				OR: [
+					{
+						householdId
+					},
+					{
+						friendHouseholdId: householdId
+					}
+				]
+			},
+			select: {
+				id: true,
+				friendHouseholdId: true,
+				friendHousehold: clause,
+				household: clause
+			}
+		});
+
+		circleInfo = circle.map((x) => {
+			if (householdId === x.friendHousehold.id) {
+				return {
+					connectionId: x.id,
+					id: x.household.id,
+					name: x.household.name,
+					parents: x.household.parents
+				};
+			}
+			return {
+				connectionId: x.id,
+				id: x.friendHouseholdId,
+				name: x.friendHousehold.name,
+				parents: x.friendHousehold.parents
+			};
+		});
+
 		return {
 			AvailabilityStatus,
 			availabilityDates,
-			kidNames
+			kidNames,
+			circleInfo
 		};
 	}
 }) satisfies PageServerLoad;
