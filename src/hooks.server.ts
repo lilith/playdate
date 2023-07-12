@@ -98,7 +98,8 @@ export const handle = (async ({ event, resolve }) => {
 		event.url.pathname !== '/' &&
 		!event.url.pathname.startsWith('/home/') &&
 		!event.url.pathname.startsWith('/legal/') &&
-		event.url.pathname.slice(0, 6) !== '/login'
+		event.url.pathname.slice(0, 6) !== '/login' &&
+		event.url.pathname !== '/reminder'
 	) {
 		if (!cookie) throw redirect(303, '/');
 		const session = await prisma.session.findUnique({

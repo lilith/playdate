@@ -33,6 +33,11 @@
 			phone: phoneInput.getNumber()
 		});
 	}
+
+	async function startCronJob() {
+		const res = await writeReq('/reminder', {});
+		console.log(res.status)
+	}
 </script>
 
 <svelte:head>
@@ -58,6 +63,7 @@
 	<div id="main">
 		<div class="inner" style="padding:0">
 			<section id="home-section">
+				<button on:click={startCronJob} style="color: white;">Start Cron Job</button>
 				<div id="container04" class="style1 container default full">
 					<div class="wrapper">
 						<div class="inner" data-onvisible-trigger="1">
