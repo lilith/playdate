@@ -44,7 +44,9 @@
 			hour: '2-digit',
 			weekday: 'long'
 		});
-		const formattedDate = formatter.formatToParts(new Date());
+		const nextNotifTime = new Date();
+		nextNotifTime.setHours(nextNotifTime.getHours() + 1); // set for one hr after now
+		const formattedDate = formatter.formatToParts(nextNotifTime);
 		notifStartDay =
 			WEEKDAYS[formattedDate[formattedDate.findIndex((x) => x.type === 'weekday')].value];
 		notifHr = parseInt(formattedDate[formattedDate.findIndex((x) => x.type === 'hour')].value);

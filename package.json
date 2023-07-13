@@ -57,7 +57,6 @@
 		"@prisma/client": "^4.15.0",
 		"jsonwebtoken": "^9.0.0",
 		"marked": "^5.1.0",
-		"moment": "^2.29.4",
 		"node-cron": "^3.0.2",
 		"twilio": "^4.11.1"
 	}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { env as public_env } from '$env/dynamic/public';
 	import { writeReq } from '../utils';
 	import { onMount } from 'svelte';
 	import intlTelInput from 'intl-tel-input';
@@ -29,14 +30,22 @@
 			return;
 		}
 
-		const response = await writeReq('/login', {
-			phone: phoneInput.getNumber()
+		const phone = phoneInput.getNumber();
+		const res = await writeReq('/login', {
+			phone
 		});
-	}
+		if (res.status === 200) {
+			const { time, token } = await res.json();
 
-	async function startCronJob() {
-		const res = await writeReq('/reminder', {});
-		console.log(res.status)
+			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.location;
+
+			await writeReq('/twilio', {
+				msg: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
+					1
+				)}/${token}`,
+				phone
+			});
+		}
 	}
 </script>
 
@@ -63,7 +72,6 @@
 	<div id="main">
 		<div class="inner" style="padding:0">
 			<section id="home-section">
-				<button on:click={startCronJob} style="color: white;">Start Cron Job</button>
 				<div id="container04" class="style1 container default full">
 					<div class="wrapper">
 						<div class="inner" data-onvisible-trigger="1">

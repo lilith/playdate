@@ -1,4 +1,5 @@
 import { env as private_env } from '$env/dynamic/private';
+import { env as public_env } from '$env/dynamic/public';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 
@@ -67,5 +68,13 @@ export async function POST({ request }: { request: Request }) {
 		);
 	}
 
-	return json(message);
+	// It's a security issue to share the auth link with the client. Don't do this if
+	// import.meta.env.PROD OR public_env.PUBLIC_URL are set
+	if (import.meta.env.DEV && !public_env.PUBLIC_URL) {
+		return json(message);
+	} else {
+		return new Response(null, {
+			status: 200
+		});
+	}
 }
