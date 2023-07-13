@@ -4,7 +4,6 @@ export const formatMin = (min: number) => {
 };
 
 export const writeReq = (path: string, body: { [key: string]: any }, method = 'POST') => {
-	console.log(path, body, method);
 	return fetch(path, {
 		method,
 		headers: {
