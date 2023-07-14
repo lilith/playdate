@@ -77,3 +77,7 @@ export async function POST({ request }: { request: Request }) {
 		});
 	}
 }
+
+export async function GET({ request }: { request: Request }) {
+	console.log(request);
+}
