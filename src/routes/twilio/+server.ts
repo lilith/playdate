@@ -84,13 +84,14 @@ export async function GET({ request, params, query }) {
 	console.log('GET REQ')
 	console.log({ request, params, query })
 
-	const twiml = new MessagingResponse();
+	// const twiml = new MessagingResponse();
 
-	const response = new Response(twiml.toString(), {
-		headers: {
-		  'Content-Type': 'text/xml'
-		}
-	  });
+	// const response = new Response(twiml.toString(), {
+	// 	headers: {
+	// 	  'Content-Type': 'text/xml'
+	// 	}
+	//   });
 	
-	return response;
+	// return response;
+	return new Response('boop')
 };
