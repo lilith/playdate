@@ -80,8 +80,9 @@ export async function POST({ request }: { request: Request }) {
 	}
 }
 
-export async function GET(thing) {
-	console.log(thing)
+export async function GET({ request, params, query }) {
+	console.log('GET REQ')
+	console.log({ request, params, query })
 
 	const twiml = new MessagingResponse();
 
