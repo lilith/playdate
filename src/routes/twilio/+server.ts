@@ -40,8 +40,7 @@ export async function POST({ request }: { request: Request }) {
 			phone
 		},
 		select: {
-			blocked: true,
-			allowReminders: true
+			blocked: true
 		}
 	});
 
@@ -55,8 +54,9 @@ export async function POST({ request }: { request: Request }) {
 			}
 		);
 	}
-	const { blocked, allowReminders } = permissions;
-	if (blocked || !allowReminders) {
+	console.log('PERMISSIONS', permissions);
+	const { blocked } = permissions;
+	if (blocked) {
 		return new Response(null, {
 			status: 200
 		});
@@ -110,10 +110,10 @@ export async function POST({ request }: { request: Request }) {
 }
 
 export async function GET({ url }: { url: URL }) {
-	console.log('GET REQ', url.searchParams.keys());
 	const body = url.searchParams.get('Body');
 	const phone = url.searchParams.get('From') ?? undefined;
 	if (body === 'STOP') {
+		console.log('BLOCKED');
 		await prisma.phoneContactPermissions.update({
 			where: {
 				phone
@@ -123,6 +123,7 @@ export async function GET({ url }: { url: URL }) {
 			}
 		});
 	} else if (body === 'UNSTOP') {
+		console.log('UNBLOCKED');
 		await prisma.phoneContactPermissions.update({
 			where: {
 				phone
