@@ -629,8 +629,9 @@
 	.emoji {
 		background: white;
 		font-size: x-large;
-		margin: 1rem 0;
-		padding: 0.2rem;
+		margin: .5rem 0;
+		padding-left: 0.2rem;
+		padding-right: 0.2rem;
 		border-radius: 3px;
 		border: 1px solid #d9d9d9;
 	}
