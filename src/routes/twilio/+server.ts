@@ -1,7 +1,9 @@
 import { env as private_env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;
 
 export async function POST({ request }: { request: Request }) {
@@ -32,6 +34,33 @@ export async function POST({ request }: { request: Request }) {
 	}
 	let message;
 	let createMessageRequest;
+
+	const permissions = await prisma.phoneContactPermissions.findUnique({
+		where: {
+			phone
+		},
+		select: {
+			blocked: true,
+			allowReminders: true
+		}
+	});
+
+	if (!permissions) {
+		return new Response(
+			JSON.stringify({
+				message: `Can't find permissions for phone ${phone}`
+			}),
+			{
+				status: 500
+			}
+		);
+	}
+	const { blocked, allowReminders } = permissions;
+	if (blocked || !allowReminders) {
+		return new Response(null, {
+			status: 200
+		});
+	}
 	try {
 		createMessageRequest = {
 			body: msg,
@@ -80,17 +109,37 @@ export async function POST({ request }: { request: Request }) {
 	}
 }
 
-export async function GET({ request, params, query }) {
-	console.log('GET REQ')
-	console.log({ request, params, query })
+export async function GET({ url }: { url: URL }) {
+	console.log('GET REQ', url.searchParams.keys());
+	const body = url.searchParams.get('Body');
+	const phone = url.searchParams.get('Phone') ?? undefined;
+	if (body === 'STOP') {
+		await prisma.phoneContactPermissions.update({
+			where: {
+				phone
+			},
+			data: {
+				blocked: true
+			}
+		});
+	} else if (body === 'UNSTOP') {
+		await prisma.phoneContactPermissions.update({
+			where: {
+				phone
+			},
+			data: {
+				blocked: false
+			}
+		});
+	}
 
 	const twiml = new MessagingResponse();
 
 	const response = new Response(twiml.toString(), {
 		headers: {
-		  'Content-Type': 'text/xml'
+			'Content-Type': 'text/xml'
 		}
-	  });
-	
+	});
+
 	return response;
-};
+}
