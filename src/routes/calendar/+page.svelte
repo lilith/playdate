@@ -306,7 +306,7 @@
 				<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
 					<td
 						class:blue={shownRows.has(i)}
-						class="left"
+						class="day"
 						on:click={() => {
 							shownRows.add(i);
 							shownRows = new Set(shownRows);
@@ -320,7 +320,7 @@
 					</td>
 					<td
 						class:blue={shownRows.has(i)}
-						class="left"
+						class="date"
 						on:click={() => {
 							shownRows.add(i);
 							shownRows = new Set(shownRows);
@@ -334,6 +334,7 @@
 					</td>
 					<td
 						colspan="2"
+						class="time"
 						on:click={() => {
 							shownRows.add(i);
 							shownRows = new Set(shownRows);
@@ -343,7 +344,12 @@
 							shownRows = new Set(shownRows);
 						}}
 					>
-						<p>{row.availRange ?? 'Unspecified'}</p>
+					{#if !row.availRange}
+						<p>Unspecified (<span class="edit">edit</span>)</p>
+					{:else if row.availRange === 'Busy'}
+						<p>Busy (<span class="edit">edit</span>)</p>
+					{:else}
+						<p>{row.availRange}</p>
 						<p>
 							{#each Array.from(row.emoticons) as emojiStr}
 								{EMOTICONS_REVERSE[emojiStr]}
@@ -353,6 +359,8 @@
 							<p>{row.notes}</p>
 						{/if}
 						<p class="edit">EDIT</p>
+					{/if}
+
 					</td>
 					{#if !row.availRange}
 						<td
@@ -360,7 +368,7 @@
 							on:keyup={() => markAs(i, AvailabilityStatus.BUSY)}
 							class="busy"
 						>
-							Mark Busy
+							Busy
 						</td>
 					{:else if row.availRange === 'Busy'}
 						<td
@@ -382,7 +390,7 @@
 				</tr>
 				{#if shownRows.has(i)}
 					<tr style="background: #A0E3FF">
-						<td colspan="5" style="padding: 0.9rem 0.4rem;">
+						<td colspan="5" style="padding: 0.9rem 0.4rem;" class="editorCell">
 							<form on:submit|preventDefault={() => {}}>
 								<div class="v-center-h-space flex-col" style="gap: 0.1rem;">
 									<!-- prettier-ignore -->
@@ -517,9 +525,38 @@
 	.text-inherit {
 		font-size: inherit;
 	}
-	#schedule .left {
+
+	#schedule .day {
 		text-align: left;
 		padding-left: 0.3rem;
+		padding-right: 0.3rem;
+		white-space: nowrap;
+	}
+	#schedule .date {
+		text-align: left;
+		padding-left: 0.3rem;
+		padding-right: 0.3rem;
+		white-space: nowrap;
+	}
+	#schedule .time {
+		width:99%;
+	}
+	.busy,
+	.clear {
+		text-decoration: underline;
+		font-weight: 600;
+		white-space: nowrap;
+		padding: 0.3rem;
+	}
+	.edit{
+		text-decoration: underline;
+		font-weight: 600;
+		white-space: nowrap;
+		padding-left: 0.3rem;
+		padding-right: 0.3rem;
+	}
+	#schedule .editorCell {
+		width:100%;
 	}
 	.editor-btns {
 		gap: 0.5rem;
@@ -566,12 +603,7 @@
 	.tooltip {
 		width: fit-content;
 	}
-	.busy,
-	.edit,
-	.clear {
-		text-decoration: underline;
-		font-weight: 600;
-	}
+
 	table {
 		border-collapse: collapse;
 		border: 1px solid #dddddd;
