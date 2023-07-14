@@ -2,6 +2,8 @@ import { env as private_env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 
+const MessagingResponse = Twilio.twiml.MessagingResponse;
+
 export async function POST({ request }: { request: Request }) {
 	const { phone, msg, sendAt } = await request.json();
 	if (!phone || !msg) {
@@ -78,8 +80,16 @@ export async function POST({ request }: { request: Request }) {
 	}
 }
 
-export async function GET({ params }: { params: { [key: string]: any } }) {
-	console.log('GET TWILIO')
-	console.log(params);
-	return new Response('boop');
-}
+export async function GET(thing) {
+	console.log(thing)
+
+	const twiml = new MessagingResponse();
+
+	const response = new Response(twiml.toString(), {
+		headers: {
+		  'Content-Type': 'text/xml'
+		}
+	  });
+	
+	return response;
+};
