@@ -54,13 +54,8 @@ export async function POST({ request }: { request: Request }) {
 			}
 		);
 	}
-	console.log('PERMISSIONS', permissions);
 	const { blocked } = permissions;
-	if (blocked) {
-		return new Response(null, {
-			status: 200
-		});
-	}
+	if (blocked) return json('BLOCKED');
 	try {
 		createMessageRequest = {
 			body: msg,
@@ -111,9 +106,9 @@ export async function POST({ request }: { request: Request }) {
 
 export async function GET({ url }: { url: URL }) {
 	const body = url.searchParams.get('Body');
-	const phone = url.searchParams.get('From') ?? undefined;
-	if (body === 'STOP') {
-		console.log('BLOCKED');
+	const phone = url.searchParams.get('From')?.toLowerCase() ?? undefined;
+	if (body === 'stop') {
+		console.log(`BLOCKED ${phone}`);
 		await prisma.phoneContactPermissions.update({
 			where: {
 				phone
@@ -122,8 +117,8 @@ export async function GET({ url }: { url: URL }) {
 				blocked: true
 			}
 		});
-	} else if (body === 'UNSTOP') {
-		console.log('UNBLOCKED');
+	} else if (body === 'unstop' || body === 'start') {
+		console.log(`UNBLOCKED ${phone}`);
 		await prisma.phoneContactPermissions.update({
 			where: {
 				phone

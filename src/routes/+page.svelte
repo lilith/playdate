@@ -39,12 +39,21 @@
 
 			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.location;
 
-			await writeReq('/twilio', {
+			const msgRes = await writeReq('/twilio', {
 				msg: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
 					1
 				)}/${token}`,
 				phone
 			});
+			const msg = await msgRes.json();
+			if (msgRes.status === 200) {
+				if (msg === 'BLOCKED')
+					alert(
+						`You must text UNSTOP to ${public_env.PUBLIC_TWILIO_PHONE_NUMBER} to be able to receive a login code.`
+					);
+			} else {
+				alert(msg);
+			}
 		}
 	}
 </script>
