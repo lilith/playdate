@@ -345,20 +345,22 @@
 						}}
 					>
 					{#if !row.availRange}
-						<p>Unspecified (<span class="edit">edit</span>)</p>
+						<p>Unspecified (<span class="edit">set time</span>)</p>
 					{:else if row.availRange === 'Busy'}
-						<p>Busy (<span class="edit">edit</span>)</p>
+						<p>Busy (<span class="edit">set time</span>)</p>
 					{:else}
-						<p>{row.availRange}</p>
-						<p>
-							{#each Array.from(row.emoticons) as emojiStr}
-								{EMOTICONS_REVERSE[emojiStr]}
-							{/each}
-						</p>
-						{#if row.notes}
-							<p>{row.notes}</p>
+						<p class="timeDisplay">{row.availRange}</p>
+						{#if row.emoticons}
+							<p class="emoticonsDisplay">
+								{#each Array.from(row.emoticons) as emojiStr}
+									{EMOTICONS_REVERSE[emojiStr]}
+								{/each}
+							</p>
 						{/if}
-						<p class="edit">EDIT</p>
+						{#if row.notes}
+							<p class="notesDisplay">{row.notes}</p>
+						{/if}
+						<p class="changeTime">(change)</p>
 					{/if}
 
 					</td>
@@ -525,37 +527,56 @@
 	.text-inherit {
 		font-size: inherit;
 	}
-
-	#schedule .day {
+	table {
+		border-collapse: collapse;
+		border: 1px solid #dddddd;
+	}
+	#schedule {
+		width: 100%;
+	}
+	#schedule td {
+		padding: 0.4rem 0rem;
+		text-align: center;
+		border-right: 1px solid #dddddd;
+	}
+	#schedule td.day, #schedule td.date  {
 		text-align: left;
 		padding-left: 0.3rem;
 		padding-right: 0.3rem;
 		white-space: nowrap;
 	}
-	#schedule .date {
-		text-align: left;
-		padding-left: 0.3rem;
-		padding-right: 0.3rem;
-		white-space: nowrap;
+	#schedule td.time {
+		width:99%; /* All excess space goes here */
+		cursor: pointer;
 	}
-	#schedule .time {
-		width:99%;
+	#schedule td.time .emoticonsDisplay, #schedule td.time .timeDisplay{
+		display: inline; /* No line breaks between time and emoticons */
 	}
-	.busy,
-	.clear {
+ 	#schedule td.time .timeDisplay{
+		padding-right: 2em;
+	}
+	#schedule .changeTime{
+		display: block;
+		text-decoration: underline;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	#schedule td.busy,
+	#schedule td.clear {
 		text-decoration: underline;
 		font-weight: 600;
 		white-space: nowrap;
 		padding: 0.3rem;
+		cursor: pointer;
 	}
-	.edit{
+	
+	#schedule .edit, #schedule .changeTime{
 		text-decoration: underline;
 		font-weight: 600;
-		white-space: nowrap;
-		padding-left: 0.3rem;
-		padding-right: 0.3rem;
+		cursor: pointer;
 	}
-	#schedule .editorCell {
+
+	#schedule td.editorCell {
 		width:100%;
 	}
 	.editor-btns {
@@ -604,19 +625,7 @@
 		width: fit-content;
 	}
 
-	table {
-		border-collapse: collapse;
-		border: 1px solid #dddddd;
-	}
 
-	#schedule {
-		width: 100%;
-	}
-	#schedule td {
-		padding: 0.4rem 0rem;
-		text-align: center;
-		border-right: 1px solid #dddddd;
-	}
 	.emoji {
 		background: white;
 		font-size: x-large;
