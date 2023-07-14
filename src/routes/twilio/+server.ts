@@ -112,7 +112,7 @@ export async function POST({ request }: { request: Request }) {
 export async function GET({ url }: { url: URL }) {
 	console.log('GET REQ', url.searchParams.keys());
 	const body = url.searchParams.get('Body');
-	const phone = url.searchParams.get('Phone') ?? undefined;
+	const phone = url.searchParams.get('From') ?? undefined;
 	if (body === 'STOP') {
 		await prisma.phoneContactPermissions.update({
 			where: {
