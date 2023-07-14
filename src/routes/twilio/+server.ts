@@ -81,4 +81,5 @@ export async function POST({ request }: { request: Request }) {
 export async function GET({ params }: { params: { [key: string]: any } }) {
 	console.log('GET TWILIO')
 	console.log(params);
+	return new Response('boop');
 }
