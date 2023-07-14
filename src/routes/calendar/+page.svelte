@@ -345,9 +345,9 @@
 						}}
 					>
 					{#if !row.availRange}
-						<p>Unspecified (<span class="edit">set time</span>)</p>
+						<p>Unspecified (<span class="edit">edit</span>)</p>
 					{:else if row.availRange === 'Busy'}
-						<p>Busy (<span class="edit">set time</span>)</p>
+						<p>Busy (<span class="edit">edit</span>)</p>
 					{:else}
 						<p class="timeDisplay">{row.availRange}</p>
 						{#if row.emoticons}
@@ -360,7 +360,7 @@
 						{#if row.notes}
 							<p class="notesDisplay">{row.notes}</p>
 						{/if}
-						<p class="changeTime">(change)</p>
+						<p class="changeTime">(edit)</p>
 					{/if}
 
 					</td>
@@ -552,8 +552,8 @@
 	#schedule td.time .emoticonsDisplay, #schedule td.time .timeDisplay{
 		display: inline; /* No line breaks between time and emoticons */
 	}
- 	#schedule td.time .timeDisplay{
-		padding-right: 2em;
+ 	#schedule td.time .emoticonsDisplay{
+		padding-left: 0.5em;
 	}
 	#schedule .changeTime{
 		display: block;
