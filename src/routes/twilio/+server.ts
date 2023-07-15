@@ -1,4 +1,3 @@
-import { env as private_env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
@@ -35,27 +34,35 @@ export async function POST({ request }: { request: Request }) {
 	let message;
 	let createMessageRequest;
 
-	const permissions = await prisma.phoneContactPermissions.findUnique({
-		where: {
-			phone
-		},
-		select: {
-			blocked: true
-		}
+	const user = await prisma.user.findUnique({
+		where: { phone },
 	});
 
-	if (!permissions) {
-		return new Response(
-			JSON.stringify({
-				message: `Can't find permissions for phone ${phone}`
-			}),
-			{
-				status: 500
+	if (user) { // if user exists, check whether we have their permission to text them
+		const permissions = await prisma.phoneContactPermissions.findUnique({
+			where: {
+				phone
+			},
+			select: {
+				blocked: true
 			}
-		);
+		});
+
+		if (!permissions) {
+			return new Response(
+				JSON.stringify({
+					message: `Can't find permissions for phone ${phone}`
+				}),
+				{
+					status: 500
+				}
+			);
+		}
+
+		const { blocked } = permissions;
+		if (blocked) return json('BLOCKED');
 	}
-	const { blocked } = permissions;
-	if (blocked) return json('BLOCKED');
+
 	try {
 		createMessageRequest = {
 			body: msg,
@@ -94,8 +101,8 @@ export async function POST({ request }: { request: Request }) {
 	}
 
 	// It's a security issue to share the auth link with the client. Don't do this if
-	// import.meta.env.PROD OR private_env.PUBLIC_URL are set
-	if (import.meta.env.DEV && !private_env.PUBLIC_URL) {
+	// import.meta.env.PROD
+	if (import.meta.env.DEV) {
 		return json(message);
 	} else {
 		return new Response(null, {

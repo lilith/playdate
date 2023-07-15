@@ -52,7 +52,7 @@
 						`You must text UNSTOP to ${public_env.PUBLIC_TWILIO_PHONE_NUMBER} to be able to receive a login code.`
 					);
 			} else {
-				alert(msg);
+				alert(msg.message);
 			}
 		}
 	}
