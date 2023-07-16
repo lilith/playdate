@@ -58,6 +58,7 @@
 		"jsonwebtoken": "^9.0.0",
 		"marked": "^5.1.0",
 		"node-cron": "^3.0.2",
+		"sanitize": "^2.1.2",
 		"twilio": "^4.11.1"
 	}
 }
