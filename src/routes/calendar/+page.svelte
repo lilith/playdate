@@ -250,7 +250,6 @@
 			try {
 				circleNotifMsg = await sms();
 			} catch (err) {
-				circleNotifMsg = 'Failed to compose notif message';
 				console.error(err);
 			}
 			return 'ok';
@@ -303,6 +302,19 @@
 		circleInfo.forEach((c: { parents: Parent[] }) => {
 			c.parents.forEach((p: Parent) => notify(p));
 		});
+	}
+
+	async function sanitizeNotes(i: number) {
+		const v = rows[i].notes;
+		if (!v) return; // empty notes are totally valid
+		const res = await fetch(`/sanitize?which=dateNotes&notes=${encodeURIComponent(v)}`);
+		const { notes, message } = await res.json();
+		if (res.status !== 200) {
+			console.error(message);
+			throw new Error(message); // don't continue on to saving
+		} else {
+			rows[i].notes = notes;
+		}
 	}
 </script>
 
@@ -448,6 +460,7 @@
 								<div class="editor-btns">
 									<Button
 										onClick={async () => {
+											await sanitizeNotes(i);
 											const res = await markAs(i, AvailabilityStatus.AVAILABLE);
 											if (res === 'ok') {
 												shownRows.delete(i);

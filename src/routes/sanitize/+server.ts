@@ -8,20 +8,22 @@ const sanitizer = sanitizerFunc();
 type PRONOUNS_ENUM = keyof typeof Pronoun;
 
 const WHICH_PARAMS: { [key: string]: string[] } = {
-	circleNotif: ['user', 'schedDiffs']
+	circleNotif: ['user', 'schedDiffs'],
+	dateNotes: ['notes']
 };
 export async function GET({ url }: { url: URL }) {
 	const which = getParams(url, ['which'])?.[0];
 	if (!which)
 		return new Response(JSON.stringify({ message: "'which' param not provided" }), { status: 400 });
-	if (['circleNotif'].includes(which)) {
+	if (Object.keys(WHICH_PARAMS).includes(which)) {
 		const params = getParams(url, WHICH_PARAMS[which]);
 		if (!params)
 			return new Response(JSON.stringify({ message: `Expecting params: ${WHICH_PARAMS[which]}` }));
 
 		if (which === 'circleNotif') {
 			return json({ sms: await circleNotif(...params) });
-		} else if (which === '') {
+		} else if (which === 'dateNotes') {
+			return json({ notes: dateNotes(...params) });
 		}
 	}
 
@@ -71,3 +73,5 @@ const circleNotif = async (userStr: string, schedDiffs: string) => {
 		Pronoun[user.pronouns].split(',')[1]
 	} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSchedDiffs}`;
 };
+
+const dateNotes = (notes: string) => sanitize(notes);
