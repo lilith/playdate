@@ -96,6 +96,7 @@
 	let shownRows = new Set();
 	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
+	let circleNotifMsg: string;
 	function getSchedDiff() {
 		const diffs: string[] = [];
 		let lastIsBusy = false;
@@ -246,6 +247,11 @@
 				};
 			});
 			getSchedDiff();
+			try {
+				circleNotifMsg = await sms();
+			} catch (err) {
+				console.error(err);
+			}
 			return 'ok';
 		} else {
 			alert('Something went wrong with saving');
@@ -263,17 +269,18 @@
 	}
 
 	let notified = new Set();
-	function sms() {
-		let objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
-		if (objectivePronoun === 'hers') objectivePronoun = objectivePronoun.slice(0, -1);
-		const msg = `${user.firstName}${
-			user.lastName && user.lastName.length ? ` ${user.lastName}` : ''
-		} (parent of ${kidNames}) has updated ${
-			PRONOUNS[user.pronouns].split(',')[1]
-		} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)\n\n${schedDiffs.join(
-			'\n'
-		)}`;
-		return msg;
+	async function sms() {
+		const res = await fetch(
+			`/sanitize?which=circleNotif&user=${encodeURIComponent(
+				JSON.stringify(user)
+			)}&schedDiffs=${encodeURIComponent(schedDiffs.join('\n'))}`
+		);
+		const { sms, message } = await res.json();
+		if (res.status !== 200) {
+			throw new Error(message);
+		} else {
+			return sms;
+		}
 	}
 	type Parent = {
 		phone: string;
@@ -284,7 +291,7 @@
 		const { allowReminders } = phonePermissions;
 		if (allowReminders) {
 			await writeReq('/twilio', {
-				msg: sms(),
+				msg: circleNotifMsg,
 				phone
 			});
 			notified.add(phone);
@@ -295,6 +302,19 @@
 		circleInfo.forEach((c: { parents: Parent[] }) => {
 			c.parents.forEach((p: Parent) => notify(p));
 		});
+	}
+
+	async function sanitizeNotes(i: number) {
+		const v = rows[i].notes;
+		if (!v) return; // empty notes are totally valid
+		const res = await fetch(`/sanitize?which=dateNotes&notes=${encodeURIComponent(v)}`);
+		const { notes, message } = await res.json();
+		if (res.status !== 200) {
+			console.error(message);
+			throw new Error(message); // don't continue on to saving
+		} else {
+			rows[i].notes = notes;
+		}
 	}
 </script>
 
@@ -344,25 +364,24 @@
 							shownRows = new Set(shownRows);
 						}}
 					>
-					{#if !row.availRange}
-						<p>Unspecified (<span class="edit">edit</span>)</p>
-					{:else if row.availRange === 'Busy'}
-						<p>Busy (<span class="edit">edit</span>)</p>
-					{:else}
-						<p class="timeDisplay">{row.availRange}</p>
-						{#if row.emoticons}
-							<p class="emoticonsDisplay">
-								{#each Array.from(row.emoticons) as emojiStr}
-									{EMOTICONS_REVERSE[emojiStr]}
-								{/each}
-							</p>
+						{#if !row.availRange}
+							<p>Unspecified (<span class="edit">edit</span>)</p>
+						{:else if row.availRange === 'Busy'}
+							<p>Busy (<span class="edit">edit</span>)</p>
+						{:else}
+							<p class="timeDisplay">{row.availRange}</p>
+							{#if row.emoticons}
+								<p class="emoticonsDisplay">
+									{#each Array.from(row.emoticons) as emojiStr}
+										{EMOTICONS_REVERSE[emojiStr]}
+									{/each}
+								</p>
+							{/if}
+							{#if row.notes}
+								<p class="notesDisplay">{row.notes}</p>
+							{/if}
+							<p class="changeTime">(edit)</p>
 						{/if}
-						{#if row.notes}
-							<p class="notesDisplay">{row.notes}</p>
-						{/if}
-						<p class="changeTime">(edit)</p>
-					{/if}
-
 					</td>
 					{#if !row.availRange}
 						<td
@@ -441,6 +460,7 @@
 								<div class="editor-btns">
 									<Button
 										onClick={async () => {
+											await sanitizeNotes(i);
 											const res = await markAs(i, AvailabilityStatus.AVAILABLE);
 											if (res === 'ok') {
 												shownRows.delete(i);
@@ -539,23 +559,25 @@
 		text-align: center;
 		border-right: 1px solid #dddddd;
 	}
-	#schedule td.day, #schedule td.date  {
+	#schedule td.day,
+	#schedule td.date {
 		text-align: left;
 		padding-left: 0.3rem;
 		padding-right: 0.3rem;
 		white-space: nowrap;
 	}
 	#schedule td.time {
-		width:99%; /* All excess space goes here */
+		width: 99%; /* All excess space goes here */
 		cursor: pointer;
 	}
-	#schedule td.time .emoticonsDisplay, #schedule td.time .timeDisplay{
+	#schedule td.time .emoticonsDisplay,
+	#schedule td.time .timeDisplay {
 		display: inline; /* No line breaks between time and emoticons */
 	}
- 	#schedule td.time .emoticonsDisplay{
+	#schedule td.time .emoticonsDisplay {
 		padding-left: 0.5em;
 	}
-	#schedule .changeTime{
+	#schedule .changeTime {
 		display: block;
 		text-decoration: underline;
 		font-weight: 600;
@@ -569,15 +591,16 @@
 		padding: 0.3rem;
 		cursor: pointer;
 	}
-	
-	#schedule .edit, #schedule .changeTime{
+
+	#schedule .edit,
+	#schedule .changeTime {
 		text-decoration: underline;
 		font-weight: 600;
 		cursor: pointer;
 	}
 
 	#schedule td.editorCell {
-		width:100%;
+		width: 100%;
 	}
 	.editor-btns {
 		gap: 0.5rem;
@@ -625,11 +648,10 @@
 		width: fit-content;
 	}
 
-
 	.emoji {
 		background: white;
 		font-size: x-large;
-		margin: .5rem 0;
+		margin: 0.5rem 0;
 		padding-left: 0.2rem;
 		padding-right: 0.2rem;
 		border-radius: 3px;
