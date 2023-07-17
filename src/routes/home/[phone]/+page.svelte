@@ -192,10 +192,6 @@
 					<div class="wrapper">
 						<div class="inner" data-onvisible-trigger="1">
 							<h2 id="text07" class="style1">Thank You</h2>
-							<p id="text10" class="style3">
-								Maecenas aliquam velit scelerisque. Nisi vitae suscipit tellus mauris. Suscipit
-								tellus mauris a diam maecenas sed enim ut sem lorem ipsum.
-							</p>
 							<ul id="buttons06" class="style1 buttons">
 								<li>
 									<!-- svelte-ignore a11y-invalid-attribute -->
