@@ -22,7 +22,7 @@
 		});
 		setTimeout(() => {
 			stylePhoneInput();
-		}, 1000);
+		}, 0);
 		if (data.phone) phoneInput.telInput.value = data.phone;
 	});
 
@@ -39,7 +39,7 @@
 		if (res.status === 200) {
 			const { time, token } = await res.json();
 
-			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.location;
+			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.origin;
 
 			const msgRes = await writeReq('/twilio', {
 				msg: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
