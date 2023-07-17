@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import intlTelInput from 'intl-tel-input';
 
+	export let data;
 	let phoneInput: object;
 
 	function stylePhoneInput() {
@@ -21,7 +22,8 @@
 		});
 		setTimeout(() => {
 			stylePhoneInput();
-		}, 1000);
+		}, 0);
+		if (data.phone) phoneInput.telInput.value = data.phone;
 	});
 
 	async function login() {
@@ -37,7 +39,7 @@
 		if (res.status === 200) {
 			const { time, token } = await res.json();
 
-			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.location;
+			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.origin;
 
 			const msgRes = await writeReq('/twilio', {
 				msg: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
@@ -124,9 +126,10 @@
 							</form>
 							<p id="text08" class="style3">
 								By submitting your phone number you consent to receive SMS messages from
-								Playdate.Help and acknowledge our <a href="/legal/privacy">Privacy Policy</a>. You
-								can opt out at any time via your account or by replying STOP. playdate.help is
-								open-source, non-commercial, and won&#39;t sell your info.
+								Playdate.Help and acknowledge our <a href="/legal/terms">Terms of Use</a> and
+								<a href="/legal/privacy">Privacy Policy</a>. You can opt out at any time via your
+								account or by replying STOP. playdate.help is open-source, non-commercial, and
+								won&#39;t sell your info.
 							</p>
 							<ul id="buttons03" class="style1 buttons">
 								<li>
