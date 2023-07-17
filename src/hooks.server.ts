@@ -1,4 +1,3 @@
-import { env as public_env } from '$env/dynamic/public';
 import type { Handle, RequestEvent } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
@@ -6,11 +5,6 @@ const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
-
-import * as cron from 'node-cron';
-import { writeReq } from './utils';
-
-let firstRun = false;
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
@@ -90,30 +84,6 @@ const redirectOrContinue = (
 };
 
 export const handle = (async ({ event, resolve }) => {
-	console.log('handleFetch', event)
-	if (!firstRun) {
-		console.log('*** SCHED CRON JOB ***', `${public_env.PUBLIC_URL}/hello`);
-		// writeReq(`${public_env.PUBLIC_URL}/hello`, {})
-
-		const request = new Request(
-            `${public_env.PUBLIC_URL}/hello`,
-            {
-				...event.request,
-				method: 'POST',
-			}
-        );
-
-		event.fetch(request)
-		.then((res) => res.text())
-		.then((res) => console.log(`res: ${res}`))
-		// cron.schedule('*/1 * * * *', async function () {
-		// 	console.log('*** CRON JOB RUN ***');
-		// 	const res = await writeReq(`${public_env.PUBLIC_URL}/reminder`, {});
-		// 	if (res.status !== 200) console.error(await res.json());
-		// });
-		firstRun = true;
-	}
-
 	// // log env var from sveltekit server side
 	// console.log('DATABASE_PRISMA_URL', process.env.DATABASE_PRISMA_URL);
 

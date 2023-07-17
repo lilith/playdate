@@ -1,3 +1,4 @@
+import { env as private_env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
@@ -35,10 +36,11 @@ export async function POST({ request }: { request: Request }) {
 	let createMessageRequest;
 
 	const user = await prisma.user.findUnique({
-		where: { phone },
+		where: { phone }
 	});
 
-	if (user) { // if user exists, check whether we have their permission to text them
+	if (user) {
+		// if user exists, check whether we have their permission to text them
 		const permissions = await prisma.phoneContactPermissions.findUnique({
 			where: {
 				phone

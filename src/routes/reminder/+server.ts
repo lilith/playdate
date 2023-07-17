@@ -4,7 +4,6 @@ import { json } from '@sveltejs/kit';
 const prisma = new PrismaClient();
 
 export async function POST({ fetch }: { fetch: any }) {
-	console.log('START OF REMINDER')
 	/**
         goes through each user in the db
         If it's time to send them a notif, we'll just do so right there. No need to schedule it.
@@ -25,62 +24,60 @@ export async function POST({ fetch }: { fetch: any }) {
 			}
 		}
 	});
-	users.forEach(async (user) => {
-		const { id, phone, reminderDatetime, reminderIntervalDays, phonePermissions, timeZone } =
-			user;
-		const { allowReminders, blocked } = phonePermissions;
-		console.log(phone, allowReminders, blocked)
-		if (!allowReminders || blocked) return;
+	const results = [];
 
-		const options = {
-			timeZone
-		};
+	for (const user of users) {
+		const { id, phone, reminderDatetime, reminderIntervalDays, phonePermissions, timeZone } = user;
+		try {
+			const { allowReminders, blocked } = phonePermissions;
+			if (!allowReminders || blocked) continue;
 
-		const formattedDate = nowLocal.toLocaleString('en-US', options);
-		const now = new Date(formattedDate);
-		const timeDifference = Math.abs(now.getTime() - reminderDatetime.getTime()); // Get the absolute time difference in milliseconds
-		const minuteInMillis = 60 * 1000; // 1 minute in milliseconds
-		console.log(phone, reminderDatetime, timeDifference)
-		if (timeDifference < minuteInMillis) {
-			// currently within a minute of when user should be reminded
-			// send notif
-			const msgRes = await fetch('/twilio', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					msg: `Hi! It's your periodic reminder to update your schedule: https://playdate.help/login/${phone}`,
-					phone
-				})
-			});
+			const options = {
+				timeZone
+			};
 
-			if (msgRes.status !== 200) return msgRes;
+			const formattedDate = nowLocal.toLocaleString('en-US', options);
+			const now = new Date(formattedDate);
+			const timeDifference = Math.abs(now.getTime() - reminderDatetime.getTime()); // Get the absolute time difference in milliseconds
+			const minuteInMillis = 60 * 1000; // 1 minute in milliseconds
+			if (timeDifference < minuteInMillis) {
+				// currently within a minute of when the user should be reminded
+				// send notification
+				const msgRes = await fetch('/twilio', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						msg: `Hi! It's your periodic reminder to update your schedule: https://playdate.help/login/${phone}`,
+						phone
+					})
+				});
 
-			// update reminder date for next notif
-			const newReminderDate = new Date(reminderDatetime);
-			newReminderDate.setDate(reminderDatetime.getDate() + reminderIntervalDays);
-			const updatedUser = await prisma.user.update({
-				where: {
-					id
-				},
-				data: {
-					reminderDatetime: newReminderDate
+				if (msgRes.status !== 200) {
+					throw new Error(`Failed to send notification for user with phone: ${phone}`);
 				}
-			});
-			console.log(updatedUser)
-			if (updatedUser.reminderDatetime !== newReminderDate) {
-				return new Response(
-					JSON.stringify({
-						message: `Unable to update user's reminderDatetime (phone: ${phone})`
-					}),
-					{
-						status: 500
-					}
-				);
-			}
-		}
-	});
 
-	return json('ok');
+				// update reminder date for the next notification
+				const newReminderDate = new Date(reminderDatetime);
+				newReminderDate.setDate(reminderDatetime.getDate() + reminderIntervalDays);
+				const updatedUser = await prisma.user.update({
+					where: {
+						id
+					},
+					data: {
+						reminderDatetime: newReminderDate
+					}
+				});
+
+				if (updatedUser.reminderDatetime.getTime() !== newReminderDate.getTime()) {
+					throw new Error(`Unable to update user's reminderDatetime (phone: ${phone})`);
+				}
+			}
+		} catch (error) {
+			results.push({ phone, message: (error as Error).message });
+		}
+	}
+
+	return json(results);
 }
