@@ -48,7 +48,7 @@
 	);
 </script>
 
-<div class="container">
+<div>
 	<NavBar pageName="Dashboard" />
 	<div style="margin-bottom: 2rem;">
 		<p class="subtitle">Notices<span>{numNotices}</span></p>
@@ -241,7 +241,7 @@
 		background-color: #f2f2f2;
 	}
 	.link {
-		text-decoration: link;
+		text-decoration: underline;
 		color: #4578ff;
 	}
 	.default {
