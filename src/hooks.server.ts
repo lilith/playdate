@@ -96,7 +96,6 @@ export const handle = (async ({ event, resolve }) => {
 	// check whether authenticated
 	if (
 		event.url.pathname !== '/' &&
-		!event.url.pathname.startsWith('/home/') &&
 		!event.url.pathname.startsWith('/legal/') &&
 		event.url.pathname.slice(0, 6) !== '/login' &&
 		event.url.pathname !== '/reminder' &&
