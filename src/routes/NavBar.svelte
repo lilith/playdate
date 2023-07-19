@@ -72,6 +72,7 @@
 		color: #5a5a5a;
 	}
 	.overlay {
+		z-index: 2;
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -90,6 +91,7 @@
 		justify-content: flex-end;
 	}
 	.menu {
+		z-index: 2;
 		position: fixed;
 		top: 0;
 		right: 0;
