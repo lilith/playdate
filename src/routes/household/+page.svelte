@@ -107,13 +107,14 @@
 	}
 
 	async function deleteKid(ind: number) {
-		const response = await fetch('/db', {
-			method: 'DELETE',
-			body: JSON.stringify({
+		const response = await writeReq(
+			'/db',
+			{
 				type: 'householdChild',
 				id: kids[ind].id
-			})
-		});
+			},
+			'DELETE'
+		);
 		if (response.status == 200) {
 			await invalidate('data:householdId');
 			kids = kids.slice(0, ind).concat(kids.slice(ind + 1));
@@ -168,13 +169,14 @@
 	}
 
 	async function deleteHousehold() {
-		const response = await fetch('/db', {
-			method: 'DELETE',
-			body: JSON.stringify({
+		const response = await writeReq(
+			'/db',
+			{
 				type: 'household',
 				id: householdId
-			})
-		});
+			},
+			'DELETE'
+		);
 		if (response.status == 200) {
 			alert('Successfully deleted household');
 			await invalidate('data:householdId');
@@ -216,7 +218,7 @@
 			id
 		});
 		if (response.status == 200) {
-			await invalidate('data:householdId');
+			await invalidateAll();
 			// handle name and publicNotes separately here so that we only hard-reset them here
 			name = $page.data.householdInfo.name;
 			publicNotes = $page.data.householdInfo.publicNotes;

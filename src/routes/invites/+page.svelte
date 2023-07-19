@@ -7,7 +7,7 @@
 	import { invalidate } from '$app/navigation';
 	import { writeReq } from '../../utils';
 
-	let { friendReqsInfo, householdInvites } = $page.data;
+	let { friendReqsInfo, householdInvites, user } = $page.data;
 	afterUpdate(() => {
 		friendReqsInfo = $page.data.friendReqsInfo;
 		householdInvites = $page.data.householdInvites;
@@ -18,7 +18,8 @@
 			type: 'acceptFriendReq',
 			householdId: $page.data.user.householdId,
 			friendHouseholdId,
-			friendReqId
+			friendReqId,
+			phone: user.phone
 		});
 		if (response.status == 200) {
 			await invalidate('data:invite');
@@ -48,6 +49,9 @@
 		});
 		if (response.status === 200) {
 			await invalidate('data:invite');
+		} else {
+			const { message } = await response.json();
+			alert(message);
 		}
 	}
 

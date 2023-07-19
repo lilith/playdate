@@ -164,11 +164,25 @@ export const handle = (async ({ event, resolve }) => {
 			return redirectOrContinue(event, '/household', resolve);
 		}
 
-		/**
-		TODO:
-		F-G if there are pending friend invites
-		If all of these are complete, the user will go to the default dashboard page F-H
-		*/
+		// F-G if there are pending friend invites
+		const friendReqs = await prisma.friendRequest.findMany({
+			where: {
+				targetPhone: user.phone
+			}
+		});
+		const preInvites = ['/profile', '/household'].includes(event.url.pathname);
+		if (friendReqs.length && !preInvites) {
+			return redirectOrContinue(event, '/invites', resolve);
+		}
+
+		const householdInvites = await prisma.joinHouseholdRequest.findMany({
+			where: {
+				targetPhone: user.phone
+			}
+		});
+		if (householdInvites.length && !preInvites) {
+			return redirectOrContinue(event, '/invites', resolve);
+		}
 	}
 	const response = await resolve(event);
 	return response;
