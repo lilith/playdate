@@ -99,6 +99,19 @@ async function deleteHouseholdInvite(req: { id: number }) {
 
 async function acceptHouseholdInvite(req: { phone: string; householdId: number; id: number }) {
 	const { phone, householdId, id } = req;
+	// if part of existing household, then don't accept
+	const household = await prisma.user.findUnique({
+		where: {
+			phone
+		},
+		select: {
+			householdId: true
+		}
+	});
+	if (household?.householdId)
+		throw error(400, {
+			message: 'You are still part of a household!'
+		});
 	await prisma.user.update({
 		where: {
 			phone
@@ -108,7 +121,19 @@ async function acceptHouseholdInvite(req: { phone: string; householdId: number; 
 		}
 	});
 
+	// don't need to worry about household invites from diff users in the household
+	// bc we prevent that when issuing household invites
 	await deleteHouseholdInvite({ id });
+
+	// delete any leftover reqs from this same household
+	const friendReqs = await prisma.friendRequest.findMany({
+		where: {
+			fromHouseholdId: householdId,
+			targetPhone: phone
+		}
+	});
+	console.log('leftover friendReqs', friendReqs);
+	return await Promise.all(friendReqs.map((x) => deleteFriendReq({ reqId: x.id })));
 }
 
 async function createCircleInvite(req: {
@@ -191,8 +216,9 @@ async function acceptFriendReq(req: {
 	householdId: number;
 	friendHouseholdId: number;
 	friendReqId: number;
+	phone: string;
 }) {
-	const { householdId, friendHouseholdId, friendReqId } = req;
+	const { householdId, friendHouseholdId, phone } = req;
 	// add to user's circle
 	await prisma.householdConnection.create({
 		data: {
@@ -201,12 +227,63 @@ async function acceptFriendReq(req: {
 		}
 	});
 
-	// delete friend req
-	await deleteFriendReq({ reqId: friendReqId });
+	// delete leftover friend reqs b/t the 2 households
+	const selectPhone = { phone: true };
+	const householdAUsers = await prisma.user.findMany({
+		where: {
+			householdId
+		},
+		select: selectPhone
+	});
+	const householdBUsers = await prisma.user.findMany({
+		where: {
+			householdId: friendHouseholdId
+		},
+		select: selectPhone
+	});
+
+	const householdAPhones = householdAUsers.map((x) => x.phone);
+	const householdBPhones = householdBUsers.map((x) => x.phone);
+
+	const selectId = { id: true };
+	const leftoverReqs1 = await prisma.friendRequest.findMany({
+		where: {
+			fromHouseholdId: householdId,
+			targetPhone: { in: householdBPhones }
+		},
+		select: selectId
+	});
+	const leftoverReqs2 = await prisma.friendRequest.findMany({
+		where: {
+			fromHouseholdId: friendHouseholdId,
+			targetPhone: { in: householdAPhones }
+		},
+		select: selectId
+	});
+	console.log('leftoverFriendReqs', leftoverReqs1.concat(leftoverReqs2));
+	leftoverReqs1.concat(leftoverReqs2).forEach(({ id }) => {
+		deleteFriendReq({ reqId: id });
+	});
+
+	// delete leftover household invites from this householdId to user
+	// should just be 1 since we prevent multiple invites from 1 household
+	// to 1 user, but using a findMany since our schema doesn't know better
+	const leftoverReqs3 = await prisma.joinHouseholdRequest.findMany({
+		where: {
+			householdId: friendHouseholdId,
+			targetPhone: phone
+		},
+		select: {
+			id: true
+		}
+	});
+	console.log('leftover householdInvites', leftoverReqs3);
+	leftoverReqs3.forEach(({ id }) => deleteHouseholdInvite({ id }));
 }
 
-function deleteFriendReq(req: { reqId: number }) {
-	return prisma.friendRequest.delete({
+async function deleteFriendReq(req: { reqId: number }) {
+	console.log('deleteFriendReq', req.reqId);
+	return await prisma.friendRequest.delete({
 		where: {
 			id: req.reqId
 		}
@@ -514,6 +591,38 @@ async function deleteHousehold(req: { id: number }) {
 		}
 	});
 
+	// delete household invites this household has issued
+	const deleteHouseholdInvites = prisma.joinHouseholdRequest.deleteMany({
+		where: {
+			householdId
+		}
+	});
+
+	// delete friend reqs this household has issued
+	const deleteFriendReqs1 = prisma.friendRequest.deleteMany({
+		where: {
+			fromHouseholdId: householdId
+		}
+	});
+
+	const householdUsers = await prisma.user.findMany({
+		where: {
+			householdId
+		},
+		select: {
+			phone: true
+		}
+	});
+
+	const householdPhones = householdUsers.map((x) => x.phone);
+
+	// delete friend reqs this household has received
+	const deleteFriendReqs2 = prisma.friendRequest.deleteMany({
+		where: {
+			targetPhone: { in: householdPhones }
+		}
+	});
+
 	// reset basic household info
 	const resetHousehold = prisma.household.update({
 		where: {
@@ -526,7 +635,14 @@ async function deleteHousehold(req: { id: number }) {
 		}
 	});
 
-	await prisma.$transaction([deleteKids, disconnectAdults, resetHousehold]);
+	prisma.$transaction([
+		deleteKids,
+		disconnectAdults,
+		deleteHouseholdInvites,
+		deleteFriendReqs1,
+		deleteFriendReqs2,
+		resetHousehold
+	]);
 }
 
 async function updateHouseholdAdult(req: { id: number }) {
