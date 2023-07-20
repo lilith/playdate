@@ -62,7 +62,6 @@
 		const response = await writeReq('/db', {
 			type: 'household',
 			id: householdId,
-			userId: $page.data.user.id,
 			name: name,
 			publicNotes: publicNotes
 		});
@@ -81,7 +80,6 @@
 		const response = await writeReq('/db', {
 			type: 'householdChild',
 			householdId: householdId,
-			founderId: $page.data.user.id,
 			firstName: e.target[0].value,
 			pronouns: e.target[2].value,
 			lastName: e.target[1].value,

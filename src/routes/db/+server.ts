@@ -1,7 +1,6 @@
 import { json, redirect, error } from '@sveltejs/kit';
 
-import type { Pronoun } from '@prisma/client';
-import type { User, PhoneContactPermissions } from '@prisma/client';
+import { PrismaClient, type Pronoun } from '@prisma/client';
 import {
 	saveUser,
 	saveHousehold,
@@ -19,28 +18,60 @@ import {
 	updateHouseholdAdult
 } from '$lib/server/db.ts';
 
+const prisma = new PrismaClient();
+
 export async function POST({
 	request,
-	cookies,
-	locals
+	cookies
 }: {
 	request: Request;
 	cookies: { get: (value: string) => string };
-	locals: {
-		phone: string;
-		user: (User & { phonePermissions: PhoneContactPermissions }) | null;
-	};
 }) {
 	const sessionToken = cookies.get('session');
 	if (!sessionToken) throw redirect(303, '/');
 
+	const session = await prisma.session.findUnique({
+		where: {
+			token: sessionToken
+		}
+	});
+
+	if (!session)
+		throw error(401, {
+			message: 'Invalid session token'
+		});
+
+	const now = new Date();
+	if (session.expires < now) {
+		throw error(401, {
+			message: 'Expired session'
+		});
+	}
+	const { phone } = session;
+	const user = await prisma.user.findUnique({
+		where: {
+			phone
+		}
+	});
 	const req = await request.json();
 
 	const res: { [key: string]: string | Pronoun | number | Date | boolean } = {};
-	if (req.type === 'user') res['id'] = await saveUser(req, locals);
-	else if (req.type === 'household') await saveHousehold(req);
-	else if (req.type === 'householdChild') res['id'] = await saveKid(req);
-	else if (req.type === 'inviteToHousehold') {
+	if (req.type === 'user') {
+		res['id'] = await saveUser(req, phone, user);
+		return json(res);
+	}
+
+	if (!user) throw error(401, { message: 'You must be logged in.' });
+
+	if (req.type === 'household') {
+		if (req.id !== user.householdId)
+			throw error(401, { message: "You may not change someone else's household data" });
+		await saveHousehold(req, user.id);
+	} else if (req.type === 'householdChild') {
+		if (req.householdId !== user.householdId)
+			throw error(401, { message: "You may not change someone else's household data" });
+		res['id'] = await saveKid(req, user.id);
+	} else if (req.type === 'inviteToHousehold') {
 		const { err } = await createHouseholdInvite(req);
 		if (err)
 			throw error(400, {

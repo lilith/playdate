@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
-import type { User, PhoneContactPermissions } from '@prisma/client';
+import type { User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 async function deleteHouseholdInvite(req: { id: number }) {
@@ -323,7 +323,8 @@ async function saveUser(
 		allowReminders: boolean;
 		allowInvites: boolean;
 	},
-	locals: { phone: string; user: (User & { phonePermissions: PhoneContactPermissions }) | null }
+	phone: string,
+	user: User | null
 ) {
 	const {
 		firstName,
@@ -360,12 +361,12 @@ async function saveUser(
 		acceptedTermsAt
 	};
 	let updatedUser;
-	if (locals.user) {
+	if (user) {
 		// user exists
 		console.log('UPDATE USER');
 		updatedUser = await prisma.user.update({
 			where: {
-				phone: locals.phone
+				phone
 			},
 			data: {
 				...baseUser,
@@ -385,10 +386,10 @@ async function saveUser(
 				phonePermissions: {
 					connectOrCreate: {
 						where: {
-							phone: locals.phone
+							phone
 						},
 						create: {
-							phone: locals.phone,
+							phone,
 							blocked: false,
 							allowInvites,
 							allowReminders,
@@ -428,13 +429,15 @@ async function createHousehold(
 	return household.id;
 }
 
-async function saveHousehold(req: {
-	id: number;
-	userId: number;
-	name: string;
-	publicNotes: string;
-}) {
-	const { id: householdId, userId, name, publicNotes } = req;
+async function saveHousehold(
+	req: {
+		id: number;
+		name: string;
+		publicNotes: string;
+	},
+	userId: number
+) {
+	const { id: householdId, name, publicNotes } = req;
 	const data = {
 		name,
 		publicNotes,
@@ -453,15 +456,17 @@ async function saveHousehold(req: {
 	}
 }
 
-async function saveKid(req: {
-	householdId: number;
-	founderId: number;
-	firstName: string;
-	pronouns: Pronoun;
-	lastName: string;
-	dateOfBirth: Date;
-}) {
-	const { founderId, firstName, pronouns, lastName, dateOfBirth } = req;
+async function saveKid(
+	req: {
+		householdId: number;
+		firstName: string;
+		pronouns: Pronoun;
+		lastName: string;
+		dateOfBirth: Date;
+	},
+	founderId: number
+) {
+	const { firstName, pronouns, lastName, dateOfBirth } = req;
 	let { householdId } = req;
 	// ensure the household exists before adding kid to it
 	if (!householdId) {
