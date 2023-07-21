@@ -18,7 +18,8 @@
 		"format": "prettier --plugin-search-dir . --write .",
 		"reset": "prisma migrate reset  && yarn dev",
 		"postinstall": "prisma generate",
-		"build:prev": "vite build && vite preview"
+		"build:prev": "vite build && vite preview",
+		"boop": "node tests/test.js"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^5.0.2",
@@ -58,6 +59,7 @@
 		"jsonwebtoken": "^9.0.0",
 		"marked": "^5.1.0",
 		"node-cron": "^3.0.2",
+		"playwright": "^1.36.1",
 		"sanitize": "^2.1.2",
 		"twilio": "^4.11.1"
 	}

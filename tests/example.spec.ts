@@ -1,22 +1,25 @@
 import { test, expect } from '@playwright/test';
 
-const url = 'https://4173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io/profile';
+const url = '/profile';
 
 test('has title', async ({ page, browser }) => {
+	await page.goto('/profile');
 	const browserContext = await browser.newContext();
 
 	// Add cookies to the browserContext
 	const cookieVals = [
 		{
 			name: 'session',
-			value: 'f6e5f8dfb568247a896e3aae4b69102301de966af2ba33c865262fafdd94eb06b7f8dfb5e22234af5b100d53b17eecaa378e57812efb86b46b2402ba1ffdaf36',
-			url
+			value: 'f172e9ac4e680fe232e3d793d19ceabb5d170eaa157d8f0de0316e21eafecc1112bc161ec534c96a49cd6c7db49d80dab0096d3be36772e57db9aab2f4c5b434',
+			url: 'https://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io/profile'
 		}
 	];
 	await browserContext.addCookies(cookieVals);
 	console.log(await browserContext.cookies()	)
-	await page.goto(url);
+	
+	await page.waitForTimeout(3000)
   
+	await page.screenshot({ path: 'screenshot.png' }); // Capture a screenshot and save it as 'screenshot.png'
 	// Expect a title "to contain" a substring.
 	// await expect(page).toHaveTitle(/Profile/);
 	await expect(page.getByRole('textbox', { name: 'first-name' })).toBeVisible();
