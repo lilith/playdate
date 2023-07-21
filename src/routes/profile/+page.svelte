@@ -35,7 +35,7 @@
 	} = $page.data.user;
 	const { terms } = $page.data;
 	let doNotDisturb = !allowInvites;
-
+	let saved = false;
 	let showModal = !acceptedTermsAt;
 
 	function setDateTimes(zone: string) {
@@ -109,6 +109,8 @@
 				await invalidateAll();
 				goto('/household');
 			}
+			saved = true;
+			setTimeout(() => (saved = false), 4000);
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -189,7 +191,7 @@
 		</select>
 
 		<label class="subtitle" for="email">Email</label>
-		<input type="text" name="email" bind:value={email} />
+		<input type="text" name="email" data-testid="email" bind:value={email} />
 
 		<div class="switch-container">
 			<label class="thin-label" for="reminder-consent">Remind me to update my schedule</label>
@@ -250,7 +252,9 @@
 			>).
 		</p>
 
-		<button type="submit" class="btn" style="margin: 2rem auto 4rem;"> Save </button>
+		<button type="submit" class="btn" style="margin: 2rem auto 4rem;">
+			{saved ? '✔' : 'Save'}
+		</button>
 	</form>
 </div>
 

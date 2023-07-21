@@ -23,7 +23,7 @@
 	"devDependencies": {
 		"@fontsource/fira-mono": "^5.0.2",
 		"@neoconfetti/svelte": "^1.0.0",
-		"@playwright/test": "^1.34.3",
+		"@playwright/test": "^1.36.1",
 		"@sveltejs/adapter-auto": "^2.1.0",
 		"@sveltejs/adapter-node": "^1.2.4",
 		"@sveltejs/adapter-vercel": "2",
