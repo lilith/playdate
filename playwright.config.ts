@@ -1,17 +1,17 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-	// webServer: {
-	// 	command: 'npm run build && npm run preview',
-	// 	port: 4173,
-	// 	reuseExistingServer: true
-	// },
-	use: {
-		// Base URL to use in actions like `await page.goto('/')`.
-		baseURL: 'https://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io',
+	webServer: {
+		command: 'yarn dev',
+		port: 5173,
+		reuseExistingServer: true
 	},
+	// use: {
+	// 	// Base URL to use in actions like `await page.goto('/')`.
+	// 	baseURL: 'https://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io',
+	// },
 	expect: {
-        timeout: 3000
+        timeout: 10000
     },
 	testDir: 'tests'
 };

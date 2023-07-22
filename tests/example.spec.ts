@@ -3,21 +3,54 @@ import { test, expect } from '@playwright/test';
 const url = '/profile';
 
 test('has title', async ({ page, browser }) => {
-	await page.goto('/profile');
 	const browserContext = await browser.newContext();
 
 	// Add cookies to the browserContext
 	const cookieVals = [
 		{
+			name: 'ajs_anonymous_id',
+			value: '92ab2c29-a940-4cac-b564-7bb5156ef1bd',
+			path: '/',
+			domain: '.gitpod.io'
+		},
+		{
+			name: 'gitpod-marketing-website-visited',
+			value: 'true',
+			path: '/',
+			domain: '.gitpod.io'
+		},
+		{
 			name: 'session',
-			value: 'f172e9ac4e680fe232e3d793d19ceabb5d170eaa157d8f0de0316e21eafecc1112bc161ec534c96a49cd6c7db49d80dab0096d3be36772e57db9aab2f4c5b434',
-			url: 'https://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io/profile'
+			value: '5cbc23c98ee57f9e1d1a9d30a59b6b0c769a13b000dadf4a6f954682b10d2a7c0853c3d0af5b3dc05f2eda1a5b3bcd7871c94a6d137ea89a2cf9b5741fae9b32',
+			path: '/',
+			domain: '5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io'
+		},
+		{
+			name: '_gitpod_io_ws_028e1cbf-996d-4321-b830-cd317845c860_owner_',
+			value: 'elcZFDOBeQfbHYjzWuEG-6l.KF4XqYUs',
+			path: '/',
+			domain: '.gitpod.io'
+		},
+		{
+			name: 'gp-analytical',
+			value: 'true',
+			path: '/',
+			domain: '.gitpod.io'
+		},
+		{
+			name: 'gp-necessary',
+			value: 'true',
+			path: '/',
+			domain: '.gitpod.io'
 		}
 	];
+
 	await browserContext.addCookies(cookieVals);
-	console.log(await browserContext.cookies()	)
-	
-	await page.waitForTimeout(3000)
+	await page.goto(url);
+	await page.waitForTimeout(3000);
+	// await expect(page).toHaveURL(
+	// 	url
+	// );
   
 	await page.screenshot({ path: 'screenshot.png' }); // Capture a screenshot and save it as 'screenshot.png'
 	// Expect a title "to contain" a substring.
