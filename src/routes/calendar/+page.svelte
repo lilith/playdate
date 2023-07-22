@@ -226,7 +226,6 @@
 			status,
 			notes: rows[i].notes,
 			emoticons: Array.from(rows[i].emoticons).join(','),
-			householdId: user.householdId,
 			startHr,
 			startMin,
 			endHr,

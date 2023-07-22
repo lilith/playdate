@@ -4,8 +4,25 @@ import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
 
 const prisma = new PrismaClient();
-async function deleteHouseholdInvite(req: { id: number }) {
+
+async function findHouseholdInvite(reqId: number) {
+	return await prisma.joinHouseholdRequest.findUnique({
+		where: {
+			id: reqId
+		}
+	});
+}
+
+async function deleteHouseholdInvite(req: { id: number }, user: User) {
 	const { id } = req;
+
+	const invite = await findHouseholdInvite(id);
+	if (!invite || invite.targetPhone !== user.phone) {
+		throw error(400, {
+			message: "You can't delete a household invite tht wsan't issued to you"
+		});
+	}
+
 	await prisma.joinHouseholdRequest.delete({
 		where: {
 			id
@@ -13,43 +30,46 @@ async function deleteHouseholdInvite(req: { id: number }) {
 	});
 }
 
-async function acceptHouseholdInvite(req: { phone: string; householdId: number; id: number }) {
-	const { phone, householdId, id } = req;
+async function acceptHouseholdInvite(req: { id: number }, user: User) {
+	const { id } = req;
+	const invite = await findHouseholdInvite(id);
+	const { phone, householdId: userHouseholdId } = user;
+
+	if (!invite || invite.targetPhone !== phone) {
+		throw error(400, {
+			message: "You can't accept a household invite that wasn't issued to you"
+		});
+	}
+
 	// if part of existing household, then don't accept
-	const household = await prisma.user.findUnique({
-		where: {
-			phone
-		},
-		select: {
-			householdId: true
-		}
-	});
-	if (household?.householdId)
+	if (userHouseholdId)
 		throw error(400, {
 			message: 'You are still part of a household!'
 		});
+
+	const { householdId: newHouseholdId } = invite;
 	await prisma.user.update({
 		where: {
 			phone
 		},
 		data: {
-			householdId
+			householdId: newHouseholdId
 		}
 	});
 
 	// don't need to worry about household invites from diff users in the household
 	// bc we prevent that when issuing household invites
-	await deleteHouseholdInvite({ id });
+	await deleteHouseholdInvite({ id }, user);
 
 	// delete any leftover reqs from this same household
 	const friendReqs = await prisma.friendRequest.findMany({
 		where: {
-			fromHouseholdId: householdId,
+			fromHouseholdId: newHouseholdId,
 			targetPhone: phone
 		}
 	});
 	console.log('leftover friendReqs', friendReqs);
-	return await Promise.all(friendReqs.map((x) => deleteFriendReq({ reqId: x.id })));
+	return await Promise.all(friendReqs.map((x) => deleteFriendReq({ reqId: x.id }, user)));
 }
 
 async function createCircleInvite(
@@ -128,7 +148,20 @@ async function createCircleInvite(
 	return {};
 }
 
-async function deleteFriend(req: { connectionId: number }) {
+async function deleteFriend(req: { connectionId: number }, user: User) {
+	const friend = await prisma.householdConnection.findUnique({
+		where: {
+			id: req.connectionId
+		}
+	});
+
+	const { householdId: hId } = user;
+	if (!friend || (friend.householdId !== hId && friend.friendHouseholdId !== hId)) {
+		throw error(400, {
+			message: "You can't delete a friend request that wasn't issued to you"
+		});
+	}
+
 	await prisma.householdConnection.delete({
 		where: {
 			id: req.connectionId
@@ -145,11 +178,7 @@ async function acceptFriendReq(
 	const { householdId, phone } = user;
 	const { friendReqId } = req;
 
-	const friendReq = await prisma.friendRequest.findUnique({
-		where: {
-			id: friendReqId
-		}
-	});
+	const friendReq = await findFriendReq(friendReqId);
 
 	if (!householdId) {
 		throw error(400, {
@@ -208,7 +237,7 @@ async function acceptFriendReq(
 	});
 	console.log('leftoverFriendReqs', leftoverReqs1.concat(leftoverReqs2));
 	leftoverReqs1.concat(leftoverReqs2).forEach(({ id }) => {
-		deleteFriendReq({ reqId: id });
+		deleteFriendReq({ reqId: id }, user);
 	});
 
 	// delete leftover household invites from this householdId to user
@@ -224,11 +253,24 @@ async function acceptFriendReq(
 		}
 	});
 	console.log('leftover householdInvites', leftoverReqs3);
-	leftoverReqs3.forEach(({ id }) => deleteHouseholdInvite({ id }));
+	leftoverReqs3.forEach(({ id }) => deleteHouseholdInvite({ id }, user));
 }
 
-async function deleteFriendReq(req: { reqId: number }) {
-	console.log('deleteFriendReq', req.reqId);
+async function findFriendReq(reqId: number) {
+	return await prisma.friendRequest.findUnique({
+		where: {
+			id: reqId
+		}
+	});
+}
+
+async function deleteFriendReq(req: { reqId: number }, user: User) {
+	const friendReq = await findFriendReq(req.reqId);
+	if (!friendReq || friendReq.targetPhone !== user.phone) {
+		throw error(400, {
+			message: "Can't delete friend request not issued to you"
+		});
+	}
 	return await prisma.friendRequest.delete({
 		where: {
 			id: req.reqId
@@ -250,6 +292,11 @@ async function saveSchedule(
 	user: User
 ) {
 	const { householdId } = user;
+	if (!householdId) {
+		throw error(400, {
+			message: 'You see to create / join a household before saving a schedule'
+		});
+	}
 	const { monthDay, status, notes, emoticons } = req;
 	let { startHr, startMin, endHr, endMin } = req;
 
@@ -315,7 +362,7 @@ async function createHouseholdInvite(
 	const { id: fromUserId } = user;
 	let { householdId } = user;
 	if (!householdId) {
-		householdId = await createHousehold(fromUserId);
+		householdId = await createHousehold(user);
 	}
 
 	const existingInvites = await prisma.joinHouseholdRequest.findMany({
@@ -439,9 +486,13 @@ async function saveUser(
 }
 
 async function createHousehold(
-	userId: number,
+	user: User,
 	data?: { name: string; publicNotes: string; updatedAt: Date }
 ) {
+	if (user.householdId)
+		throw error(400, {
+			message: "Can't create household for someone who's already in a household"
+		});
 	// create household
 	const household = await prisma.household.create({
 		data: data ?? {
@@ -454,7 +505,7 @@ async function createHousehold(
 	// then associate user to it
 	await prisma.user.update({
 		where: {
-			id: userId
+			id: user.id
 		},
 		data: {
 			householdId: household.id
@@ -466,14 +517,13 @@ async function createHousehold(
 
 async function saveHousehold(
 	req: {
-		id: number;
 		name: string;
 		publicNotes: string;
 	},
 	user: User
 ) {
-	const { id: householdId, name, publicNotes } = req;
-	const { id: userId } = user;
+	const { name, publicNotes } = req;
+	const { householdId } = user;
 	const data = {
 		name,
 		publicNotes,
@@ -481,7 +531,7 @@ async function saveHousehold(
 	};
 
 	if (!householdId) {
-		await createHousehold(userId, data);
+		await createHousehold(user, data);
 	} else {
 		await prisma.household.update({
 			where: {
@@ -502,11 +552,10 @@ async function saveKid(
 	user: User
 ) {
 	const { firstName, pronouns, lastName, dateOfBirth } = req;
-	const { id: founderId } = user;
 	let { householdId } = user;
 	// ensure the household exists before adding kid to it
 	if (!householdId) {
-		householdId = await createHousehold(founderId);
+		householdId = await createHousehold(user);
 	}
 	const kid = await prisma.householdChild.create({
 		data: {
@@ -520,8 +569,18 @@ async function saveKid(
 	return kid.id;
 }
 
-async function deleteKid(req: { id: number }) {
+async function deleteKid(req: { id: number }, user: User) {
 	const { id } = req;
+	const kid = await prisma.householdChild.findUnique({
+		where: {
+			id
+		}
+	});
+	if (!kid || kid.householdId !== user.householdId) {
+		throw error(400, {
+			message: "Can't delete child who isn't part of your household"
+		});
+	}
 	await prisma.householdChild.delete({
 		where: {
 			id
@@ -529,8 +588,14 @@ async function deleteKid(req: { id: number }) {
 	});
 }
 
-async function deleteHousehold(req: { id: number }) {
-	const { id: householdId } = req;
+async function deleteHousehold(user: User) {
+	const { householdId } = user;
+	if (!householdId) {
+		throw error(400, {
+			message: "You can't delete a household if you aren't part of one"
+		});
+	}
+
 	// delete all kids
 	const deleteKids = prisma.householdChild.deleteMany({
 		where: {
@@ -602,8 +667,20 @@ async function deleteHousehold(req: { id: number }) {
 	]);
 }
 
-async function updateHouseholdAdult(req: { id: number }) {
+async function removeHouseholdAdult(req: { id: number }, user: User) {
 	const { id } = req;
+	const coParent = await prisma.user.findUnique({
+		where: {
+			id
+		}
+	});
+
+	if (!coParent || user.householdId !== coParent.householdId) {
+		throw error(400, {
+			message: "Can't remove someone from a household that you both aren't a part of"
+		});
+	}
+
 	await prisma.user.update({
 		where: {
 			id
@@ -629,5 +706,5 @@ export {
 	saveKid,
 	deleteKid,
 	deleteHousehold,
-	updateHouseholdAdult
+	removeHouseholdAdult
 };

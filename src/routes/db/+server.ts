@@ -1,6 +1,6 @@
-import { json, redirect, error } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 
-import { PrismaClient, type Pronoun } from '@prisma/client';
+import type { Pronoun } from '@prisma/client';
 import {
 	saveUser,
 	saveHousehold,
@@ -15,10 +15,9 @@ import {
 	deleteHouseholdInvite,
 	deleteKid,
 	deleteHousehold,
-	updateHouseholdAdult
-} from '$lib/server/db.ts';
-
-const prisma = new PrismaClient();
+	removeHouseholdAdult
+} from '$lib/server/db';
+import { getProfileFromSession } from '$lib/server/shared';
 
 export async function POST({
 	request,
@@ -28,31 +27,7 @@ export async function POST({
 	cookies: { get: (value: string) => string };
 }) {
 	const sessionToken = cookies.get('session');
-	if (!sessionToken) throw redirect(303, '/');
-
-	const session = await prisma.session.findUnique({
-		where: {
-			token: sessionToken
-		}
-	});
-
-	if (!session)
-		throw error(401, {
-			message: 'Invalid session token'
-		});
-
-	const now = new Date();
-	if (session.expires < now) {
-		throw error(401, {
-			message: 'Expired session'
-		});
-	}
-	const { phone } = session;
-	const user = await prisma.user.findUnique({
-		where: {
-			phone
-		}
-	});
+	const { user, phone } = await getProfileFromSession(sessionToken);
 	const req = await request.json();
 
 	const res: { [key: string]: string | Pronoun | number | Date | boolean } = {};
@@ -104,12 +79,13 @@ export async function DELETE({
 	cookies: { get: (value: string) => string };
 }) {
 	const sessionToken = cookies.get('session');
-	if (!sessionToken) throw redirect(303, '/');
+	const { user } = await getProfileFromSession(sessionToken);
+	if (!user) throw error(401, { message: 'You must be logged in.' });
 
 	const req = await request.json();
 
-	if (req.type === 'householdChild') await deleteKid(req);
-	else if (req.type === 'household') await deleteHousehold(req);
+	if (req.type === 'householdChild') await deleteKid(req, user);
+	else if (req.type === 'household') await deleteHousehold(user);
 	return json('success');
 }
 
@@ -121,10 +97,11 @@ export async function PATCH({
 	cookies: { get: (value: string) => string };
 }) {
 	const sessionToken = cookies.get('session');
-	if (!sessionToken) throw redirect(303, '/');
+	const { user } = await getProfileFromSession(sessionToken);
+	if (!user) throw error(401, { message: 'You must be logged in.' });
 
 	const req = await request.json();
 
-	if (req.type === 'householdAdult') await updateHouseholdAdult(req);
+	if (req.type === 'householdAdult') await removeHouseholdAdult(req);
 	return json('success');
 }

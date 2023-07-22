@@ -61,7 +61,6 @@
 	async function saveToDB() {
 		const response = await writeReq('/db', {
 			type: 'household',
-			id: householdId,
 			name: name,
 			publicNotes: publicNotes
 		});
@@ -79,7 +78,6 @@
 	async function addKid(e: SubmitEvent) {
 		const response = await writeReq('/db', {
 			type: 'householdChild',
-			householdId: householdId,
 			firstName: e.target[0].value,
 			pronouns: e.target[2].value,
 			lastName: e.target[1].value,
@@ -170,8 +168,7 @@
 		const response = await writeReq(
 			'/db',
 			{
-				type: 'household',
-				id: householdId
+				type: 'household'
 			},
 			'DELETE'
 		);
@@ -193,8 +190,7 @@
 		}
 		const response = await writeReq('/db', {
 			type: 'inviteToHousehold',
-			targetPhone: phoneInput.getNumber(),
-			householdId: householdId
+			targetPhone: phoneInput.getNumber()
 		});
 		if (response.status == 200) {
 			if (!householdId) {
@@ -210,8 +206,6 @@
 	async function joinHousehold(householdId: number, id: number) {
 		const response = await writeReq('/db', {
 			type: 'acceptHouseholdInvite',
-			phone: $page.data.user.phone,
-			householdId,
 			id
 		});
 		if (response.status == 200) {
