@@ -69,9 +69,7 @@ const circleNotif = async (userStr: string, schedDiffs: string) => {
 
 	return `${user.firstName}${
 		user.lastName && user.lastName.length ? ` ${user.lastName}` : ''
-	} (parent of ${kidNames}) has updated ${
-		objectivePronoun
-	} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSchedDiffs}`;
+	} (parent of ${kidNames}) has updated ${objectivePronoun} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSchedDiffs}`;
 };
 
 const dateNotes = (notes: string) => sanitize(notes);

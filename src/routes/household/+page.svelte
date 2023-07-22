@@ -194,8 +194,7 @@
 		const response = await writeReq('/db', {
 			type: 'inviteToHousehold',
 			targetPhone: phoneInput.getNumber(),
-			householdId: householdId,
-			fromUserId: $page.data.user.id
+			householdId: householdId
 		});
 		if (response.status == 200) {
 			if (!householdId) {

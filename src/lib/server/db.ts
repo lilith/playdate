@@ -52,12 +52,20 @@ async function acceptHouseholdInvite(req: { phone: string; householdId: number; 
 	return await Promise.all(friendReqs.map((x) => deleteFriendReq({ reqId: x.id })));
 }
 
-async function createCircleInvite(req: {
-	targetPhone: string;
-	fromUserId: number;
-	fromHouseholdId: number;
-}) {
-	const { targetPhone, fromUserId, fromHouseholdId } = req;
+async function createCircleInvite(
+	req: {
+		targetPhone: string;
+	},
+	user: User
+) {
+	const { id: fromUserId, householdId: fromHouseholdId } = user;
+	const { targetPhone } = req;
+
+	if (!fromHouseholdId) {
+		throw error(400, {
+			message: 'You need to create a household before issuing friend requests'
+		});
+	}
 
 	const existingInvites = await prisma.friendRequest.findMany({
 		where: {
@@ -128,13 +136,35 @@ async function deleteFriend(req: { connectionId: number }) {
 	});
 }
 
-async function acceptFriendReq(req: {
-	householdId: number;
-	friendHouseholdId: number;
-	friendReqId: number;
-	phone: string;
-}) {
-	const { householdId, friendHouseholdId, phone } = req;
+async function acceptFriendReq(
+	req: {
+		friendReqId: number;
+	},
+	user: User
+) {
+	const { householdId, phone } = user;
+	const { friendReqId } = req;
+
+	const friendReq = await prisma.friendRequest.findUnique({
+		where: {
+			id: friendReqId
+		}
+	});
+
+	if (!householdId) {
+		throw error(400, {
+			message: 'You need to create a household before accepting friend requests'
+		});
+	}
+
+	if (!friendReq || friendReq.targetPhone !== user.phone) {
+		throw error(400, {
+			message: 'No friend request with that id issued to you'
+		});
+	}
+
+	const { fromHouseholdId: friendHouseholdId } = friendReq;
+
 	// add to user's circle
 	await prisma.householdConnection.create({
 		data: {
@@ -206,18 +236,21 @@ async function deleteFriendReq(req: { reqId: number }) {
 	});
 }
 
-async function saveSchedule(req: {
-	monthDay: string;
-	status: AvailabilityStatus;
-	notes: string | undefined;
-	emoticons: string | undefined;
-	householdId: number;
-	startHr: number;
-	startMin: number;
-	endHr: number;
-	endMin: number;
-}) {
-	const { monthDay, status, notes, emoticons, householdId } = req;
+async function saveSchedule(
+	req: {
+		monthDay: string;
+		status: AvailabilityStatus;
+		notes: string | undefined;
+		emoticons: string | undefined;
+		startHr: number;
+		startMin: number;
+		endHr: number;
+		endMin: number;
+	},
+	user: User
+) {
+	const { householdId } = user;
+	const { monthDay, status, notes, emoticons } = req;
 	let { startHr, startMin, endHr, endMin } = req;
 
 	if (startHr === undefined) startHr = 0;
@@ -272,13 +305,15 @@ async function saveSchedule(req: {
 	});
 }
 
-async function createHouseholdInvite(req: {
-	targetPhone: string;
-	householdId: number;
-	fromUserId: number;
-}) {
-	const { targetPhone, fromUserId } = req;
-	let { householdId } = req;
+async function createHouseholdInvite(
+	req: {
+		targetPhone: string;
+	},
+	user: User
+) {
+	const { targetPhone } = req;
+	const { id: fromUserId } = user;
+	let { householdId } = user;
 	if (!householdId) {
 		householdId = await createHousehold(fromUserId);
 	}
@@ -435,9 +470,10 @@ async function saveHousehold(
 		name: string;
 		publicNotes: string;
 	},
-	userId: number
+	user: User
 ) {
 	const { id: householdId, name, publicNotes } = req;
+	const { id: userId } = user;
 	const data = {
 		name,
 		publicNotes,
@@ -458,16 +494,16 @@ async function saveHousehold(
 
 async function saveKid(
 	req: {
-		householdId: number;
 		firstName: string;
 		pronouns: Pronoun;
 		lastName: string;
 		dateOfBirth: Date;
 	},
-	founderId: number
+	user: User
 ) {
 	const { firstName, pronouns, lastName, dateOfBirth } = req;
-	let { householdId } = req;
+	const { id: founderId } = user;
+	let { householdId } = user;
 	// ensure the household exists before adding kid to it
 	if (!householdId) {
 		householdId = await createHousehold(founderId);

@@ -64,37 +64,33 @@ export async function POST({
 	if (!user) throw error(401, { message: 'You must be logged in.' });
 
 	if (req.type === 'household') {
-		if (req.id !== user.householdId)
-			throw error(401, { message: "You may not change someone else's household data" });
-		await saveHousehold(req, user.id);
+		await saveHousehold(req, user);
 	} else if (req.type === 'householdChild') {
-		if (req.householdId !== user.householdId)
-			throw error(401, { message: "You may not change someone else's household data" });
-		res['id'] = await saveKid(req, user.id);
+		res['id'] = await saveKid(req, user);
 	} else if (req.type === 'inviteToHousehold') {
-		const { err } = await createHouseholdInvite(req);
+		const { err } = await createHouseholdInvite(req, user);
 		if (err)
 			throw error(400, {
 				message: err
 			});
 	} else if (req.type === 'schedule') {
-		await saveSchedule(req);
+		await saveSchedule(req, user);
 	} else if (req.type === 'inviteToCircle') {
-		const { err } = await createCircleInvite(req);
+		const { err } = await createCircleInvite(req, user);
 		if (err)
 			throw error(400, {
 				message: err
 			});
 	} else if (req.type === 'acceptFriendReq') {
-		await acceptFriendReq(req);
+		await acceptFriendReq(req, user);
 	} else if (req.type === 'rejectFriendReq') {
-		await deleteFriendReq(req);
+		await deleteFriendReq(req, user);
 	} else if (req.type === 'deleteFriend') {
-		await deleteFriend(req);
+		await deleteFriend(req, user);
 	} else if (req.type === 'acceptHouseholdInvite') {
-		await acceptHouseholdInvite(req);
+		await acceptHouseholdInvite(req, user);
 	} else if (req.type === 'rejectHouseholdInvite') {
-		await deleteHouseholdInvite(req);
+		await deleteHouseholdInvite(req, user);
 	}
 
 	return json(res);
