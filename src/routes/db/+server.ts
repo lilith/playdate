@@ -43,19 +43,11 @@ export async function POST({
 	} else if (req.type === 'householdChild') {
 		res['id'] = await saveKid(req, user);
 	} else if (req.type === 'inviteToHousehold') {
-		const { err } = await createHouseholdInvite(req, user);
-		if (err)
-			throw error(400, {
-				message: err
-			});
+		await createHouseholdInvite(req, user);
 	} else if (req.type === 'schedule') {
 		await saveSchedule(req, user);
 	} else if (req.type === 'inviteToCircle') {
-		const { err } = await createCircleInvite(req, user);
-		if (err)
-			throw error(400, {
-				message: err
-			});
+		await createCircleInvite(req, user);
 	} else if (req.type === 'acceptFriendReq') {
 		await acceptFriendReq(req, user);
 	} else if (req.type === 'rejectFriendReq') {
@@ -102,6 +94,6 @@ export async function PATCH({
 
 	const req = await request.json();
 
-	if (req.type === 'householdAdult') await removeHouseholdAdult(req);
+	if (req.type === 'householdAdult') await removeHouseholdAdult(req, user);
 	return json('success');
 }

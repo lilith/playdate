@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
+import { construct_svelte_component_dev } from 'svelte/internal';
 
 const prisma = new PrismaClient();
 
@@ -82,7 +83,7 @@ async function createCircleInvite(
 	const { targetPhone } = req;
 
 	if (!fromHouseholdId) {
-		throw error(400, {
+		throw error(401, {
 			message: 'You need to create a household before issuing friend requests'
 		});
 	}
@@ -94,9 +95,9 @@ async function createCircleInvite(
 		}
 	});
 	if (existingInvites.length)
-		return {
-			err: 'The user associated with this number has already been invited to this circle.'
-		};
+		throw error(400, {
+			message: 'The user associated with this number has already been invited to this circle.'
+		});
 
 	const targetUser = await prisma.user.findUnique({
 		where: {
@@ -116,9 +117,9 @@ async function createCircleInvite(
 			}
 		});
 		if (existingFriend1)
-			return {
-				err: 'The user associated with this number is already in your circle.'
-			};
+			throw error(400, {
+				message: 'The user associated with this number is already in your circle.'
+			});
 
 		const existingFriend2 = await prisma.householdConnection.findUnique({
 			where: {
@@ -129,9 +130,9 @@ async function createCircleInvite(
 			}
 		});
 		if (existingFriend2)
-			return {
-				err: 'The user associated with this number is already in your circle.'
-			};
+			throw error(400, {
+				message: 'The user associated with this number is already in your circle.'
+			});
 	}
 
 	const now = new Date();
@@ -145,7 +146,6 @@ async function createCircleInvite(
 			fromHouseholdId
 		}
 	});
-	return {};
 }
 
 async function deleteFriend(req: { connectionId: number }, user: User) {
@@ -181,13 +181,13 @@ async function acceptFriendReq(
 	const friendReq = await findFriendReq(friendReqId);
 
 	if (!householdId) {
-		throw error(400, {
+		throw error(401, {
 			message: 'You need to create a household before accepting friend requests'
 		});
 	}
 
 	if (!friendReq || friendReq.targetPhone !== user.phone) {
-		throw error(400, {
+		throw error(401, {
 			message: 'No friend request with that id issued to you'
 		});
 	}
@@ -265,9 +265,11 @@ async function findFriendReq(reqId: number) {
 }
 
 async function deleteFriendReq(req: { reqId: number }, user: User) {
+	console.log('DELETE FRIEND REQ', req);
 	const friendReq = await findFriendReq(req.reqId);
+	console.log(friendReq);
 	if (!friendReq || friendReq.targetPhone !== user.phone) {
-		throw error(400, {
+		throw error(401, {
 			message: "Can't delete friend request not issued to you"
 		});
 	}
@@ -293,8 +295,8 @@ async function saveSchedule(
 ) {
 	const { householdId } = user;
 	if (!householdId) {
-		throw error(400, {
-			message: 'You see to create / join a household before saving a schedule'
+		throw error(401, {
+			message: 'You need to create / join a household before saving a schedule'
 		});
 	}
 	const { monthDay, status, notes, emoticons } = req;
@@ -362,7 +364,9 @@ async function createHouseholdInvite(
 	const { id: fromUserId } = user;
 	let { householdId } = user;
 	if (!householdId) {
-		householdId = await createHousehold(user);
+		throw error(401, {
+			message: 'You need to create / join a household before inviting others to join it.'
+		});
 	}
 
 	const existingInvites = await prisma.joinHouseholdRequest.findMany({
@@ -372,9 +376,9 @@ async function createHouseholdInvite(
 		}
 	});
 	if (existingInvites.length)
-		return {
-			err: 'The user associated with this number has already been invited to this household.'
-		};
+		throw error(400, {
+			message: 'The user associated with this number has already been invited to this household.'
+		});
 	const now = new Date();
 	const expires = now;
 	expires.setDate(now.getDate() + 7); // expire 1 week from now
@@ -386,7 +390,6 @@ async function createHouseholdInvite(
 			fromUserId
 		}
 	});
-	return {};
 }
 
 async function saveUser(
@@ -555,7 +558,9 @@ async function saveKid(
 	let { householdId } = user;
 	// ensure the household exists before adding kid to it
 	if (!householdId) {
-		householdId = await createHousehold(user);
+		throw error(401, {
+			message: 'Create a household before trying to add a child to it'
+		});
 	}
 	const kid = await prisma.householdChild.create({
 		data: {

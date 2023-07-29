@@ -1,7 +1,7 @@
 import { PrismaClient, Pronoun } from '@prisma/client';
 const prisma = new PrismaClient();
 async function main() {
-	const phones: string[] = ['+12015550121', '+12015550122'];
+	const phones: string[] = ['+12015550121', '+12015550122', '+12015550123', '+120155501234'];
 	const now = new Date();
 	const expires = new Date();
 	expires.setHours(expires.getHours() + 1);
@@ -25,53 +25,55 @@ async function main() {
 		};
 	}
 
+	function emptyHousehold(ind: number) {
+		return {
+			household: {
+				connectOrCreate: {
+					where: {
+						id: ind
+					},
+					create: {
+						// phone: phones[ind - 1],
+						id: ind,
+						name: `Household ${ind}`
+					}
+				}
+			}
+		};
+	}
+
+	function basicUser(id: number) {
+		return {
+			firstName: `User ${id}`,
+			locale: 'English',
+			pronouns: Pronoun['SHE_HER_HERS'],
+			timeZone: 'America/Los_Angeles',
+			reminderDatetime: new Date(),
+			reminderIntervalDays: 7,
+			acceptedTermsAt: new Date()
+		};
+	}
+
 	// User 1
-	// await prisma.phoneContactPermissions.create({
-	//     data: {
-	//         phone: phones[0],
-	//         blocked: false,
-	//         allowInvites: true,
-	//         allowReminders: true,
-	//         acceptedTermsAt: now
-	//     }
-	// })
-	const user1 = {
-		firstName: 'User 1',
-		locale: 'English',
-		pronouns: Pronoun['SHE_HER_HERS'],
-		timeZone: 'America/Los_Angeles',
-		reminderDatetime: new Date(),
-		reminderIntervalDays: 7,
-		acceptedTermsAt: new Date()
-	};
 	await prisma.user.upsert({
 		where: {
 			phone: phones[0]
 		},
-		update: user1,
+		update: basicUser(1),
 		create: {
-			...user1,
+			...basicUser(1),
 			...permsYes(phones[0])
 		}
 	});
 
 	// User 2
-	const user2 = {
-		firstName: 'User 2',
-		locale: 'English',
-		pronouns: Pronoun['SHE_HER_HERS'],
-		timeZone: 'America/Los_Angeles',
-		reminderDatetime: new Date(),
-		reminderIntervalDays: 7,
-		acceptedTermsAt: new Date()
-	};
 	await prisma.user.upsert({
 		where: {
 			phone: phones[1]
 		},
-		update: user2,
+		update: basicUser(2),
 		create: {
-			...user2,
+			...basicUser(2),
 			...permsYes(phones[1])
 		}
 	});
@@ -88,6 +90,68 @@ async function main() {
 		},
 		update: session,
 		create: session
+	});
+
+	// User 3
+	const user3 = {
+		...basicUser(3),
+		...emptyHousehold(3)
+	};
+
+	await prisma.user.upsert({
+		where: {
+			phone: phones[2]
+		},
+		update: user3,
+		create: {
+			...user3,
+			...permsYes(phones[2])
+		}
+	});
+
+	// User 4
+	const user4 = {
+		...basicUser(4),
+		...emptyHousehold(4)
+	};
+
+	await prisma.user.upsert({
+		where: {
+			phone: phones[3]
+		},
+		update: user4,
+		create: {
+			...user4,
+			...permsYes(phones[3])
+		}
+	});
+
+	// friend req from User 4 to User 3
+	const friendReq = {
+		id: 4,
+		targetPhone: phones[2],
+		fromHouseholdId: 4,
+		fromUserId: 4
+	};
+	await prisma.friendRequest.upsert({
+		where: {
+			id: 4
+		},
+		update: friendReq,
+		create: friendReq
+	});
+	const user4session = 'user4session';
+	const session4 = {
+		token: user4session,
+		phone: phones[3],
+		expires
+	};
+	await prisma.session.upsert({
+		where: {
+			token: user4session
+		},
+		update: session4,
+		create: session4
 	});
 }
 

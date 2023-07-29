@@ -95,20 +95,86 @@ test("User 2 fails to change User 1's basic household info", async ({ page, cont
 	await page.close();
 });
 
-test.only("User 2 fails to change User 1's household children", async ({ page, context }) => {
+/* 
+Skipped tests b/c the related endpoints don't ask WHICH user's data to alter
+that info is derived from the session cookie
+- User 2 fails to change User 1's household children
+- User 2 fails to issue invitations for others to join User 3's household
+- User 2 fails to alter User 1's schedule
+- User 2 fails to issue friend reqs to others from User 3's household
+*/
+
+test("User 4 fails to accept friend request on User 3's behalf", async ({ page, context }) => {
+	context.addCookies([
+		{
+			name: 'session',
+			value: 'user4session',
+			url: host
+		}
+	]);
 	const res = await context.request.fetch(host + '/db', {
 		method: 'post',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		data: {
-			type: 'householdChild',
-			id: 1,
-			name: 'Fake name'
+			type: 'acceptFriendReq',
+			friendReqId: 3
 		}
 	});
 	const { message } = await res.json();
-	expect(message).toEqual("You may not change someone else's household data");
+	expect(message).toEqual('No friend request with that id issued to you');
+	expect(res.status()).toEqual(401);
+	await page.close();
+});
+
+test("User 4 fails to decline friend request on User 3's behalf", async ({ page, context }) => {
+	context.addCookies([
+		{
+			name: 'session',
+			value: 'user4session',
+			url: host
+		}
+	]);
+	const res = await context.request.fetch(host + '/db', {
+		method: 'post',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		data: {
+			type: 'rejectFriendReq',
+			reqId: 3
+		}
+	});
+	const { message } = await res.json();
+	expect(message).toEqual("Can't delete friend request not issued to you");
+	expect(res.status()).toEqual(401);
+	await page.close();
+});
+
+test.only("User 4 fails to decline friend request on User 3's behalf", async ({
+	page,
+	context
+}) => {
+	context.addCookies([
+		{
+			name: 'session',
+			value: 'user4session',
+			url: host
+		}
+	]);
+	const res = await context.request.fetch(host + '/db', {
+		method: 'post',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		data: {
+			type: 'rejectFriendReq',
+			reqId: 3
+		}
+	});
+	const { message } = await res.json();
+	expect(message).toEqual("Can't delete friend request not issued to you");
 	expect(res.status()).toEqual(401);
 	await page.close();
 });
