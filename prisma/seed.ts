@@ -1,7 +1,13 @@
 import { PrismaClient, Pronoun } from '@prisma/client';
 const prisma = new PrismaClient();
 async function main() {
-	const phones: string[] = ['+12015550121', '+12015550122', '+12015550123', '+120155501234'];
+	const phones: string[] = [
+		'+12015550121',
+		'+12015550122',
+		'+12015550123',
+		'+12015550124',
+		'+12015550125'
+	];
 	const now = new Date();
 	const expires = new Date();
 	expires.setHours(expires.getHours() + 1);
@@ -128,18 +134,19 @@ async function main() {
 
 	// friend req from User 4 to User 3
 	const friendReq = {
-		id: 4,
+		id: 3,
 		targetPhone: phones[2],
 		fromHouseholdId: 4,
 		fromUserId: 4
 	};
 	await prisma.friendRequest.upsert({
 		where: {
-			id: 4
+			id: 3
 		},
 		update: friendReq,
 		create: friendReq
 	});
+
 	const user4session = 'user4session';
 	const session4 = {
 		token: user4session,
@@ -152,6 +159,53 @@ async function main() {
 		},
 		update: session4,
 		create: session4
+	});
+
+	// User 5
+	const user5 = {
+		...basicUser(5),
+		...emptyHousehold(5)
+	};
+
+	await prisma.user.upsert({
+		where: {
+			phone: phones[4]
+		},
+		update: user5,
+		create: {
+			...user5,
+			...permsYes(phones[4])
+		}
+	});
+
+	// household connection b/t Households 3 and 5
+	const householdConnection = {
+		id: 3,
+		householdId: 3,
+		friendHouseholdId: 5
+	};
+	await prisma.householdConnection.upsert({
+		where: {
+			id: 3
+		},
+		update: householdConnection,
+		create: householdConnection
+	});
+
+	// household invite from User 5 to User 2
+	const householdInvite = {
+		id: 2,
+		targetPhone: phones[1],
+		householdId: 5,
+		fromUserId: 5
+	};
+
+	await prisma.joinHouseholdRequest.upsert({
+		where: {
+			id: 2
+		},
+		update: householdInvite,
+		create: householdInvite
 	});
 }
 

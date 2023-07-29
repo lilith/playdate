@@ -19,7 +19,7 @@ async function deleteHouseholdInvite(req: { id: number }, user: User) {
 
 	const invite = await findHouseholdInvite(id);
 	if (!invite || invite.targetPhone !== user.phone) {
-		throw error(400, {
+		throw error(401, {
 			message: "You can't delete a household invite tht wsan't issued to you"
 		});
 	}
@@ -37,7 +37,7 @@ async function acceptHouseholdInvite(req: { id: number }, user: User) {
 	const { phone, householdId: userHouseholdId } = user;
 
 	if (!invite || invite.targetPhone !== phone) {
-		throw error(400, {
+		throw error(401, {
 			message: "You can't accept a household invite that wasn't issued to you"
 		});
 	}
@@ -157,8 +157,8 @@ async function deleteFriend(req: { connectionId: number }, user: User) {
 
 	const { householdId: hId } = user;
 	if (!friend || (friend.householdId !== hId && friend.friendHouseholdId !== hId)) {
-		throw error(400, {
-			message: "You can't delete a friend request that wasn't issued to you"
+		throw error(401, {
+			message: "You can't delete a household connection that you're not a part of"
 		});
 	}
 
@@ -265,9 +265,7 @@ async function findFriendReq(reqId: number) {
 }
 
 async function deleteFriendReq(req: { reqId: number }, user: User) {
-	console.log('DELETE FRIEND REQ', req);
 	const friendReq = await findFriendReq(req.reqId);
-	console.log(friendReq);
 	if (!friendReq || friendReq.targetPhone !== user.phone) {
 		throw error(401, {
 			message: "Can't delete friend request not issued to you"

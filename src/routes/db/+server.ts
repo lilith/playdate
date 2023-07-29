@@ -58,6 +58,10 @@ export async function POST({
 		await acceptHouseholdInvite(req, user);
 	} else if (req.type === 'rejectHouseholdInvite') {
 		await deleteHouseholdInvite(req, user);
+	} else {
+		throw error(400, {
+			message: `The request type ${req.type} isn't supported`
+		});
 	}
 
 	return json(res);
