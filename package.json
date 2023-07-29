@@ -5,6 +5,9 @@
 	"engines": {
 		"node": ">=18"
 	},
+	"prisma": {
+		"seed": "ts-node --transpile-only prisma/seed.ts"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -19,7 +22,7 @@
 		"reset": "prisma migrate reset  && yarn dev",
 		"postinstall": "prisma generate",
 		"build:prev": "vite build && vite preview",
-		"boop": "node tests/test.js"
+		"seed": "prisma db seed"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^5.0.2",
@@ -59,7 +62,6 @@
 		"jsonwebtoken": "^9.0.0",
 		"marked": "^5.1.0",
 		"node-cron": "^3.0.2",
-		"playwright": "^1.36.1",
 		"sanitize": "^2.1.2",
 		"twilio": "^4.11.1"
 	}

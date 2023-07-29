@@ -1,18 +1,27 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-	webServer: {
-		command: 'yarn dev',
-		port: 5173,
-		reuseExistingServer: true
-	},
+	webServer: [
+		{
+			command: 'pg_start',
+			port: 5432,
+			reuseExistingServer: true
+		},
+		{
+			command: 'yarn dev',
+			port: 5173,
+			reuseExistingServer: true
+		}
+	],
 	// use: {
 	// 	// Base URL to use in actions like `await page.goto('/')`.
-	// 	baseURL: 'https://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io',
+	// 	// baseURL: 'https://5173-debug-lilith-playdate-kvvsqrmwmqz.ws-us102.gitpod.io',
+	// 	baseURL: 'localhost'
 	// },
 	expect: {
-        timeout: 10000
-    },
+		timeout: 3000
+	},
+	timeout: 20000,
 	testDir: 'tests'
 };
 
@@ -37,4 +46,3 @@ export default config;
 // 	},
 // 	testDir: 'tests'
 // });
-
