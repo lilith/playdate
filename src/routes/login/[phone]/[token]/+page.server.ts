@@ -23,7 +23,7 @@ export const load = (async ({ params, cookies }) => {
 			}
 		);
 	}
-	console.log('VERIFIED TOKEN');
+
 	// check DB's expiration date
 	const { phone, expires } = magicLinkInfo as { phone: string; expires: Date };
 

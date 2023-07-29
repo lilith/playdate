@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+	log: ['query', 'info', 'warn', 'error']
+});
 
 const generate = async () => {
 	const createdAt = new Date();
@@ -61,7 +63,7 @@ export async function POST({ request }: { request: Request }) {
 			}
 		);
 	}
-	console.log('TOKEN', token);
+
 	// save these attrs to DB
 	save(token, phone, createdAt, expires)
 		.then(async () => {

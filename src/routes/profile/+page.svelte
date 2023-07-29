@@ -35,7 +35,6 @@
 	} = $page.data.user;
 	const { terms } = $page.data;
 	let doNotDisturb = !allowInvites;
-	let saved = false;
 	let showModal = !acceptedTermsAt;
 
 	function setDateTimes(zone: string) {
@@ -109,8 +108,6 @@
 				await invalidateAll();
 				goto('/household');
 			}
-			saved = true;
-			setTimeout(() => (saved = false), 4000);
 		} else {
 			alert('Something went wrong with saving');
 		}
@@ -252,9 +249,7 @@
 			>).
 		</p>
 
-		<button type="submit" class="btn" style="margin: 2rem auto 4rem;">
-			{saved ? '✔' : 'Save'}
-		</button>
+		<button type="submit" class="btn" style="margin: 2rem auto 4rem;"> Save </button>
 	</form>
 </div>
 
