@@ -76,6 +76,17 @@
 	}
 
 	async function addKid(e: SubmitEvent) {
+		if (!householdId) {
+			const response = await writeReq('/db', {
+				type: 'household',
+				name: '',
+				publicNotes: ''
+			});
+
+			if (response.status !== 200) {
+				alert('Something went wrong with saving');
+			}
+		}
 		const response = await writeReq('/db', {
 			type: 'householdChild',
 			firstName: e.target[0].value,
