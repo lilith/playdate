@@ -99,8 +99,7 @@ export const handle = (async ({ event, resolve }) => {
 		!event.url.pathname.startsWith('/legal/') &&
 		event.url.pathname.slice(0, 6) !== '/login' &&
 		event.url.pathname !== '/reminder' &&
-		event.url.pathname !== '/twilio' &&
-		event.url.pathname !== '/sanitize'
+		!(event.url.pathname === '/twilio' && event.url.searchParams.get('nocookie'))
 	) {
 		if (!cookie) throw redirect(303, '/');
 		const session = await prisma.session.findUnique({
@@ -127,6 +126,11 @@ export const handle = (async ({ event, resolve }) => {
 			event.locals.phone = session.phone;
 			const response = await resolve(event);
 			return response;
+		}
+
+		if (event.url.pathname === '/twilio' && event.url.searchParams.get('noacc')) {
+			// user has session token but no account
+			return await resolve(event);
 		}
 
 		await setLocal(user, session.phone, event);

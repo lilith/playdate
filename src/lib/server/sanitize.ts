@@ -1,4 +1,5 @@
 import { PrismaClient, Pronoun, type User } from '@prisma/client';
+import { error } from '@sveltejs/kit';
 const prisma = new PrismaClient();
 import sanitizerFunc from 'sanitize';
 
@@ -14,8 +15,7 @@ export const getParams = (url: URL, paramNames: string[]) => {
 
 const sanitize = (input: string) => sanitizer.value(input, 'str');
 
-export const circleNotif = async (userStr: string, schedDiffs: string) => {
-	const user = JSON.parse(userStr) as User;
+export const circleNotif = async (schedDiffs: string, user: User) => {
 	const sanitizedSchedDiffs = sanitize(schedDiffs);
 	let objectivePronoun = Pronoun[user.pronouns as PRONOUNS_ENUM].split('_')[2];
 	const { SHE_HER_HERS, THEY_THEM_THEIRS, XE_XEM_XYRS, ZEZIE_HIR_HIRS } = Pronoun;
@@ -31,7 +31,10 @@ export const circleNotif = async (userStr: string, schedDiffs: string) => {
 	let kidNames: string = '';
 
 	if (!user.householdId) {
-		return new Response(JSON.stringify({ message: 'null householdId' }), { status: 400 });
+		throw error(400, {
+			message:
+				'You need to be part of a household in order to send notifs about your updated calendar'
+		});
 	}
 	const kids = await prisma.householdChild.findMany({
 		where: {

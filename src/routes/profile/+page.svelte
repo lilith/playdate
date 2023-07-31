@@ -133,9 +133,8 @@
 				on:click={async () => {
 					acceptedTermsAt = new Date();
 
-					const url = import.meta.env.PROD ? public_env.PUBLIC_URL : location.host;
-					await writeReq('/twilio', {
-						msg: `Thanks for subscribing to reminders and friend availability notifications from ${url}! You can disable this at any time on your Profile page or by responding STOP.`,
+					await writeReq('/twilio?nocookie=true', {
+						type: 'thanks',
 						phone: $page.data.user.phone
 					});
 					dialog.close();

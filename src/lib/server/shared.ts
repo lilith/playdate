@@ -4,6 +4,7 @@ import type { Session } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function getProfileFromSession(sessionToken: string) {
+	if (!sessionToken) return { user: null, phone: null };
 	const session = (await prisma.session.findUnique({
 		where: {
 			token: sessionToken

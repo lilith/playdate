@@ -65,7 +65,7 @@
 </script>
 
 <div>
-	<Modal showModal={showClickToTextLink}>
+	<Modal bind:showModal={showClickToTextLink}>
 		<h2 slot="header">Pre-filled SMS Invite</h2>
 
 		<div style="display: flex; flex-direction: column; margin-bottom: 1rem;">
