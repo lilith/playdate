@@ -1,8 +1,11 @@
 # playdate
+[![Run Tests](https://github.com/lilith/playdate/actions/workflows/test.yml/badge.svg)](https://github.com/lilith/playdate/actions/workflows/test.yml)
+
 
 _get texts when your kid's friends are free. broadcast texts to their parents when you're free. save time automatically. schedule easier. build friendships. make memories._
 
 [playdate.help](https://playdate.help) saves time and helps build friendships by coordinating tentative availability between parents for playdates. It's open-source (AGPLv3) and non-commercial.
+
 
 The [design document draft is here](https://docs.google.com/document/d/18AJJTOX9x-pXl4mSTfKHp_9Op4cszZLhZkb9UiQZbNA/edit?usp=sharing) (comment and edit!)
 
@@ -22,6 +25,7 @@ ideal tech stack: SvelteKit, Twilio, PostgreSQL, Vercel (If too slow, DigitalOce
 - `TWILIO_PHONE_NUMBER`
 - `DATABASE_PRISMA_URL`
 - `DATABASE_URL_NON_POOLING`
+- `PUBLIC_URL` (in prod)
 
 ## Sending SMS / friend links
 
