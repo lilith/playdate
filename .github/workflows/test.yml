@@ -1,7 +1,9 @@
 name: Run Tests
 
 on: [push, pull_request]
-
+env:
+  DATABASE_PRISMA_URL: postgres://postgres:postgres@localhost:5432/test
+  DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -45,5 +47,4 @@ jobs:
 
     - name: Run tests
       run: yarn test
-      env:
-        DATABASE_PRISMA_URL: postgres://postgres:postgres@localhost:5432/test
+      
