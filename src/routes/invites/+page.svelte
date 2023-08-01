@@ -7,19 +7,16 @@
 	import { invalidate } from '$app/navigation';
 	import { writeReq } from '../../utils';
 
-	let { friendReqsInfo, householdInvites, user } = $page.data;
+	let { friendReqsInfo, householdInvites } = $page.data;
 	afterUpdate(() => {
 		friendReqsInfo = $page.data.friendReqsInfo;
 		householdInvites = $page.data.householdInvites;
 	});
 
-	async function acceptFriendReq(friendReqId: number, friendHouseholdId: number) {
+	async function acceptFriendReq(friendReqId: number) {
 		const response = await writeReq('/db', {
 			type: 'acceptFriendReq',
-			householdId: $page.data.user.householdId,
-			friendHouseholdId,
-			friendReqId,
-			phone: user.phone
+			friendReqId
 		});
 		if (response.status == 200) {
 			await invalidate('data:invite');
@@ -40,11 +37,9 @@
 		}
 	}
 
-	async function joinHousehold(householdId: number, id: number) {
+	async function joinHousehold(id: number) {
 		const response = await writeReq('/db', {
 			type: 'acceptHouseholdInvite',
-			phone: $page.data.user.phone,
-			householdId,
 			id
 		});
 		if (response.status === 200) {
@@ -100,8 +95,8 @@
 					</div>
 					<div
 						class="btn-wrapper success w-half"
-						on:click={() => acceptFriendReq(household.reqId, household.id)}
-						on:keyup={() => acceptFriendReq(household.reqId, household.id)}
+						on:click={() => acceptFriendReq(household.reqId)}
+						on:keyup={() => acceptFriendReq(household.reqId)}
 					>
 						<AcceptIcon />
 					</div>
@@ -156,8 +151,8 @@
 					</div>
 					<div
 						class="btn-wrapper success w-half"
-						on:click={() => joinHousehold(invite.household.id, invite.id)}
-						on:keyup={() => joinHousehold(invite.household.id, invite.id)}
+						on:click={() => joinHousehold(invite.id)}
+						on:keyup={() => joinHousehold(invite.id)}
 					>
 						<AcceptIcon />
 					</div>

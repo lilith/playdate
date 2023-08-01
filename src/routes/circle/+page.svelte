@@ -32,11 +32,9 @@
 			alert('You have entered an invalid contact number.');
 			return;
 		}
-		const response = await writeReq('/db', {
+		await writeReq('/db', {
 			type: 'inviteToCircle',
-			targetPhone: phoneInput.getNumber(),
-			fromHouseholdId: $page.data.user.householdId,
-			fromUserId: $page.data.user.id
+			targetPhone: phoneInput.getNumber()
 		});
 		inviteesPhone = phoneInput.getNumber();
 		phoneInput.telInput.value = '';

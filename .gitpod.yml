@@ -8,5 +8,5 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: yarn install && yarn run build
+  - init: yarn install && npx playwright install && npx playwright install-deps && yarn run build
     command: yarn run dev

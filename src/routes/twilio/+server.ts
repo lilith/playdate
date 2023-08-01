@@ -116,6 +116,7 @@ export async function POST({ request }: { request: Request }) {
 export async function GET({ url }: { url: URL }) {
 	const body = url.searchParams.get('Body');
 	const phone = url.searchParams.get('From')?.toLowerCase() ?? undefined;
+	console.log('RECEIVED TEXT', body, phone);
 	if (body === 'stop') {
 		console.log(`BLOCKED ${phone}`);
 		await prisma.phoneContactPermissions.update({

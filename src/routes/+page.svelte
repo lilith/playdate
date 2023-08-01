@@ -38,6 +38,7 @@
 		});
 		if (res.status === 200) {
 			const { time, token } = await res.json();
+			if (public_env.PUBLIC_ENV === 'test') console.log('PHONE_TOKEN', phone, token);
 
 			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.origin;
 

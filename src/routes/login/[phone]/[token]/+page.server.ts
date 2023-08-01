@@ -1,15 +1,10 @@
+import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET({
-	params,
-	cookies
-}: {
-	params: { token: string };
-	cookies: { set: (a: string, b: string, c: object) => void; get: (value: string) => string };
-}) {
+export const load = (async ({ params, cookies }) => {
 	let magicLinkInfo;
 	try {
 		// validate token against what's stored in the DB
@@ -77,4 +72,4 @@ export async function GET({
 	});
 
 	throw redirect(308, '/dashboard');
-}
+}) satisfies PageServerLoad;

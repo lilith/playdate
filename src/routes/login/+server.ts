@@ -63,6 +63,7 @@ export async function POST({ request }: { request: Request }) {
 			}
 		);
 	}
+
 	// save these attrs to DB
 	save(token, phone, createdAt, expires)
 		.then(async () => {

@@ -36,7 +36,6 @@
 	} = $page.data.user;
 	const { terms } = $page.data;
 	let doNotDisturb = !allowInvites;
-
 	let showModal = !acceptedTermsAt;
 
 	function setDateTimes(zone: string) {
@@ -161,13 +160,13 @@
 
 	<form method="POST" action="/db" on:submit|preventDefault={saveToDB}>
 		<label class="subtitle" for="first-name">First Name<span class="red">*</span></label>
-		<input type="text" name="first-name" bind:value={firstName} required />
+		<input type="text" name="first-name" id="first-name" bind:value={firstName} required />
 
 		<label class="subtitle" for="last-name">Last Name</label>
 		<input type="text" name="last-name" bind:value={lastName} />
 
 		<label class="subtitle" for="pronouns">Pronouns<span class="red">*</span></label>
-		<select name="pronouns" bind:value={pronouns} required>
+		<select name="pronouns" id="pronouns" bind:value={pronouns} required>
 			<option value="" />
 			{#each Object.entries(PRONOUNS) as pronoun}
 				<option value={pronoun[0]}>{pronoun[1]}</option>
@@ -175,7 +174,7 @@
 		</select>
 
 		<label class="subtitle" for="zone">Zone<span class="red">*</span></label>
-		<select name="zone" bind:value={timeZone} required on:change={onChangeZone}>
+		<select name="zone" id="zone" bind:value={timeZone} required on:change={onChangeZone}>
 			{#each Intl.supportedValuesOf('timeZone') as zone}
 				<option value={zone}>{zone}</option>
 			{/each}
