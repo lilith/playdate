@@ -33,9 +33,12 @@ jobs:
         
     - name: Install dependencies
       run: yarn install --frozen-lockfile
+      
+    - name: Make sure it builds before we install playwright browsers
+      run: yarn build
 
-    - name: Install Playwright dependencies
-      run: npx playwright install-deps
+    - name: Install Playwright dependencies (just chromium for now)
+      run: npx playwright install-deps chromium
 
     - name: Run tests
       run: yarn test
