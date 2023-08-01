@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { env as public_env } from '$env/dynamic/public';
 	import { PRONOUNS, LANGUAGES } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
@@ -133,7 +134,7 @@
 				on:click={async () => {
 					acceptedTermsAt = new Date();
 
-					const url = import.meta.env.PROD ? $page.data.PUBLIC_URL : location.host;
+					const url = import.meta.env.PROD ? public_env.PUBLIC_URL : location.host;
 					await writeReq('/twilio', {
 						msg: `Thanks for subscribing to reminders and friend availability notifications from ${url}! You can disable this at any time on your Profile page or by responding STOP.`,
 						phone: $page.data.user.phone
