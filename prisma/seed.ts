@@ -6,7 +6,8 @@ async function main() {
 		'+12015550122',
 		'+12015550123',
 		'+12015550124',
-		'+12015550125'
+		'+12015550125',
+		'+12015550126'
 	];
 	const now = new Date();
 	const expires = new Date();
@@ -48,6 +49,35 @@ async function main() {
 		};
 	}
 
+	function householdWithKid(ind: number, kidInd: number) {
+		return {
+			household: {
+				connectOrCreate: {
+					where: {
+						id: ind
+					},
+					create: {
+						id: ind,
+						name: `Household ${ind}`,
+						children: {
+							connectOrCreate: [
+								{
+									where: {
+										id: kidInd
+									},
+									create: {
+										firstName: `User ${ind} Kid ${kidInd}`,
+										pronouns: Pronoun['HE_HIM_HIS']
+									}
+								}
+							]
+						}
+					}
+				}
+			}
+		};
+	}
+
 	function basicUser(id: number) {
 		return {
 			firstName: `User ${id}`,
@@ -59,6 +89,10 @@ async function main() {
 			acceptedTermsAt: new Date()
 		};
 	}
+
+	await prisma.friendRequest
+		.deleteMany()
+		.catch(() => console.log('No friend request table to delete'));
 
 	// User 1
 	await prisma.user.upsert({
@@ -206,6 +240,50 @@ async function main() {
 		},
 		update: householdInvite,
 		create: householdInvite
+	});
+
+	// User 6
+	const user6 = {
+		...basicUser(6),
+		...householdWithKid(6, 1)
+	};
+
+	await prisma.user.upsert({
+		where: {
+			phone: phones[5]
+		},
+		update: user6,
+		create: {
+			...user6,
+			...permsYes(phones[5])
+		}
+	});
+
+	const kid1 = {
+		householdId: 6,
+		firstName: 'User 6 Kid 1',
+		pronouns: Pronoun['HE_HIM_HIS']
+	};
+	await prisma.householdChild.upsert({
+		where: {
+			id: 1
+		},
+		update: kid1,
+		create: kid1
+	});
+
+	const user6session = 'user6session';
+	const session6 = {
+		token: user6session,
+		phone: phones[5],
+		expires
+	};
+	await prisma.session.upsert({
+		where: {
+			token: user6session
+		},
+		update: session6,
+		create: session6
 	});
 }
 

@@ -45,7 +45,7 @@ export const load = (async ({ parent, depends }) => {
 			}
 		}
 	};
-	let kidNames: string = '';
+	let kidNames = '';
 	if (householdId) {
 		const circle = await prisma.householdConnection.findMany({
 			where: {

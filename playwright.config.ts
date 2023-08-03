@@ -16,7 +16,7 @@ const config: PlaywrightTestConfig = {
 	expect: {
 		timeout: 3000
 	},
-	timeout: 20000,
+	timeout: 5000,
 	testDir: 'tests'
 };
 

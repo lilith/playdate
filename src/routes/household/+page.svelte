@@ -51,8 +51,8 @@
 		const twoWeeksLater = new Date();
 		twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
 
-		await writeReq('/twilio', {
-			msg: "Tip: Add this number to your contacts as Playdate Help to prevent impersonation - we'll only ever contact you from this number.",
+		await writeReq('/twilio?noacc=true', {
+			type: 'tip',
 			phone: $page.data.user.phone,
 			sendAt: twoWeeksLater
 		});
@@ -76,6 +76,19 @@
 	}
 
 	async function addKid(e: SubmitEvent) {
+		let newHouse = false;
+		if (!householdId) {
+			newHouse = true;
+			const response = await writeReq('/db', {
+				type: 'household',
+				name: '',
+				publicNotes: ''
+			});
+
+			if (response.status !== 200) {
+				alert('Something went wrong with saving');
+			}
+		}
 		const response = await writeReq('/db', {
 			type: 'householdChild',
 			firstName: e.target[0].value,
@@ -84,7 +97,7 @@
 			dateOfBirth: new Date(e.target[3].value)
 		});
 		if (response.status == 200) {
-			if (!householdId) schedTipMsg();
+			if (newHouse) schedTipMsg();
 			await invalidate('data:householdId');
 			const { id } = await response.json();
 			kids = [
@@ -415,7 +428,7 @@
 			<p class="subtitle">Adult (Household managers)</p>
 			{#each adults as adult, ind}
 				<div class="card">
-					<p>{adult.firstName} {adult.lastName}</p>
+					<p>{adult.firstName} {adult.lastName ?? ''}</p>
 					<button
 						class="delete-btn"
 						on:click|preventDefault={() => openModal(ModalReason.DISCONNECT_ADULT, ind)}

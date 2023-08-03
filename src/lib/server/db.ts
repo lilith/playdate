@@ -2,7 +2,6 @@ import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
-import { construct_svelte_component_dev } from 'svelte/internal';
 
 const prisma = new PrismaClient();
 
@@ -360,7 +359,7 @@ async function createHouseholdInvite(
 ) {
 	const { targetPhone } = req;
 	const { id: fromUserId } = user;
-	let { householdId } = user;
+	const { householdId } = user;
 	if (!householdId) {
 		throw error(401, {
 			message: 'You need to create / join a household before inviting others to join it.'
@@ -553,7 +552,7 @@ async function saveKid(
 	user: User
 ) {
 	const { firstName, pronouns, lastName, dateOfBirth } = req;
-	let { householdId } = user;
+	const { householdId } = user;
 	// ensure the household exists before adding kid to it
 	if (!householdId) {
 		throw error(401, {

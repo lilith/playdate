@@ -270,9 +270,7 @@
 	let notified = new Set();
 	async function sms() {
 		const res = await fetch(
-			`/sanitize?which=circleNotif&user=${encodeURIComponent(
-				JSON.stringify(user)
-			)}&schedDiffs=${encodeURIComponent(schedDiffs.join('\n'))}`
+			`/sanitize?which=circleNotif&schedDiffs=${encodeURIComponent(schedDiffs.join('\n'))}`
 		);
 		const { sms, message } = await res.json();
 		if (res.status !== 200) {
@@ -290,8 +288,9 @@
 		const { allowReminders } = phonePermissions;
 		if (allowReminders) {
 			await writeReq('/twilio', {
-				msg: circleNotifMsg,
-				phone
+				phone,
+				type: 'circleNotif',
+				schedDiffs: schedDiffs.join('\n')
 			});
 			notified.add(phone);
 			notified = new Set(notified);
@@ -522,7 +521,7 @@
 									{:else}
 										<button class="notif-btn" on:click={() => notify(p)}
 											>Notify <span class:strike={!p.phonePermissions.allowReminders}
-												>{p.firstName} {p.lastName}</span
+												>{p.firstName} {p.lastName ?? ''}</span
 											></button
 										>
 									{/if}

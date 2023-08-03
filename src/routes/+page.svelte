@@ -40,22 +40,20 @@
 			const { time, token } = await res.json();
 			if (public_env.PUBLIC_ENV === 'test') console.log('PHONE_TOKEN', phone, token);
 
-			const url = import.meta.env.PROD ? public_env.PUBLIC_URL : window.origin;
-
-			const msgRes = await writeReq('/twilio', {
-				msg: `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
-					1
-				)}/${token}`,
-				phone
+			const msgRes = await writeReq('/twilio?nocookie=true', {
+				phone,
+				type: 'login',
+				time,
+				token
 			});
-			const msg = await msgRes.json();
+			const { message } = await msgRes.json();
 			if (msgRes.status === 200) {
-				if (msg === 'BLOCKED')
+				if (message === 'BLOCKED')
 					alert(
 						`You must text UNSTOP to ${public_env.PUBLIC_TWILIO_PHONE_NUMBER} to be able to receive a login code.`
 					);
 			} else {
-				alert(msg.message);
+				alert(message);
 			}
 		}
 	}
