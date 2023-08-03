@@ -28,7 +28,7 @@ export const circleNotif = async (schedDiffs: string, user: User) => {
 			objectivePronoun = objectivePronoun.slice(0, -1).toLowerCase();
 	}
 
-	let kidNames: string = '';
+	let kidNames = '';
 
 	if (!user.householdId) {
 		throw error(400, {

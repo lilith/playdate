@@ -90,7 +90,9 @@ async function main() {
 		};
 	}
 
-	await prisma.friendRequest.deleteMany();
+	await prisma.friendRequest
+		.deleteMany()
+		.catch(() => console.log('No friend request table to delete'));
 
 	// User 1
 	await prisma.user.upsert({

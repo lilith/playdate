@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { env as public_env } from '$env/dynamic/public';
 	import { PRONOUNS, LANGUAGES } from '../../constants';
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
