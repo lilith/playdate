@@ -45,7 +45,7 @@ const msgToSend = async (
 			}
 			if (!recipient.householdId) {
 				throw error(401, {
-					message: "Can't notify someone who's not in your circle"
+					message: "Can't notify someone who doesn't have a household of sched updates"
 				});
 			}
 
@@ -149,9 +149,11 @@ export const sendMsg = async (request: Request, initiator: User | null) => {
 		}
 	}
 
+	const body = await msgToSend(type, recipient, initiator, { ...rest, phone });
+
 	try {
 		createMessageRequest = {
-			body: await msgToSend(type, recipient, initiator, { ...rest, phone }),
+			body,
 			to: phone,
 			...(sendAt
 				? {
