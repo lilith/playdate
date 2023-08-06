@@ -48,11 +48,8 @@ jobs:
     - name: Build in node mode
       run: yarn nodebuild
       
-    - name: Install playwright
-      run: npx playwright install
-
-    - name: Install Playwright dependencies (just chromium for now)
-      run: npx playwright install-deps chromium
+    - name: Install playwright & dependencies
+      run: yarn exec playwright install --with-deps
 
     - name: Run tests
       run: yarn test
