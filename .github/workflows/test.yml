@@ -4,6 +4,7 @@ on: [push, pull_request]
 env:
   DATABASE_PRISMA_URL: postgres://postgres:postgres@localhost:5432/test
   DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+  PUBLIC_URL: http://localhost:5173
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,6 +42,9 @@ jobs:
       
     - name: Build in node mode
       run: yarn nodebuild
+
+    - name: Install playwright
+      run: npx playwright install
 
     - name: Install Playwright dependencies (just chromium for now)
       run: npx playwright install-deps chromium
