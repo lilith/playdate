@@ -4,6 +4,11 @@ on: [push, pull_request]
 env:
   DATABASE_PRISMA_URL: postgres://postgres:postgres@localhost:5432/test
   DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+  PUBLIC_URL: http://localhost:5173
+  TWILIO_MESSAGING_SERVICE_SID: ${{ secrets.TWILIO_MESSAGING_SERVICE_SID }}
+  TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+  TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+  TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,6 +46,9 @@ jobs:
       
     - name: Build in node mode
       run: yarn nodebuild
+      
+    - name: Install playwright
+      run: npx playwright install
 
     - name: Install Playwright dependencies (just chromium for now)
       run: npx playwright install-deps chromium
