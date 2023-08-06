@@ -423,10 +423,14 @@ async function saveUser(
 		allowInvites,
 		allowReminders
 	} = req;
+	// Get the current date in the user's timezone
+	const userLocalDate = new Date().toLocaleString('en-US', { timeZone });
 
-	const d = new Date();
-	const day = d.getDay();
-	const diff = d.getDate() - day + notifStartDay;
+	// Convert the user's date to a JavaScript Date object
+	const d = new Date(userLocalDate);
+
+	// Calculate the desired date based on the user's timezone
+	const diff = d.getDate() - d.getDay() + notifStartDay;
 	d.setDate(diff);
 	d.setHours(notifHr);
 	d.setMinutes(notifMin);

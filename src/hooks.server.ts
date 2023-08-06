@@ -1,10 +1,17 @@
 import type { Handle, RequestEvent } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
+import * as cron from 'node-cron';
+import { sendNotif } from '$lib/server/twilio';
+
 const prisma = new PrismaClient();
 
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
+
+cron.schedule('*/1 * * * *', function () {
+	sendNotif();
+});
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,

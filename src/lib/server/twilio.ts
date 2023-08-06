@@ -94,12 +94,24 @@ const msgToSend = async (
 			msg = `Thanks for subscribing to reminders and friend availability notifications from ${url}! You can disable this at any time on your Profile page or by responding STOP.`;
 			break;
 		}
+		case 'reminder': {
+			const { phone } = msgComps;
+			msg = `Hi! It's your periodic reminder to update your schedule: https://playdate.help/login/${phone}`;
+			break;
+		}
+		default:
+			throw error(400, {
+				message: `Message type ${type} not supported`
+			});
 	}
 	return msg;
 };
 
-export const sendMsg = async (request: Request, initiator: User | null) => {
-	const { phone, sendAt, type, ...rest } = await request.json();
+export const sendMsg = async (
+	request: { phone: string; sendAt?: Date; type: string },
+	initiator: User | null
+) => {
+	const { phone, sendAt, type, ...rest } = request;
 	if (!phone || !type) {
 		throw error(400, {
 			message: `Missing a ${!phone ? 'phone number' : 'type of message to send'}`
@@ -229,3 +241,53 @@ export const getMsg = async (url: URL) => {
 
 	return response;
 };
+
+export async function sendNotif() {
+	const nowLocal = new Date();
+	const users = await prisma.user.findMany({
+		select: {
+			id: true,
+			phone: true,
+			reminderDatetime: true,
+			reminderIntervalDays: true,
+			timeZone: true,
+			phonePermissions: {
+				select: {
+					allowReminders: true,
+					blocked: true
+				}
+			}
+		}
+	});
+	users.forEach(async (user) => {
+		const { id, phone, reminderDatetime, reminderIntervalDays, phonePermissions, timeZone } = user;
+		const { allowReminders, blocked } = phonePermissions;
+		if (!allowReminders || blocked) return;
+
+		const options = {
+			timeZone
+		};
+
+		const formattedDate = nowLocal.toLocaleString('en-US', options);
+		const now = new Date(formattedDate);
+		const timeDifference = Math.abs(now.getTime() - reminderDatetime.getTime()); // Get the absolute time difference in milliseconds
+		const minuteInMillis = 60 * 1000; // 1 minute in milliseconds
+		if (timeDifference < minuteInMillis) {
+			// currently within a minute of when user should be reminded
+			// send notif
+			await sendMsg({ phone, type: 'reminder' }, null);
+
+			// update reminder date for next notif
+			const newReminderDate = new Date(reminderDatetime);
+			newReminderDate.setDate(reminderDatetime.getDate() + reminderIntervalDays);
+			await prisma.user.update({
+				where: {
+					id
+				},
+				data: {
+					reminderDatetime: newReminderDate
+				}
+			});
+		}
+	});
+}
