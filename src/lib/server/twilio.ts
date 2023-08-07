@@ -117,7 +117,9 @@ const msgToSend = async (
 					process.exit(1);
 				});
 
-			msg = `Hi! It's your periodic reminder to update your schedule: ${url}/login/${phone}/${token}`;
+			msg = `Hi! It's your periodic reminder to update your schedule: ${url}/login/${phone.slice(
+				1
+			)}/${token}`;
 			break;
 		}
 		default:
@@ -263,13 +265,19 @@ export const getMsg = async (url: URL) => {
 	return response;
 };
 
+function shuffleArr(arr: any[]) {
+	for (let i = arr.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+}
+
 export async function sendNotif() {
 	const nowLocal = new Date();
 	const users = await prisma.user.findMany({
 		select: {
 			id: true,
 			phone: true,
-			reminderDatetime: true,
 			reminderIntervalDays: true,
 			timeZone: true,
 			phonePermissions: {
@@ -280,8 +288,12 @@ export async function sendNotif() {
 			}
 		}
 	});
+
+	// randomize the order of 'users'
+	shuffleArr(users);
+
 	users.forEach(async (user) => {
-		const { id, phone, reminderDatetime, reminderIntervalDays, phonePermissions, timeZone } = user;
+		const { id, phone, reminderIntervalDays, phonePermissions, timeZone } = user;
 		const { allowReminders, blocked } = phonePermissions;
 		if (!allowReminders || blocked) return;
 
@@ -291,6 +303,29 @@ export async function sendNotif() {
 
 		const formattedDate = nowLocal.toLocaleString('en-US', options);
 		const now = new Date(formattedDate);
+
+		// sleep for a random amount of time between 1 and 2 seconds prior to each message.
+		const min = 1000;
+		const max = 2000;
+		await new Promise((r) => setTimeout(r, Math.floor(Math.random() * (max - min + 1)) + min));
+
+		// Re-query the database for the reminderDateTime before the time comparison logic.
+		// Using the cached data from the initial query greatly increases the odds of duplicate messages.
+		const userRequery = await prisma.user.findUnique({
+			where: {
+				phone
+			},
+			select: {
+				reminderDatetime: true
+			}
+		});
+
+		if (!userRequery)
+			throw error(500, {
+				message: `Couldn't requery user with phone ${phone}`
+			});
+
+		const { reminderDatetime } = userRequery;
 
 		// It would be better to send the notifications late than never.
 		if (reminderDatetime < now) {
