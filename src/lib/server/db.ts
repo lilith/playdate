@@ -423,18 +423,23 @@ async function saveUser(
 		allowInvites,
 		allowReminders
 	} = req;
-	// Get the current date in the user's timezone so we don't set reminderDatetime (more than a day) in the past
+	// Get the current date in the user's timezone so we don't set reminderDatetime in the past
 	const now = new Date();
 	const userLocalDate = now.toLocaleString('en-US', { timeZone });
 	// Convert the user's date to a JavaScript Date object
 	const d = new Date(userLocalDate);
 	const timezoneOffset = now.getTime() - d.getTime();
 	// Calculate the desired date based on the user's timezone
-	const diff = d.getDate() - d.getDay() + notifStartDay;
+	let diff = d.getDate() - d.getDay() + notifStartDay;
+
+	if (notifHr < d.getHours()) {
+		diff += notifFreq;
+	}
 	d.setDate(diff);
 	d.setHours(notifHr);
 	d.setMinutes(notifMin);
 
+	// convert to UTC in the end
 	const utcReminderDate = new Date(d.getTime() + timezoneOffset);
 
 	const baseUser = {
