@@ -14,28 +14,16 @@ export const load = (async ({ params, cookies }) => {
 			}
 		});
 	} catch {
-		return new Response(
-			JSON.stringify({
-				message: "Can't verify token"
-			}),
-			{
-				status: 403
-			}
-		);
+		console.error("Can't verify token");
+		throw redirect(308, `/?phone=${params.phone}`);
 	}
 
 	// check DB's expiration date
 	const { phone, expires } = magicLinkInfo as { phone: string; expires: Date };
 
 	if (expires < new Date()) {
-		return new Response(
-			JSON.stringify({
-				message: 'Token has expired'
-			}),
-			{
-				status: 403
-			}
-		);
+		console.error('Token has expired');
+		throw redirect(308, `/?phone=${params.phone}`);
 	}
 
 	let crypto;
@@ -43,9 +31,7 @@ export const load = (async ({ params, cookies }) => {
 		crypto = await import('node:crypto');
 	} catch (err) {
 		console.error('crypto support is disabled!');
-		return {
-			token: null
-		};
+		throw redirect(308, `/?phone=${params.phone}`);
 	}
 
 	const sessionCreatedAt = new Date();
