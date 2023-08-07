@@ -273,13 +273,12 @@ function shuffleArr(arr: any[]) {
 }
 
 export async function sendNotif() {
-	const nowLocal = new Date();
+	const now = new Date();
 	const users = await prisma.user.findMany({
 		select: {
 			id: true,
 			phone: true,
 			reminderIntervalDays: true,
-			timeZone: true,
 			phonePermissions: {
 				select: {
 					allowReminders: true,
@@ -293,16 +292,9 @@ export async function sendNotif() {
 	shuffleArr(users);
 
 	users.forEach(async (user) => {
-		const { id, phone, reminderIntervalDays, phonePermissions, timeZone } = user;
+		const { id, phone, reminderIntervalDays, phonePermissions } = user;
 		const { allowReminders, blocked } = phonePermissions;
 		if (!allowReminders || blocked) return;
-
-		const options = {
-			timeZone
-		};
-
-		const formattedDate = nowLocal.toLocaleString('en-US', options);
-		const now = new Date(formattedDate);
 
 		// sleep for a random amount of time between 1 and 2 seconds prior to each message.
 		const min = 1000;
@@ -325,8 +317,7 @@ export async function sendNotif() {
 				message: `Couldn't requery user with phone ${phone}`
 			});
 
-		const { reminderDatetime: utcReminderDate } = userRequery;
-		const reminderDatetime = new Date(utcReminderDate.toLocaleString('en-US', { timeZone }));
+		const { reminderDatetime } = userRequery;
 		// It would be better to send the notifications late than never.
 		if (reminderDatetime < now) {
 			const sameDay = new Date(now);
