@@ -291,9 +291,34 @@ export async function sendNotif() {
 
 		const formattedDate = nowLocal.toLocaleString('en-US', options);
 		const now = new Date(formattedDate);
+
+		// It would be better to send the notifications late than never.
+		if (reminderDatetime < now) {
+			const sameDay = new Date(now);
+			sameDay.setDate(reminderDatetime.getDate());
+
+			const diff = Math.abs(sameDay.getTime() - reminderDatetime.getTime()) / (1000 * 60);
+
+			if (diff <= 30) {
+				await sendMsg({ phone, type: 'reminder' }, null);
+
+				// update reminder date for next notif -- x days from today
+				const newReminderDate = new Date(now);
+				newReminderDate.setDate(newReminderDate.getDate() + reminderIntervalDays);
+				await prisma.user.update({
+					where: {
+						id
+					},
+					data: {
+						reminderDatetime: newReminderDate
+					}
+				});
+			}
+			return;
+		}
+
 		const timeDifference = Math.abs(now.getTime() - reminderDatetime.getTime()); // Get the absolute time difference in milliseconds
 		const minuteInMillis = 60 * 1000; // 1 minute in milliseconds
-		console.log(user.phone, now, reminderDatetime);
 		if (timeDifference < minuteInMillis) {
 			// currently within a minute of when user should be reminded
 			// send notif
