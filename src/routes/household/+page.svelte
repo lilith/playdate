@@ -308,7 +308,7 @@
 					<h4 class="subtitle-3">Sender</h4>
 					<p class="subtitle-2" style="display: inline; color: black; font-weight: 500;">
 						{householdInvites[0].fromUser.firstName}
-						{householdInvites[0].fromUser.lastName}
+						{householdInvites[0].fromUser.lastName ?? ''}
 					</p>
 					<span style="padding: 0 0.5rem; font-size: 15px;"
 						>({householdInvites[0].fromUser.phone})</span
@@ -316,7 +316,7 @@
 
 					<h4 class="subtitle-3">Kids</h4>
 					{#each householdInvites[0].household.children as kid}
-						<p style="font-size: 18px;">{kid.firstName} {kid.lastName}</p>
+						<p style="font-size: 18px;">{kid.firstName} {kid.lastName ?? ''}</p>
 					{/each}
 				</div>
 
@@ -375,7 +375,7 @@
 		<p class="subtitle">Kids</p>
 		{#each kids as kid, ind}
 			<div class="card">
-				<p>{kid.firstName} {kid.lastName}</p>
+				<p>{kid.firstName} {kid.lastName ?? ''}</p>
 				<button class="delete-btn" on:click|preventDefault={() => deleteKid(ind)}><hr /></button>
 			</div>
 			<hr class="inner-section" />

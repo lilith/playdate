@@ -21,7 +21,7 @@
 	<p class="subtitle">Kids</p>
 	{#each household.kids as kid}
 		<div class="card">
-			<p>{kid.firstName} {kid.lastName}</p>
+			<p>{kid.firstName} {kid.lastName ?? ''}</p>
 			<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
 			<p class="small-font">Age: {kid.age}</p>
 		</div>
@@ -30,7 +30,7 @@
 	<p class="subtitle">Adults</p>
 	{#each household.adults as adult}
 		<div class="card">
-			<p>{adult.firstName} {adult.lastName}</p>
+			<p>{adult.firstName} {adult.lastName ?? ''}</p>
 			<p class="small-font">Pronouns: {PRONOUNS[adult.pronouns]}</p>
 			<p class="small-font">
 				Phone: <a href="tel:{adult.phone}">{adult.phone}</a>

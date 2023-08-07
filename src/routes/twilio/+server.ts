@@ -10,8 +10,7 @@ export async function POST({
 }) {
 	const sessionToken = cookies.get('session');
 	const { user } = await getProfileFromSession(sessionToken);
-
-	return sendMsg(request, user);
+	return sendMsg(await request.json(), user);
 }
 
 export function GET({ url }: { url: URL }) {

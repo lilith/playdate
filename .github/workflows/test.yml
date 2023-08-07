@@ -31,26 +31,25 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-        
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
-      
-    - name: Run postinstall (db stuff)
-      run: yarn postinstall
-      
-    - name: Build in node mode
-      run: yarn nodebuild
-      
-    - name: Install playwright & dependencies
-      run: yarn exec playwright install --with-deps
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
-    - name: Run tests
-      run: yarn test
-      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run postinstall (db stuff)
+        run: yarn postinstall
+
+      - name: Build in node mode
+        run: yarn nodebuild
+
+      - name: Install playwright & dependencies
+        run: yarn exec playwright install --with-deps
+
+      - name: Run tests
+        run: yarn test

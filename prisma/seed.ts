@@ -94,6 +94,19 @@ async function main() {
 		.deleteMany()
 		.catch(() => console.log('No friend request table to delete'));
 
+	const expiredLink = {
+		token: '3e99472f1003794c',
+		phone: '+12015550121',
+		expires: new Date('8/5/2020')
+	};
+	await prisma.magicLink.upsert({
+		where: {
+			id: 1
+		},
+		update: expiredLink,
+		create: expiredLink
+	});
+
 	// User 1
 	await prisma.user.upsert({
 		where: {

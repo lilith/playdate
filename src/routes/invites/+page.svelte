@@ -80,7 +80,7 @@
 			<p class="household-name">{household.name}</p>
 			<div>
 				{#each household.parents as parent}
-					<p>{parent.firstName} {parent.lastName}</p>
+					<p>{parent.firstName} {parent.lastName ?? ''}</p>
 				{/each}
 			</div>
 			<a href="tel:{household.phone}">{household.phone}</a>
@@ -132,12 +132,12 @@
 			<p class="household-name">{invite.household.name}</p>
 			<div>
 				{#each invite.household.parents as parent}
-					<p>{parent.firstName} {parent.lastName}: {parent.phone}</p>
+					<p>{parent.firstName} {parent.lastName ?? ''}: {parent.phone}</p>
 				{/each}
 			</div>
 			<div>
 				{#each invite.household.children as child}
-					<p>{child.firstName} {child.lastName}</p>
+					<p>{child.firstName} {child.lastName ?? ''}</p>
 				{/each}
 			</div>
 			<div class="w-full">

@@ -104,7 +104,7 @@
 							: 'line-through'}"
 					>
 						{parent.firstName}
-						{parent.lastName}
+						{parent.lastName ?? ''}
 					</p>
 				{/each}
 			</div>
