@@ -325,8 +325,8 @@ export async function sendNotif() {
 				message: `Couldn't requery user with phone ${phone}`
 			});
 
-		const { reminderDatetime } = userRequery;
-
+		const { reminderDatetime: utcReminderDate } = userRequery;
+		const reminderDatetime = new Date(utcReminderDate.toLocaleString('en-US', { timeZone }));
 		// It would be better to send the notifications late than never.
 		if (reminderDatetime < now) {
 			const sameDay = new Date(now);
@@ -338,7 +338,7 @@ export async function sendNotif() {
 				await sendMsg({ phone, type: 'reminder' }, null);
 
 				// update reminder date for next notif -- x days from today
-				const newReminderDate = new Date(now);
+				const newReminderDate = new Date(reminderDatetime);
 				newReminderDate.setDate(newReminderDate.getDate() + reminderIntervalDays);
 				await prisma.user.update({
 					where: {
