@@ -413,7 +413,7 @@
 							<form on:submit|preventDefault={() => {}}>
 								<div class="v-center-h-space flex-col" style="gap: 0.1rem;">
 									<!-- prettier-ignore -->
-									<textarea
+									<input type="text"
 										class="text-inherit"
 										placeholder='Enter a valid time range. Ex. "2:30pm-7 or 5-6"'
 										bind:value={row.availRange}
