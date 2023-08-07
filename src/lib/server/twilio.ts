@@ -4,6 +4,7 @@ import { error, json } from '@sveltejs/kit';
 import Twilio from 'twilio';
 import { PrismaClient, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
+import { generate, save } from './login';
 
 const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;
@@ -96,7 +97,27 @@ const msgToSend = async (
 		}
 		case 'reminder': {
 			const { phone } = msgComps;
-			msg = `Hi! It's your periodic reminder to update your schedule: https://playdate.help/login/${phone}`;
+			const { token, createdAt, expires } = await generate();
+
+			if (!token) {
+				console.error('token generation failed');
+				throw error(500, {
+					message: 'Token generation failed'
+				});
+			}
+
+			// save these attrs to DB
+			save(token, phone, createdAt, expires)
+				.then(async () => {
+					await prisma.$disconnect();
+				})
+				.catch(async (e) => {
+					console.error(e);
+					await prisma.$disconnect();
+					process.exit(1);
+				});
+
+			msg = `Hi! It's your periodic reminder to update your schedule: ${url}/login/${phone}/${token}`;
 			break;
 		}
 		default:
@@ -272,6 +293,7 @@ export async function sendNotif() {
 		const now = new Date(formattedDate);
 		const timeDifference = Math.abs(now.getTime() - reminderDatetime.getTime()); // Get the absolute time difference in milliseconds
 		const minuteInMillis = 60 * 1000; // 1 minute in milliseconds
+		console.log(user.phone, now, reminderDatetime);
 		if (timeDifference < minuteInMillis) {
 			// currently within a minute of when user should be reminded
 			// send notif
