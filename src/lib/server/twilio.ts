@@ -279,7 +279,14 @@ function getNewReminderDate(
 	reminderIntervalDays: number
 ) {
 	const newLocalReminderDate = toLocalTimezone(reminderDatetime, timeZone);
+	const hr = newLocalReminderDate.getHours();
+	const min = newLocalReminderDate.getMinutes();
 	newLocalReminderDate.setDate(newLocalReminderDate.getDate() + reminderIntervalDays);
+
+	// Handle DST transitions by adjusting the time to match the original time
+	newLocalReminderDate.setHours(hr);
+	newLocalReminderDate.setMinutes(min);
+
 	return toUTC(newLocalReminderDate, timeZone);
 }
 
