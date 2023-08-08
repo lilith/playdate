@@ -442,10 +442,19 @@ async function saveUser(
 	d.setDate(diff);
 	d.setHours(notifHr);
 	d.setMinutes(notifMin);
+	console.log({
+		date: d.getDate(),
+		notifFreq,
+		timeZone,
+		diff,
+		notifStartDay,
+		notifHr,
+		notifMin
+	});
+	console.log('local date', d);
 
 	// convert to UTC in the end
 	const utcReminderDate = toUTC(d, timeZone);
-	console.log('local date', d);
 	console.log('utc date', utcReminderDate);
 	const baseUser = {
 		locale,
