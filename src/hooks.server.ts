@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 import * as cron from 'node-cron';
 import { sendNotif } from '$lib/server/twilio';
+import { toLocalTimezone } from '$lib/server/date';
 
 const prisma = new PrismaClient();
 
@@ -46,9 +47,7 @@ const setLocal = async (
 		userInfo.phone = user.phone;
 		userInfo.notifFreq = user.reminderIntervalDays;
 
-		const localReminderDate = new Date(
-			user.reminderDatetime.toLocaleString('en-US', { timeZone: user.timeZone })
-		);
+		const localReminderDate = toLocalTimezone(user.reminderDatetime, user.timeZone);
 		userInfo.notifStartDay = localReminderDate.getDay();
 		const notifHr = localReminderDate.getHours();
 		if (notifHr > 12) {
