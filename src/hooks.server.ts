@@ -10,9 +10,9 @@ const prisma = new PrismaClient();
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
 
-cron.schedule('*/1 * * * *', function () {
-	sendNotif();
-});
+// cron.schedule('*/1 * * * *', function () {
+// 	sendNotif();
+// });
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
@@ -48,8 +48,8 @@ const setLocal = async (
 		userInfo.notifFreq = user.reminderIntervalDays;
 
 		const localReminderDate = toLocalTimezone(user.reminderDatetime, user.timeZone);
-		userInfo.notifStartDay = localReminderDate.getDay();
-		const notifHr = localReminderDate.getHours();
+		userInfo.notifStartDay = localReminderDate.weekday % 7;
+		const notifHr = localReminderDate.hour;
 		if (notifHr > 12) {
 			userInfo.notifHr = notifHr - 12;
 			userInfo.notifMeridiem = 'PM';
@@ -64,7 +64,7 @@ const setLocal = async (
 			userInfo.notifMeridiem = 'AM';
 		}
 		// userInfo.notifMeridiem = notifHr > 12 ? 'PM' : 'AM';
-		userInfo.notifMin = localReminderDate.getMinutes();
+		userInfo.notifMin = localReminderDate.minute;
 		userInfo.allowReminders = user.phonePermissions.allowReminders;
 		userInfo.allowInvites = user.phonePermissions.allowInvites;
 

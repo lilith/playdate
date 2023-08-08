@@ -292,15 +292,16 @@ function getNewReminderDate(
 	reminderIntervalDays: number
 ) {
 	const newLocalReminderDate = toLocalTimezone(reminderDatetime, timeZone);
-	const hr = newLocalReminderDate.getHours();
-	const min = newLocalReminderDate.getMinutes();
-	newLocalReminderDate.setDate(newLocalReminderDate.getDate() + reminderIntervalDays);
-
+	const hr = newLocalReminderDate.hour;
+	const min = newLocalReminderDate.minute;
 	// Handle DST transitions by adjusting the time to match the original time
-	newLocalReminderDate.setHours(hr);
-	newLocalReminderDate.setMinutes(min);
+	newLocalReminderDate.set({
+		day: newLocalReminderDate.day + reminderIntervalDays,
+		hour: hr,
+		minute: min
+	});
 
-	return toUTC(newLocalReminderDate, timeZone);
+	return toUTC(newLocalReminderDate.toJSDate(), timeZone);
 }
 
 export async function sendNotif() {

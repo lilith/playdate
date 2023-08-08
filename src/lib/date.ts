@@ -17,8 +17,6 @@ export const toUTC = (d: Date, timeZone: string) => {
 	return new Date(localDatetime.toUTC().toString());
 };
 
-export const toLocalTimezone = (date: Date, timeZone: string) => {
-	console.log('start with', date);
-	console.log('local date str', date.toLocaleString('en-US', { timeZone }), timeZone);
-	return new Date(date.toLocaleString('en-US', { timeZone }));
+export const toLocalTimezone = (d: Date, timeZone: string) => {
+	return DateTime.fromJSDate(d, { zone: 'utc' }).setZone(timeZone);
 };

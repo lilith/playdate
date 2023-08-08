@@ -427,35 +427,18 @@ async function saveUser(
 	// Get the current date in the user's timezone so we don't set reminderDatetime in the past
 	const d = toLocalTimezone(new Date(), timeZone);
 	// Calculate the desired date based on the user's timezone
-	let diff = d.getDate() - d.getDay() + notifStartDay;
+	let diff = d.day - (d.weekday % 7) + notifStartDay;
 
 	// either desired start day has already passed this week
 	// or the hour has passed today
 	// or the minute has passed this hour
 	if (
-		diff < d.getDate() ||
-		(diff === d.getDate() &&
-			(notifHr < d.getHours() || (notifHr === d.getHours() && notifMin < d.getMinutes())))
+		diff < d.day ||
+		(diff === d.day && (notifHr < d.hour || (notifHr === d.hour && notifMin < d.minute)))
 	) {
 		diff += notifFreq;
 	}
-	d.setDate(diff);
-	d.setHours(notifHr);
-	d.setMinutes(notifMin);
-	console.log({
-		date: d.getDate(),
-		notifFreq,
-		timeZone,
-		diff,
-		notifStartDay,
-		notifHr,
-		notifMin
-	});
-	console.log('local date', d);
-
-	// convert to UTC in the end
-	const utcReminderDate = toUTC(d, timeZone);
-	console.log('utc date', utcReminderDate);
+	const newReminderDate = d.set({ day: diff, hour: notifHr, minute: notifMin });
 	const baseUser = {
 		locale,
 		firstName,
@@ -463,7 +446,7 @@ async function saveUser(
 		timeZone,
 		pronouns,
 		email,
-		reminderDatetime: utcReminderDate,
+		reminderDatetime: newReminderDate.toJSDate(),
 		reminderIntervalDays: notifFreq,
 		acceptedTermsAt
 	};
