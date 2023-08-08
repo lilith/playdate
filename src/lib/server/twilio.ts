@@ -5,7 +5,7 @@ import Twilio from 'twilio';
 import { PrismaClient, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
-import { toLocalTimezone, toUTC } from './date';
+import { toLocalTimezone, toUTC } from '../date';
 
 const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;

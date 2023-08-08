@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
-import { toLocalTimezone, toUTC } from './date';
+import { toLocalTimezone, toUTC } from '../date';
 
 const prisma = new PrismaClient();
 
@@ -429,7 +429,14 @@ async function saveUser(
 	// Calculate the desired date based on the user's timezone
 	let diff = d.getDate() - d.getDay() + notifStartDay;
 
-	if (notifHr < d.getHours() || diff < d.getDate()) {
+	// either desired start day has already passed this week
+	// or the hour has passed today
+	// or the minute has passed this hour
+	if (
+		diff < d.getDate() ||
+		(diff === d.getDate() &&
+			(notifHr < d.getHours() || (notifHr === d.getHours() && notifMin < d.getMinutes())))
+	) {
 		diff += notifFreq;
 	}
 	d.setDate(diff);
