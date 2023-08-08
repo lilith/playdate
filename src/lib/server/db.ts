@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
+import { toLocalTimezone, toUTC } from '../date';
 
 const prisma = new PrismaClient();
 
@@ -423,18 +424,27 @@ async function saveUser(
 		allowInvites,
 		allowReminders
 	} = req;
-	// Get the current date in the user's timezone
-	const userLocalDate = new Date().toLocaleString('en-US', { timeZone });
-
-	// Convert the user's date to a JavaScript Date object
-	const d = new Date(userLocalDate);
-
+	// Get the current date in the user's timezone so we don't set reminderDatetime in the past
+	const d = toLocalTimezone(new Date(), timeZone);
 	// Calculate the desired date based on the user's timezone
-	const diff = d.getDate() - d.getDay() + notifStartDay;
+	let diff = d.getDate() - d.getDay() + notifStartDay;
+
+	// either desired start day has already passed this week
+	// or the hour has passed today
+	// or the minute has passed this hour
+	if (
+		diff < d.getDate() ||
+		(diff === d.getDate() &&
+			(notifHr < d.getHours() || (notifHr === d.getHours() && notifMin < d.getMinutes())))
+	) {
+		diff += notifFreq;
+	}
 	d.setDate(diff);
 	d.setHours(notifHr);
 	d.setMinutes(notifMin);
 
+	// convert to UTC in the end
+	const utcReminderDate = toUTC(d, timeZone);
 	const baseUser = {
 		locale,
 		firstName,
@@ -442,7 +452,7 @@ async function saveUser(
 		timeZone,
 		pronouns,
 		email,
-		reminderDatetime: d,
+		reminderDatetime: utcReminderDate,
 		reminderIntervalDays: notifFreq,
 		acceptedTermsAt
 	};

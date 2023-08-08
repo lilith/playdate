@@ -38,28 +38,10 @@
 	let showModal = !acceptedTermsAt;
 
 	function setDateTimes(zone: string) {
-		const formatter = new Intl.DateTimeFormat([], {
-			timeZone: zone,
-			hour: '2-digit',
-			weekday: 'long'
-		});
-		const nextNotifTime = new Date();
-		nextNotifTime.setHours(nextNotifTime.getHours() + 1); // set for one hr after now
-		const formattedDate = formatter.formatToParts(nextNotifTime);
-		notifStartDay =
-			WEEKDAYS[formattedDate[formattedDate.findIndex((x) => x.type === 'weekday')].value];
-		notifHr = parseInt(formattedDate[formattedDate.findIndex((x) => x.type === 'hour')].value);
-		if (notifHr > 12) {
-			notifHr = notifHr - 12;
-			notifMeridiem = 'PM';
-		} else if (notifHr === 0) {
-			notifHr = 12;
-			notifMeridiem = 'AM';
-		} else if (notifHr === 12) {
-			notifMeridiem = 'PM';
-		} else {
-			notifMeridiem = 'AM';
-		}
+		notifStartDay = 1;
+		notifHr = 2;
+		notifMin = 0;
+		notifMeridiem = 'PM';
 		timeZone = zone;
 	}
 

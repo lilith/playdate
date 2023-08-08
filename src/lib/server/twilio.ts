@@ -5,6 +5,7 @@ import Twilio from 'twilio';
 import { PrismaClient, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
+import { toLocalTimezone, toUTC } from '../date';
 
 const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;
@@ -272,8 +273,25 @@ function shuffleArr(arr: any[]) {
 	}
 }
 
+function getNewReminderDate(
+	reminderDatetime: Date,
+	timeZone: string,
+	reminderIntervalDays: number
+) {
+	const newLocalReminderDate = toLocalTimezone(reminderDatetime, timeZone);
+	const hr = newLocalReminderDate.getHours();
+	const min = newLocalReminderDate.getMinutes();
+	newLocalReminderDate.setDate(newLocalReminderDate.getDate() + reminderIntervalDays);
+
+	// Handle DST transitions by adjusting the time to match the original time
+	newLocalReminderDate.setHours(hr);
+	newLocalReminderDate.setMinutes(min);
+
+	return toUTC(newLocalReminderDate, timeZone);
+}
+
 export async function sendNotif() {
-	const nowLocal = new Date();
+	const now = new Date();
 	const users = await prisma.user.findMany({
 		select: {
 			id: true,
@@ -297,13 +315,6 @@ export async function sendNotif() {
 		const { allowReminders, blocked } = phonePermissions;
 		if (!allowReminders || blocked) return;
 
-		const options = {
-			timeZone
-		};
-
-		const formattedDate = nowLocal.toLocaleString('en-US', options);
-		const now = new Date(formattedDate);
-
 		// sleep for a random amount of time between 1 and 2 seconds prior to each message.
 		const min = 1000;
 		const max = 2000;
@@ -326,7 +337,6 @@ export async function sendNotif() {
 			});
 
 		const { reminderDatetime } = userRequery;
-
 		// It would be better to send the notifications late than never.
 		if (reminderDatetime < now) {
 			const sameDay = new Date(now);
@@ -338,14 +348,12 @@ export async function sendNotif() {
 				await sendMsg({ phone, type: 'reminder' }, null);
 
 				// update reminder date for next notif -- x days from today
-				const newReminderDate = new Date(now);
-				newReminderDate.setDate(newReminderDate.getDate() + reminderIntervalDays);
 				await prisma.user.update({
 					where: {
 						id
 					},
 					data: {
-						reminderDatetime: newReminderDate
+						reminderDatetime: getNewReminderDate(reminderDatetime, timeZone, reminderIntervalDays)
 					}
 				});
 			}
@@ -360,14 +368,12 @@ export async function sendNotif() {
 			await sendMsg({ phone, type: 'reminder' }, null);
 
 			// update reminder date for next notif
-			const newReminderDate = new Date(reminderDatetime);
-			newReminderDate.setDate(reminderDatetime.getDate() + reminderIntervalDays);
 			await prisma.user.update({
 				where: {
 					id
 				},
 				data: {
-					reminderDatetime: newReminderDate
+					reminderDatetime: getNewReminderDate(reminderDatetime, timeZone, reminderIntervalDays)
 				}
 			});
 		}
