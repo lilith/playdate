@@ -445,6 +445,8 @@ async function saveUser(
 
 	// convert to UTC in the end
 	const utcReminderDate = toUTC(d, timeZone);
+	console.log('local date', d);
+	console.log('utc date', utcReminderDate);
 	const baseUser = {
 		locale,
 		firstName,

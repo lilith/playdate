@@ -230,10 +230,23 @@ export const sendMsg = async (
 };
 
 export const getMsg = async (url: URL) => {
-	const body = url.searchParams.get('Body');
-	const phone = url.searchParams.get('From')?.toLowerCase() ?? undefined;
+	const body = url.searchParams.get('Body')?.toLowerCase();
+	const phone = url.searchParams.get('From');
 	console.log('RECEIVED TEXT', body, phone);
-	if (body === 'stop') {
+
+	if (!phone) {
+		throw error(400, {
+			message: "Twilio didn't include phone number"
+		});
+	}
+	if (!body) {
+		throw error(400, {
+			message: 'Empty body'
+		});
+	}
+	const optOut = ['cancel', 'end', 'quit', 'unsubscribe', 'stop', 'stopall'];
+	const optIn = ['start', 'yes', 'unstop'];
+	if (optOut.includes(body)) {
 		console.log(`BLOCKED ${phone}`);
 		await prisma.phoneContactPermissions.update({
 			where: {
@@ -243,7 +256,7 @@ export const getMsg = async (url: URL) => {
 				blocked: true
 			}
 		});
-	} else if (body === 'unstop' || body === 'start') {
+	} else if (optIn.includes(body)) {
 		console.log(`UNBLOCKED ${phone}`);
 		await prisma.phoneContactPermissions.update({
 			where: {
