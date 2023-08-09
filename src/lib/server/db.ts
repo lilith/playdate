@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
-import { toLocalTimezone, toUTC } from '../date';
+import { toLocalTimezone } from '../date';
 
 const prisma = new PrismaClient();
 

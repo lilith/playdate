@@ -10,9 +10,9 @@ const prisma = new PrismaClient();
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
 
-// cron.schedule('*/1 * * * *', function () {
-// 	sendNotif();
-// });
+cron.schedule('*/1 * * * *', function () {
+	sendNotif();
+});
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
@@ -152,7 +152,6 @@ export const handle = (async ({ event, resolve }) => {
 
 		// F-D if there is no household associated
 		if (!user.householdId) {
-			console.log('1');
 			return redirectOrContinue(event, '/household', resolve);
 		}
 
@@ -163,7 +162,6 @@ export const handle = (async ({ event, resolve }) => {
 		});
 		// F-D if there is no household associated
 		if (!household) {
-			console.log('2');
 			return redirectOrContinue(event, '/household', resolve);
 		}
 		const kids = await prisma.householdChild.findMany({
@@ -174,7 +172,6 @@ export const handle = (async ({ event, resolve }) => {
 		// F-E if the associated household has no nickname
 		// F-F if the associated household has no children. (F-E and F-F could be combined if that’s easier)
 		if (!household.name || !household.name.length || !kids.length) {
-			console.log('3', !household.name, !household.name.length, !kids.length);
 			return redirectOrContinue(event, '/household', resolve);
 		}
 

@@ -5,7 +5,7 @@ import Twilio from 'twilio';
 import { PrismaClient, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
-import { toLocalTimezone, toUTC } from '../date';
+import { toLocalTimezone } from '../date';
 
 const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;
@@ -291,17 +291,10 @@ function getNewReminderDate(
 	timeZone: string,
 	reminderIntervalDays: number
 ) {
-	const newLocalReminderDate = toLocalTimezone(reminderDatetime, timeZone);
-	const hr = newLocalReminderDate.hour;
-	const min = newLocalReminderDate.minute;
-	// Handle DST transitions by adjusting the time to match the original time
-	newLocalReminderDate.set({
-		day: newLocalReminderDate.day + reminderIntervalDays,
-		hour: hr,
-		minute: min
-	});
-
-	return toUTC(newLocalReminderDate.toJSDate(), timeZone);
+	const localDate = toLocalTimezone(reminderDatetime, timeZone);
+	// luxon handles DST transitions for us~
+	const newLocalReminderDate = localDate.plus({ days: reminderIntervalDays });
+	return newLocalReminderDate.toJSDate();
 }
 
 export async function sendNotif() {
