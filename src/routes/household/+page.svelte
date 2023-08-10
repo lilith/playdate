@@ -7,6 +7,7 @@
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '../../utils';
+	import { DateTime } from 'luxon';
 
 	enum ModalReason {
 		DISCONNECT_ADULT,
@@ -48,13 +49,18 @@
 	});
 
 	async function schedTipMsg() {
-		const twoWeeksLater = new Date();
-		twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
-
+		const twoWeeksLater = DateTime.now()
+			.setZone($page.data.user.timeZone)
+			.set({
+				hour: $page.data.user.notifHr,
+				minute: $page.data.user.notifMin
+			})
+			.plus({ days: 6 })
+			.minus({ minutes: 1 });
 		await writeReq('/twilio?noacc=true', {
 			type: 'tip',
 			phone: $page.data.user.phone,
-			sendAt: twoWeeksLater
+			sendAt: twoWeeksLater.toJSDate()
 		});
 	}
 
@@ -66,9 +72,6 @@
 		});
 		if (response.status == 200) {
 			await invalidateAll();
-			if (!householdId) {
-				schedTipMsg();
-			}
 			goto('/dashboard');
 		} else {
 			alert('Something went wrong with saving');
@@ -97,7 +100,8 @@
 			dateOfBirth: new Date(e.target[3].value)
 		});
 		if (response.status == 200) {
-			if (newHouse) schedTipMsg();
+			// if (newHouse)
+			schedTipMsg();
 			await invalidate('data:householdId');
 			const { id } = await response.json();
 			kids = [
@@ -205,18 +209,12 @@
 			type: 'inviteToHousehold',
 			targetPhone: phoneInput.getNumber()
 		});
-		if (response.status == 200) {
-			if (!householdId) {
-				await invalidate('data:householdId');
-				schedTipMsg();
-			}
-		}
 		inviteesPhone = phoneInput.getNumber();
 		showClickToTextLink = true;
 		phoneInput.telInput.value = '';
 	}
 
-	async function joinHousehold(householdId: number, id: number) {
+	async function joinHousehold(id: number) {
 		const response = await writeReq('/db', {
 			type: 'acceptHouseholdInvite',
 			id
@@ -323,7 +321,7 @@
 				<div slot="close" let:dialog>
 					<button
 						on:click={async () => {
-							await joinHousehold(householdInvites[0].household.id, householdInvites[0].id);
+							await joinHousehold(householdInvites[0].id);
 							dialog.close();
 						}}
 					>
