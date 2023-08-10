@@ -100,8 +100,7 @@
 			dateOfBirth: new Date(e.target[3].value)
 		});
 		if (response.status == 200) {
-			// if (newHouse)
-			schedTipMsg();
+			if (newHouse) schedTipMsg();
 			await invalidate('data:householdId');
 			const { id } = await response.json();
 			kids = [
