@@ -1,5 +1,6 @@
 import { generate, save } from '$lib/server/login';
 import { PrismaClient } from '@prisma/client';
+import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient({
 	log: ['query', 'info', 'warn', 'error']
@@ -19,7 +20,6 @@ export async function POST({ request }: { request: Request }) {
 	}
 
 	const { token, createdAt, expires } = await generate();
-
 	if (!token) {
 		console.error('token generation failed');
 		return new Response(
@@ -43,15 +43,8 @@ export async function POST({ request }: { request: Request }) {
 			process.exit(1);
 		});
 
-	// put the expiration date in a human-readable format for the text message
-	const hrs = expires.getHours();
-	const time = `${hrs > 12 ? hrs - 12 : hrs}:${
-		expires.getMinutes() < 10 ? '0' : ''
-	}${expires.getMinutes()}${hrs >= 12 ? 'PM' : 'AM'}`;
-
 	return new Response(
 		JSON.stringify({
-			time,
 			token
 		}),
 		{

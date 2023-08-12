@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export const generate = async () => {
 	const createdAt = new Date();
 	const expires = new Date();
-	expires.setHours(createdAt.getHours() + 1);
+	expires.setHours(createdAt.getHours() + 12);
 
 	let crypto;
 	try {

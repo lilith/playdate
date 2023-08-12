@@ -40,11 +40,13 @@
 			const { time, token } = await res.json();
 			if (public_env.PUBLIC_ENV === 'test') console.log('PHONE_TOKEN', phone, token);
 
+			const region = new Intl.DateTimeFormat();
+			const { timeZone } = region.resolvedOptions();
 			const msgRes = await writeReq('/twilio?nocookie=true', {
 				phone,
 				type: 'login',
-				time,
-				token
+				token,
+				timeZone
 			});
 			const { message } = await msgRes.json();
 			if (msgRes.status === 200) {

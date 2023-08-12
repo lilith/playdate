@@ -6,6 +6,7 @@ import { PrismaClient, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
 import { toLocalTimezone } from '../date';
+import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;
@@ -20,9 +21,27 @@ const msgToSend = async (
 	let msg;
 	switch (type) {
 		case 'login': {
-			const { phone, time, token } = msgComps;
+			const { phone, token, timeZone } = msgComps;
+			const magicLink = await prisma.magicLink
+				.findUnique({
+					where: {
+						token
+					},
+					select: {
+						expires: true
+					}
+				})
+				.catch((err) => console.error(err));
+			if (!magicLink) {
+				throw error(404, {
+					message: `No magic link with token ${token}`
+				});
+			}
 
-			msg = `Your login link to playdate.help will expire at ${time}: ${url}/login/${phone.slice(
+			const localTime = toLocalTimezone(magicLink.expires, timeZone).toLocaleString(
+				DateTime.TIME_SIMPLE
+			);
+			msg = `Your login link to playdate.help will expire at ${localTime}: ${url}/login/${phone.slice(
 				1
 			)}/${token}`;
 			break;
