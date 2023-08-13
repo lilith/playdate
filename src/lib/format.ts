@@ -65,7 +65,7 @@ export function generateDiffSchedule(ogRows: Row[], rows: Row[]): string[] {
 	return diffs;
 }
 
-export function generateFullSchedule(rows: any[]): string[] {
+export function generateFullSchedule(rows: Row[]): string[] {
 	const schedule: string[] = [];
 	let lastIsBusy = false;
 
@@ -86,4 +86,26 @@ export function generateFullSchedule(rows: any[]): string[] {
 	});
 
 	return schedule;
+}
+
+export function timeToParts(t: string) {
+	// will look like either h:mma or ha
+	if (t.includes(':')) {
+		const [hStr, mmaStr] = t.split(':');
+		let h = parseInt(hStr);
+		const m = parseInt(mmaStr.slice(0, -2));
+		const a = mmaStr.slice(-2);
+		if (a === 'PM') h += 12;
+		return {
+			h,
+			m
+		};
+	}
+	const hStr = t.slice(0, -2);
+	let h = parseInt(hStr);
+	const a = t.slice(-2);
+	if (a === 'PM') h += 12;
+	return {
+		h
+	};
 }

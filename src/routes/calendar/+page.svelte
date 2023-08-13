@@ -44,7 +44,7 @@
 					availRange !== AvailabilityStatus.UNSPECIFIED &&
 					availRange !== AvailabilityStatus.BUSY
 				) {
-					// it's gonna be formatted like H:MM - H:MM
+					// it's gonna be formatted like h(:mm)a - h(:mm)a
 					const timeSplit = availRange.split(/[( - )|:]/);
 					startHr = parseInt(timeSplit[0]);
 					startMin = parseInt(timeSplit[1]);
@@ -82,12 +82,13 @@
 		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
 		// validator and formatter
 		const regexpRange =
-			/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm)?\s*/i;
+			/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm|AM|PM)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm|AM|PM)?\s*/i;
 		const t = rows[i].availRange.match(regexpRange)?.groups;
 		if (!t) {
 			return {};
 		}
-		let { fromhalf, tohalf } = t;
+		let fromhalf = t.fromhalf?.toLowerCase();
+		let tohalf = t.tohalf?.toLowerCase();
 		let fromhr = parseInt(t.fromhr);
 		let tohr = parseInt(t.tohr);
 		let frommin = t.frommin ? parseInt(t.frommin) : 0;
@@ -111,10 +112,10 @@
 				fromhalf = 'am';
 			}
 			tohalf = 'pm';
-		} else if (fromhalf) {
+		} else if (fromhalf && !tohalf) {
 			if (tohr * 100 + tomin > fromhr * 100 + frommin) tohalf = fromhalf;
 			else tohalf = fromhalf === 'am' ? 'pm' : 'am';
-		} else {
+		} else if (!fromhalf && tohalf) {
 			if (tohr * 100 + tomin > fromhr * 100 + frommin) fromhalf = tohalf;
 			else fromhalf = tohalf === 'am' ? 'pm' : 'am';
 		}
@@ -210,6 +211,10 @@
 			});
 			notified.add(phone);
 			notified = new Set(notified);
+			setTimeout(() => {
+				notified.delete(phone);
+				notified = new Set(notified);
+			}, 4000);
 		}
 	}
 	function notifyAll() {
@@ -668,6 +673,8 @@
 	}
 	#notif-table td {
 		padding: 0.4rem 0;
+		height: 46px;
+		width: 50%;
 	}
 	.tooltiptext {
 		left: 0;
