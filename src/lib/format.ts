@@ -1,7 +1,7 @@
-import { EMOTICONS_REVERSE } from '$lib/constants';
+import { EMOTICONS_REVERSE, type Row } from '$lib/constants';
 
-function getScheduleItem(row: any): string {
-	let scheduleItem: string = '';
+function getScheduleItem(row: Row): string {
+	let scheduleItem = '';
 	const busy = row.availRange === 'Busy';
 	const unspecified = row.availRange === undefined;
 
@@ -27,7 +27,7 @@ function getScheduleItem(row: any): string {
 function updateLastScheduleItem(schedule: string[], newDate: string): void {
 	const lastScheduleItem = schedule[schedule.length - 1];
 	if (lastScheduleItem.includes('-')) {
-		let dates = lastScheduleItem.split('-');
+		const dates = lastScheduleItem.split('-');
 		dates[dates.length - 1] = newDate;
 		schedule[schedule.length - 1] = dates.join('-');
 	} else {
@@ -35,7 +35,7 @@ function updateLastScheduleItem(schedule: string[], newDate: string): void {
 	}
 }
 
-export function generateDiffSchedule(ogRows: any[], rows: any[]): string[] {
+export function generateDiffSchedule(ogRows: Row[], rows: Row[]): string[] {
 	const diffs: string[] = [];
 	let lastIsBusy = false;
 	let lastIsUnspecified = false;

@@ -37,7 +37,7 @@
 			phone
 		});
 		if (res.status === 200) {
-			const { time, token } = await res.json();
+			const { token } = await res.json();
 			if (public_env.PUBLIC_ENV === 'test') console.log('PHONE_TOKEN', phone, token);
 
 			const region = new Intl.DateTimeFormat();

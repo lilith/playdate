@@ -1,6 +1,5 @@
 import { generate, save } from '$lib/server/login';
 import { PrismaClient } from '@prisma/client';
-import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient({
 	log: ['query', 'info', 'warn', 'error']

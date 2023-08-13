@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DAYS, PRONOUNS, EMOTICONS_REVERSE } from '$lib/constants';
+	import { DAYS, PRONOUNS, EMOTICONS_REVERSE, type Row } from '$lib/constants';
 	import { generateDiffSchedule, generateFullSchedule } from '$lib/format';
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
@@ -11,29 +11,8 @@
 
 	let { availabilityDates, user, kidNames, AvailabilityStatus, circleInfo } = $page.data;
 
-	let rows: {
-		englishDay: string;
-		monthDay: string;
-		availRange: string;
-		notes: string | undefined;
-		emoticons: Set<string>;
-		startHr: number | undefined;
-		startMin: number | undefined;
-		endHr: number | undefined;
-		endMin: number | undefined;
-	}[] = [];
-
-	let ogRows: {
-		englishDay: string;
-		monthDay: string;
-		availRange: string;
-		notes: string | undefined;
-		emoticons: Set<string>;
-		startHr: number | undefined;
-		startMin: number | undefined;
-		endHr: number | undefined;
-		endMin: number | undefined;
-	}[] = [];
+	let rows: Row[] = [];
+	let ogRows: Row[] = [];
 
 	const EMOTICONS = {
 		'🏠': 'house',

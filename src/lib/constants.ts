@@ -189,3 +189,15 @@ export type BusyDetails = {
 	availRange: string;
 };
 export type Dates = { [key: string]: DateDetails[] };
+
+export type Row = {
+	englishDay: string;
+	monthDay: string;
+	availRange: string;
+	notes: string | undefined;
+	emoticons: Set<string>;
+	startHr: number | undefined;
+	startMin: number | undefined;
+	endHr: number | undefined;
+	endMin: number | undefined;
+};

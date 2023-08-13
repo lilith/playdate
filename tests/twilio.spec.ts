@@ -3,7 +3,7 @@ import { run } from '../prisma/seed';
 
 const host = 'http://localhost:5173';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async () => {
 	await run();
 });
 

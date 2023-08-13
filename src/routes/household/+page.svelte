@@ -204,7 +204,7 @@
 			alert('You have entered an invalid contact number.');
 			return;
 		}
-		const response = await writeReq('/db', {
+		await writeReq('/db', {
 			type: 'inviteToHousehold',
 			targetPhone: phoneInput.getNumber()
 		});
