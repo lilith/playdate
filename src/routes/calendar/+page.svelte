@@ -13,6 +13,7 @@
 
 	let rows: Row[] = [];
 	let ogRows: Row[] = [];
+	let schedFull: string[] = [];
 
 	const EMOTICONS = {
 		'🏠': 'house',
@@ -71,13 +72,12 @@
 			};
 		});
 		ogRows = [...rows];
+		schedFull = generateFullSchedule(rows);
 	});
 
 	let shownRows = new Set();
 	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
-	let schedFull: string[] = [];
-
 	function getAvailRange(i: number, status: string) {
 		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
 		// validator and formatter
@@ -415,57 +415,55 @@
 			{/each}
 		</table>
 		{#key schedDiffs}
-			{#if schedDiffs.length}
-				<p class="subtitle">Notify Circle</p>
-				<p id="preview-notif-subtitle">Preview of your notification messsage(s)</p>
-				<label class="switch">
-					<input type="checkbox" bind:checked={diff} />
-					<span class="slider round" />
-					<span class="toggle-label">Full</span>
-					<span class="toggle-label" style="left: 50%;">Diff</span>
-				</label>
-				<div id="preview-notif">
-					{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
-					of {kidNames}) has updated {PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
-					<br />
-					Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)
-					<br /><br />
+			<p class="subtitle">Notify Circle</p>
+			<p id="preview-notif-subtitle">Preview of your notification messsage(s)</p>
+			<label class="switch">
+				<input type="checkbox" bind:checked={diff} disabled={!schedDiffs.length} />
+				<span class="slider round" />
+				<span class="toggle-label">Full</span>
+				<span class="toggle-label" style="left: 50%;">Diff</span>
+			</label>
+			<div id="preview-notif">
+				{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
+				of {kidNames}) has updated {PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
+				<br />
+				Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)
+				<br /><br />
 
-					{#if diff}
-						{#each schedDiffs as diff}
-							<p>{diff}</p>
-						{/each}
-					{:else}
-						{#each schedFull as day}
-							<p>{day}</p>
-						{/each}
-					{/if}
-				</div>
-
-				<button class="notif-btn" style="margin: 1rem;" on:click={notifyAll}>Notify All</button>
-				<table id="notif-table">
-					{#each circleInfo as c}
-						{#each c.parents as p}
-							<tr>
-								<td>
-									{c.name}
-								</td>
-								<td>
-									{#if notified.has(p.phone)}
-										<p>Notified!</p>
-									{:else}
-										<button class="notif-btn" on:click={() => notify(p)}
-											>Notify <span class:strike={!p.phonePermissions.allowReminders}
-												>{p.firstName} {p.lastName ?? ''}</span
-											></button
-										>
-									{/if}
-								</td>
-							</tr>
-						{/each}
+				{#if diff}
+					{#each schedDiffs as diff}
+						<p>{diff}</p>
 					{/each}
-				</table>
-			{/if}
+				{:else}
+					{#each schedFull as day}
+						<p>{day}</p>
+					{/each}
+				{/if}
+			</div>
+
+			<button class="notif-btn" style="margin: 1rem;" on:click={notifyAll}>Notify All</button>
+			<table id="notif-table">
+				{#each circleInfo as c}
+					{#each c.parents as p}
+						<tr>
+							<td>
+								{c.name}
+							</td>
+							<td>
+								{#if notified.has(p.phone)}
+									<p>Notified!</p>
+								{:else}
+									<button class="notif-btn" on:click={() => notify(p)}
+										>Notify <span class:strike={!p.phonePermissions.allowReminders}
+											>{p.firstName} {p.lastName ?? ''}</span
+										></button
+									>
+								{/if}
+							</td>
+						</tr>
+					{/each}
+				{/each}
+			</table>
 		{/key}
 	</div>
 </div>
@@ -508,6 +506,10 @@
 		background-color: #73a4eb;
 		-webkit-transition: 0.4s;
 		transition: 0.4s;
+	}
+
+	input:disabled + .slider {
+		background-color: #d9d9d9;
 	}
 
 	.slider:before {
