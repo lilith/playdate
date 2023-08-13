@@ -44,7 +44,7 @@ const getFormattedAvailability = (
 		if (x.status === AvailabilityStatus.UNSPECIFIED) return;
 		if (x.status !== AvailabilityStatus.BUSY) {
 			if (x.startTime && x.endTime) {
-				availRange = `${dateTo12Hour(x.startTime)} - ${dateTo12Hour(x.endTime)}`;
+				availRange = `${dateTo12Hour(x.startTime)}-${dateTo12Hour(x.endTime)}`;
 			}
 		}
 
@@ -71,12 +71,13 @@ const getFormattedAvailability = (
 					const lastEntry = res[res.length - 1].availRange;
 					// if dateRange has multiple days, then just change the last date
 					// otherwise just append new date to last one with a hyphen
-					if (lastEntry.includes(' - ')) {
-						const dates = lastEntry.split(' - ');
+					const separator = '-';
+					if (lastEntry.includes(separator)) {
+						const dates = lastEntry.split(separator);
 						dates[dates.length - 1] = `${englishDay} ${monthDay}`;
-						res[res.length - 1].availRange = dates.join(' - ');
+						res[res.length - 1].availRange = dates.join(separator);
 					} else {
-						res[res.length - 1].availRange += ` - ${englishDay} ${monthDay}`;
+						res[res.length - 1].availRange += `${separator}${englishDay} ${monthDay}`;
 					}
 				} else {
 					lastIsBusy = true;

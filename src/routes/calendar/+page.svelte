@@ -416,7 +416,7 @@
 		</table>
 		{#key schedDiffs}
 			<p class="subtitle">Notify Circle</p>
-			<p id="preview-notif-subtitle">Preview of your notification messsage(s)</p>
+			<p id="preview-notif-subtitle">Preview of your notification message(s)</p>
 			<label class="switch">
 				<input type="checkbox" bind:checked={diff} disabled={!schedDiffs.length} />
 				<span class="slider round" />
@@ -425,9 +425,10 @@
 			</label>
 			<div id="preview-notif">
 				{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
-				of {kidNames}) has updated {PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
+				of {kidNames}) has {diff ? 'changed the following days on' : 'updated'}
+				{PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
 				<br />
-				Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)
+				Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)
 				<br /><br />
 
 				{#if diff}
@@ -527,7 +528,7 @@
 	input:checked + .slider + .toggle-label {
 		color: white;
 	}
-	input:not(:checked) ~ .toggle-label:last-child {
+	input:not(:checked):not(:disabled) ~ .toggle-label:last-child {
 		color: white;
 	}
 

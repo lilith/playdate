@@ -48,7 +48,7 @@ export const circleNotif = async (schedDiffs: string, user: User) => {
 
 	return `${user.firstName}${
 		user.lastName && user.lastName.length ? ` ${user.lastName}` : ''
-	} (parent of ${kidNames}) has updated ${objectivePronoun} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSchedDiffs}`;
+	} (parent of ${kidNames}) has updated ${objectivePronoun} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSchedDiffs}`;
 };
 
 export const dateNotes = (notes: string) => sanitize(notes);

@@ -69,7 +69,7 @@ export const load = (async ({ parent, depends }) => {
 				default: {
 					availRange = 'AVAILABLE'; // should never actually be rendered as such
 					if (x.startTime && x.endTime) {
-						availRange = `${dateTo12Hour(x.startTime)} - ${dateTo12Hour(x.endTime)}`;
+						availRange = `${dateTo12Hour(x.startTime)}-${dateTo12Hour(x.endTime)}`;
 					}
 				}
 			}

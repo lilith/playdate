@@ -133,14 +133,16 @@
 							{row.englishDay}
 							{row.monthDay}
 							{row.availRange}
-							<div class="tooltip w-fit">
-								<p>
-									{row.emoticons}
-									<span class="tooltiptext">
-										<Legend />
-									</span>
-								</p>
-							</div>
+							{#if row.emoticons !== 'N/A'}
+								<div class="tooltip w-fit">
+									<p>
+										{row.emoticons}
+										<span class="tooltiptext">
+											<Legend />
+										</span>
+									</p>
+								</div>
+							{/if}
 						</div>
 						{#if row.notes}
 							{row.notes}

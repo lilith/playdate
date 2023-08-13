@@ -2,7 +2,7 @@
 <p>🚗 Can visit</p>
 <p>👤 Just kids</p>
 <p>👥 Chaperone(s)</p>
-<p>🏫 At school</p>
+<p>🏫 Via school</p>
 <hr style="margin: 0.2rem 0;" />
 <p style="margin: auto;">Availability</p>
 <p>⭐️ Good</p>
