@@ -6,7 +6,7 @@ import {
 	type DateDetails,
 	type BusyDetails,
 	EMOTICONS_REVERSE
-} from '../../constants';
+} from '$lib/constants';
 import type { Household } from './constants';
 
 const prisma = new PrismaClient();

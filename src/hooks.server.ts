@@ -10,9 +10,11 @@ const prisma = new PrismaClient();
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
 
-cron.schedule('*/1 * * * *', function () {
-	sendNotif();
-});
+if (import.meta.env.PROD) {
+	cron.schedule('*/1 * * * *', function () {
+		sendNotif();
+	});
+}
 
 const setLocal = async (
 	user: (User & { phonePermissions: PhoneContactPermissions }) | null,

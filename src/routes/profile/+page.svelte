@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { PRONOUNS, LANGUAGES } from '../../constants';
+	import { PRONOUNS, LANGUAGES } from '$lib/constants';
 	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';

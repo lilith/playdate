@@ -2,7 +2,7 @@
 	import Legend from '../Legend.svelte';
 	import NavBar from '../NavBar.svelte';
 	import { page } from '$app/stores';
-	import type { Dates, DateDetails, BusyDetails } from '../../constants';
+	import type { Dates, DateDetails, BusyDetails } from '$lib/constants';
 	import { formatMin } from '../../utils';
 	import type { Household } from './constants';
 	import { goto } from '$app/navigation';

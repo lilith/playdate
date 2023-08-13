@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import { LANGUAGES } from '../../constants';
+import { LANGUAGES } from '$lib/constants';
 import { marked } from 'marked';
 
 export const load = (async ({ fetch }) => {

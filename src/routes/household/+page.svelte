@@ -2,7 +2,7 @@
 	import PhoneInput from '../PhoneInput.svelte';
 	import { page } from '$app/stores';
 	import { onMount, afterUpdate } from 'svelte';
-	import { PRONOUNS, type PRONOUNS_ENUM } from '../../constants';
+	import { PRONOUNS, type PRONOUNS_ENUM } from '$lib/constants';
 	import Modal from '../Modal.svelte';
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';

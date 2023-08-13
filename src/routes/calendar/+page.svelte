@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { DAYS, PRONOUNS, EMOTICONS_REVERSE } from '../../constants';
+	import { DAYS, PRONOUNS, EMOTICONS_REVERSE } from '$lib/constants';
+	import { generateDiffSchedule, generateFullSchedule } from '$lib/format';
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
 	import { invalidate } from '$app/navigation';
@@ -96,56 +97,7 @@
 	let shownRows = new Set();
 	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
-	let circleNotifMsg: string;
-	function getSchedDiff() {
-		const diffs: string[] = [];
-		let lastIsBusy = false;
-		let lastIsUnspecified = false;
-		ogRows.forEach((ogRow, i) => {
-			const newRow = rows[i];
-			if (newRow.availRange !== ogRow.availRange) {
-				let diff;
-				const busy = newRow.availRange === 'Busy';
-				const unspecified = newRow.availRange === undefined;
-				if (busy) diff = `${newRow.availRange} ${newRow.monthDay}`;
-				else if (unspecified) diff = `Unspecified ${newRow.monthDay}`;
-				else diff = `${newRow.englishDay} ${newRow.monthDay} ${newRow.availRange}`;
-
-				if (newRow.emoticons.size) {
-					diff += ' ';
-					diff += Array.from(newRow.emoticons)
-						.map((englishEmoji: string) => EMOTICONS_REVERSE[englishEmoji])
-						.join('');
-				}
-				if (newRow.notes?.length) {
-					diff += ' ';
-					diff += newRow.notes;
-				}
-				// previous diff was also for BUSY so just change end date of previous diff
-				if ((lastIsBusy && busy) || (lastIsUnspecified && unspecified)) {
-					const lastDiff = diffs[diffs.length - 1];
-					// if dateRange has multiple days, then just change the last date
-					// otherwise just append new date to last one with a hyphen
-					if (lastDiff.includes('-')) {
-						let dates = lastDiff.split('-');
-						dates[dates.length - 1] = newRow.monthDay;
-						diffs[diffs.length - 1] = dates.join('-');
-					} else {
-						diffs[diffs.length - 1] += `-${newRow.monthDay}`;
-					}
-				} else diffs.push(diff);
-				if (busy) lastIsBusy = true;
-				else lastIsBusy = false;
-
-				if (unspecified) lastIsUnspecified = true;
-				else lastIsUnspecified = false;
-			} else {
-				lastIsBusy = false;
-				lastIsUnspecified = false;
-			}
-		});
-		schedDiffs = diffs;
-	}
+	let schedFull: string[] = [];
 
 	function getAvailRange(i: number, status: string) {
 		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
@@ -245,12 +197,8 @@
 					availRange
 				};
 			});
-			getSchedDiff();
-			try {
-				circleNotifMsg = await sms();
-			} catch (err) {
-				console.error(err);
-			}
+			schedDiffs = generateDiffSchedule(ogRows, rows);
+			schedFull = generateFullSchedule(rows);
 			return 'ok';
 		} else {
 			alert('Something went wrong with saving');
@@ -268,17 +216,6 @@
 	}
 
 	let notified = new Set();
-	async function sms() {
-		const res = await fetch(
-			`/sanitize?which=circleNotif&schedDiffs=${encodeURIComponent(schedDiffs.join('\n'))}`
-		);
-		const { sms, message } = await res.json();
-		if (res.status !== 200) {
-			throw new Error(message);
-		} else {
-			return sms;
-		}
-	}
 	type Parent = {
 		phone: string;
 		phonePermissions: { allowReminders: boolean };
@@ -290,7 +227,7 @@
 			await writeReq('/twilio', {
 				phone,
 				type: 'circleNotif',
-				schedDiffs: schedDiffs.join('\n')
+				sched: diff ? schedDiffs.join('\n') : schedFull.join('\n')
 			});
 			notified.add(phone);
 			notified = new Set(notified);
@@ -314,6 +251,8 @@
 			rows[i].notes = notes;
 		}
 	}
+
+	let diff = false;
 </script>
 
 <div>
@@ -495,6 +434,12 @@
 			{#if schedDiffs.length}
 				<p class="subtitle">Notify Circle</p>
 				<p id="preview-notif-subtitle">Preview of your notification messsage(s)</p>
+				<label class="switch">
+					<input type="checkbox" bind:checked={diff} />
+					<span class="slider round" />
+					<span class="toggle-label">Full</span>
+					<span class="toggle-label" style="left: 50%;">Diff</span>
+				</label>
 				<div id="preview-notif">
 					{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
 					of {kidNames}) has updated {PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
@@ -502,9 +447,15 @@
 					Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(at school) ⭐(good) 🌟(great) 🙏(needed)
 					<br /><br />
 
-					{#each schedDiffs as diff}
-						<p>{diff}</p>
-					{/each}
+					{#if diff}
+						{#each schedDiffs as diff}
+							<p>{diff}</p>
+						{/each}
+					{:else}
+						{#each schedFull as day}
+							<p>{day}</p>
+						{/each}
+					{/if}
 				</div>
 
 				<button class="notif-btn" style="margin: 1rem;" on:click={notifyAll}>Notify All</button>
@@ -536,6 +487,82 @@
 </div>
 
 <style>
+	.toggle-label {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		left: 0px;
+		font-size: 18px;
+		color: #333;
+		width: 50%;
+		text-align: center;
+	}
+	/* The switch - the box around the slider */
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 50%;
+		height: 34px;
+		margin: 0.5rem 0 0.9rem;
+	}
+
+	/* Hide default HTML checkbox */
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	/* The slider */
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #73a4eb;
+		-webkit-transition: 0.4s;
+		transition: 0.4s;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 30px;
+		width: 50%;
+		left: 2px;
+		bottom: 2px;
+		background-color: white;
+		-webkit-transition: 0.4s;
+		transition: 0.4s;
+	}
+
+	input:checked + .slider + .toggle-label {
+		color: white;
+	}
+	input:not(:checked) ~ .toggle-label:last-child {
+		color: white;
+	}
+
+	input:focus + .slider {
+		box-shadow: 0 0 1px #73a4eb;
+	}
+
+	input:checked + .slider:before {
+		-webkit-transform: translateX(calc(100% - 4px));
+		-ms-transform: translateX(calc(100% - 4px));
+		transform: translateX(calc(100% - 4px));
+	}
+
+	/* Rounded sliders */
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 34px;
+	}
 	.strike {
 		text-decoration: line-through;
 	}
@@ -618,7 +645,6 @@
 	#preview-notif-subtitle {
 		font-size: large;
 		text-align: left;
-		margin-bottom: 0.9rem;
 	}
 	#preview-notif {
 		box-shadow: 0px 0px 4px 0px #00000096;

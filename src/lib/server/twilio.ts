@@ -92,8 +92,8 @@ const msgToSend = async (
 				});
 			}
 
-			const { schedDiffs } = msgComps;
-			msg = await circleNotif(schedDiffs, initiator);
+			const { sched } = msgComps;
+			msg = await circleNotif(sched, initiator);
 			break;
 		}
 		case 'tip': {

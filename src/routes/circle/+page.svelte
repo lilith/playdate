@@ -6,7 +6,7 @@
 	import { invalidate } from '$app/navigation';
 	import { writeReq } from '../../utils';
 	import Modal from '../Modal.svelte';
-	import { PRONOUNS, type PRONOUNS_ENUM } from '../../constants';
+	import { PRONOUNS, type PRONOUNS_ENUM } from '$lib/constants';
 
 	let phoneInput: object;
 	let inviteesPhone: string;
