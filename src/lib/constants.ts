@@ -193,7 +193,7 @@ export type Dates = { [key: string]: DateDetails[] };
 export type Row = {
 	englishDay: string;
 	monthDay: string;
-	availRange: string;
+	availRange: string | undefined;
 	notes: string | undefined;
 	emoticons: Set<string>;
 	startHr: number | undefined;

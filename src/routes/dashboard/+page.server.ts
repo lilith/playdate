@@ -8,6 +8,7 @@ import {
 	EMOTICONS_REVERSE
 } from '$lib/constants';
 import { dateTo12Hour, toLocalTimezone } from '$lib/date';
+import { getAvailRangeParts } from '$lib/parse';
 import type { Household } from './constants';
 
 const prisma = new PrismaClient();
@@ -91,13 +92,10 @@ const getFormattedAvailability = (
 				}
 			} else {
 				let emoticons = '';
-				// it's gonna be formatted like H:MM - H:MM
-				const timeSplit = availRange.split(/[( - )|:]/);
-				const startHr = parseInt(timeSplit[0]);
-				const startMin = parseInt(timeSplit[1]);
-				const endHr = parseInt(timeSplit[3]);
-				const endMin = parseInt(timeSplit[4]);
-
+				const { startHr, startMin, endHr, endMin } = getAvailRangeParts(
+					availRange,
+					AvailabilityStatus.AVAILABLE
+				) as { [key: string]: number };
 				const notes = allAvailableDates[monthDay].notes;
 				if (allAvailableDates[monthDay].emoticons) {
 					for (const emoji of allAvailableDates[monthDay].emoticons.split(',')) {
@@ -229,18 +227,6 @@ export const load = (async ({ parent }) => {
 		const overlaps: Dates = {};
 		// For each record (A) in household_days,  search circle_days for the subset with the same date -> matching_days
 		// For each of these (B), check if the start-stop times between the A-B pair of records overlaps. If so, add it to the list to suggest. We’re ignoring H/V/T/D, since that’s just an FYI for parents
-		// poss overlaps:
-		// user: 	[  ]
-		// circle: 	  [  ]
-		// ------------------
-		// user: 	  [  ]
-		// circle:	[  ]
-		// ------------------
-		// user:	[  ]
-		// circle: [	 ]
-		// ------------------
-		// user:   [     ]
-		// circle:   [  ]
 		const yr = new Date().getFullYear();
 		Object.entries(userDates).map((x) => {
 			const [monthDay, details] = x;
@@ -272,10 +258,21 @@ export const load = (async ({ parent }) => {
 					circleEnd.setHours(endHr2);
 					circleEnd.setMinutes(endMin2);
 					const end2 = circleEnd.getTime();
-
+					// poss overlaps:
+					// user: 	[  ]
+					// circle: 	  [  ]
+					// ------------------
+					// user: 	  [  ]
+					// circle:	[  ]
+					// ------------------
+					// user:	[  ]
+					// circle: [	 ]
+					// ------------------
+					// user:   [     ]
+					// circle:   [  ]
 					if (
-						(start1 <= start2 && end1 <= end2) ||
-						(start2 <= start1 && end2 <= end1) ||
+						(start1 <= start2 && start2 < end1) ||
+						(start2 < end2 && end2 <= end1) ||
 						(start2 <= start1 && end1 <= end2) ||
 						(start1 <= start2 && end2 <= end1)
 					) {

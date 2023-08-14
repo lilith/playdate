@@ -1,22 +1,12 @@
 import { AvailabilityStatus, Pronoun } from '@prisma/client';
-import type { PRONOUNS_ENUM, Row } from './constants';
+import type { PRONOUNS_ENUM } from './constants';
 
-export function timeStrToParts(availRange: string) {
-	const timeSplit = availRange.split(/[( - )|:]/);
-	return {
-		startHr: parseInt(timeSplit[0]),
-		startMin: parseInt(timeSplit[1]),
-		endHr: parseInt(timeSplit[3]),
-		endMin: parseInt(timeSplit[4])
-	};
-}
-
-export function getAvailRangeParts(row: Row, status: string) {
+export function getAvailRangeParts(availRange: string | undefined, status: string) {
 	if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
 	// validator and formatter
 	const regexpRange =
 		/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm|AM|PM)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm|AM|PM)?\s*/i;
-	const t = row.availRange.match(regexpRange)?.groups;
+	const t = (availRange as string).match(regexpRange)?.groups;
 	if (!t) {
 		return {};
 	}
@@ -53,9 +43,9 @@ export function getAvailRangeParts(row: Row, status: string) {
 		else fromhalf = tohalf === 'am' ? 'pm' : 'am';
 	}
 	return {
-		startHr: fromhalf === 'pm' ? fromhr + 12 : fromhr,
+		startHr: fromhalf === 'pm' && fromhr !== 12 ? fromhr + 12 : fromhr,
 		startMin: frommin,
-		endHr: tohalf === 'pm' ? tohr + 12 : tohr,
+		endHr: tohalf === 'pm' && tohr !== 12 ? tohr + 12 : tohr,
 		endMin: tomin
 	};
 	// return `${fromhr}${frommin ? `:${frommin < 10 ? `0${frommin}` : frommin}` : ''}${fromhalf}-${tohr}${tomin ? `:${tomin < 10 ? `0${tomin}` : tomin}` : ''}${tohalf}`;

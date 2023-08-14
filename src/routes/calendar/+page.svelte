@@ -9,7 +9,7 @@
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '../../utils';
 	import { dateTo12Hour } from '$lib/date';
-	import { getAvailRangeParts, getObjectivePronoun, timeStrToParts } from '$lib/parse';
+	import { getAvailRangeParts, getObjectivePronoun } from '$lib/parse';
 	import { DateTime } from 'luxon';
 
 	let { availabilityDates, user, kidNames, AvailabilityStatus, circleInfo } = $page.data;
@@ -50,7 +50,7 @@
 					availRange !== AvailabilityStatus.BUSY
 				) {
 					// it's gonna be formatted like h(:mm)a - h(:mm)a
-					const timeParts = timeStrToParts(availRange);
+					const timeParts = getAvailRangeParts(availRange, AvailabilityStatus.AVAILABLE);
 					startHr = timeParts.startHr;
 					startMin = timeParts.startMin;
 					endHr = timeParts.endHr;
@@ -89,7 +89,7 @@
 	let schedDiffs: string[] = [];
 
 	async function markAs(i: number, status: string) {
-		const availRangeParts = getAvailRangeParts(unsaved[i], status);
+		const availRangeParts = getAvailRangeParts(unsaved[i].availRange, status);
 		const { startHr, startMin, endHr, endMin } = availRangeParts;
 		let startTime = DateTime.now(),
 			endTime = DateTime.now();
@@ -134,7 +134,7 @@
 			const { notes } = await response.json();
 			let newAvailRange;
 			if (status === AvailabilityStatus.BUSY) newAvailRange = 'Busy';
-			else if (status === AvailabilityStatus.UNSPECIFIED) newAvailRange = '';
+			else if (status === AvailabilityStatus.UNSPECIFIED) newAvailRange = undefined;
 			else
 				newAvailRange = `${dateTo12Hour(startTime.toLocal())}-${dateTo12Hour(endTime.toLocal())}`;
 
@@ -148,7 +148,7 @@
 			unsaved[i] = {
 				...unsaved[i],
 				notes,
-				availRange: status === AvailabilityStatus.BUSY ? '' : newAvailRange,
+				availRange: status === AvailabilityStatus.AVAILABLE ? newAvailRange : '',
 				...availRangeParts
 			};
 			schedDiffs = generateDiffSchedule(ogRows, rows);
