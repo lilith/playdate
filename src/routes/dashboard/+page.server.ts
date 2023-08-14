@@ -7,7 +7,7 @@ import {
 	type BusyDetails,
 	EMOTICONS_REVERSE
 } from '$lib/constants';
-import { dateTo12Hour } from '$lib/date';
+import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import type { Household } from './constants';
 
 const prisma = new PrismaClient();
@@ -28,7 +28,8 @@ const getHousehold = (household: Household) => {
 const getFormattedAvailability = (
 	rawAvailabilityDates: AvailabilityDate[],
 	dates: Dates,
-	householdId: number
+	householdId: number,
+	timeZone: string
 ) => {
 	const allAvailableDates: {
 		[key: string]: {
@@ -44,7 +45,9 @@ const getFormattedAvailability = (
 		if (x.status === AvailabilityStatus.UNSPECIFIED) return;
 		if (x.status !== AvailabilityStatus.BUSY) {
 			if (x.startTime && x.endTime) {
-				availRange = `${dateTo12Hour(x.startTime)}-${dateTo12Hour(x.endTime)}`;
+				availRange = `${dateTo12Hour(toLocalTimezone(x.startTime, timeZone))}-${dateTo12Hour(
+					toLocalTimezone(x.endTime, timeZone)
+				)}`;
 			}
 		}
 
@@ -146,7 +149,12 @@ export const load = (async ({ parent }) => {
 	if (household) {
 		const rawAvailabilityDates = household.AvailabilityDate;
 		const userDates: Dates = {};
-		const userDatesArr = getFormattedAvailability(rawAvailabilityDates, userDates, household.id);
+		const userDatesArr = getFormattedAvailability(
+			rawAvailabilityDates,
+			userDates,
+			household.id,
+			user.timeZone
+		);
 
 		const clause = {
 			select: {
@@ -202,7 +210,8 @@ export const load = (async ({ parent }) => {
 				circleDatesMap[x.householdId] = getFormattedAvailability(
 					x.household.AvailabilityDate,
 					circleDates,
-					x.householdId
+					x.householdId,
+					user.timeZone
 				);
 				households[x.householdId] = getHousehold(x.household);
 				return;
@@ -210,7 +219,8 @@ export const load = (async ({ parent }) => {
 			circleDatesMap[x.friendHouseholdId] = getFormattedAvailability(
 				x.friendHousehold.AvailabilityDate,
 				circleDates,
-				x.friendHouseholdId
+				x.friendHouseholdId,
+				user.timeZone
 			);
 			households[x.friendHouseholdId] = getHousehold(x.friendHousehold);
 		});

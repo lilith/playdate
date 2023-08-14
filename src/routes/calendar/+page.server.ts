@@ -1,4 +1,4 @@
-import { dateTo12Hour } from '$lib/date';
+import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import type { PageServerLoad } from './$types';
 import { PrismaClient, AvailabilityStatus } from '@prisma/client';
 
@@ -69,7 +69,9 @@ export const load = (async ({ parent, depends }) => {
 				default: {
 					availRange = 'AVAILABLE'; // should never actually be rendered as such
 					if (x.startTime && x.endTime) {
-						availRange = `${dateTo12Hour(x.startTime)}-${dateTo12Hour(x.endTime)}`;
+						availRange = `${dateTo12Hour(
+							toLocalTimezone(x.startTime, user.timeZone)
+						)}-${dateTo12Hour(toLocalTimezone(x.endTime, user.timeZone))}`;
 					}
 				}
 			}

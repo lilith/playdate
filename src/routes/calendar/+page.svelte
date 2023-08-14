@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DAYS, PRONOUNS, EMOTICONS_REVERSE, type Row } from '$lib/constants';
+	import { DAYS, EMOTICONS_REVERSE, type Row } from '$lib/constants';
 	import { generateDiffSchedule, generateFullSchedule } from '$lib/format';
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
@@ -8,11 +8,15 @@
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '../../utils';
+	import { dateTo12Hour } from '$lib/date';
+	import { getAvailRangeParts, getObjectivePronoun, timeStrToParts } from '$lib/parse';
+	import { DateTime } from 'luxon';
 
 	let { availabilityDates, user, kidNames, AvailabilityStatus, circleInfo } = $page.data;
 
 	let rows: Row[] = [];
 	let ogRows: Row[] = [];
+	let unsaved: Row[] = [];
 	let schedFull: string[] = [];
 
 	const EMOTICONS = {
@@ -32,7 +36,7 @@
 			const date = new Date(new Date().setDate(now.getDate() + x));
 			const englishDay = DAYS[date.getDay()];
 			const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
-			let availRange; // one of 'BUSY', 'Unspecified', and some time range
+			let availRange; // one of 'Busy', 'Unspecified', and some time range
 			let notes;
 			let startHr;
 			let startMin;
@@ -46,11 +50,11 @@
 					availRange !== AvailabilityStatus.BUSY
 				) {
 					// it's gonna be formatted like h(:mm)a - h(:mm)a
-					const timeSplit = availRange.split(/[( - )|:]/);
-					startHr = parseInt(timeSplit[0]);
-					startMin = parseInt(timeSplit[1]);
-					endHr = parseInt(timeSplit[3]);
-					endMin = parseInt(timeSplit[4]);
+					const timeParts = timeStrToParts(availRange);
+					startHr = timeParts.startHr;
+					startMin = timeParts.startMin;
+					endHr = timeParts.endHr;
+					endMin = timeParts.endMin;
 				}
 				notes = availabilityDates[monthDay].notes;
 				if (availabilityDates[monthDay].emoticons) {
@@ -72,75 +76,37 @@
 			};
 		});
 		ogRows = [...rows];
+		unsaved = rows.map((r) => ({
+			...r,
+			emoticons: new Set(r.emoticons),
+			availRange: r.availRange === 'Busy' ? '' : r.availRange // edit on “busy” clears text box
+		}));
 		schedFull = generateFullSchedule(rows);
 	});
 
 	let shownRows = new Set();
 	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
-	function getAvailRange(i: number, status: string) {
-		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
-		// validator and formatter
-		const regexpRange =
-			/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm|AM|PM)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm|AM|PM)?\s*/i;
-		const t = rows[i].availRange.match(regexpRange)?.groups;
-		if (!t) {
-			return {};
-		}
-		let fromhalf = t.fromhalf?.toLowerCase();
-		let tohalf = t.tohalf?.toLowerCase();
-		let fromhr = parseInt(t.fromhr);
-		let tohr = parseInt(t.tohr);
-		let frommin = t.frommin ? parseInt(t.frommin) : 0;
-		let tomin = t.tomin ? parseInt(t.tomin) : 0;
 
-		if (!fromhr || fromhr > 12 || !tohr || tohr > 12 || frommin >= 60 || tomin >= 60) {
-			return {};
-		}
-
-		/**
-		When neither start nor stop time specifies am/pm:
-			We’ll assume that kids generally do afternoons together, and that start times will be before 7pm. 
-			If the start value is < 7, assume pm. If start value >= 7, assume am.
-		When only start time specifies am/pm, and stop value > start value, copy start time (am/pm), otherwise use opposite (am/pm)
-		When only stop time specifies am/pm, and start value < stop value, copy stop time (am/pm), otherwise use opposite
-		*/
-		if (!fromhalf && !tohalf) {
-			if (fromhr < 7) {
-				fromhalf = 'pm';
-			} else {
-				fromhalf = 'am';
-			}
-			tohalf = 'pm';
-		} else if (fromhalf && !tohalf) {
-			if (tohr * 100 + tomin > fromhr * 100 + frommin) tohalf = fromhalf;
-			else tohalf = fromhalf === 'am' ? 'pm' : 'am';
-		} else if (!fromhalf && tohalf) {
-			if (tohr * 100 + tomin > fromhr * 100 + frommin) fromhalf = tohalf;
-			else fromhalf = tohalf === 'am' ? 'pm' : 'am';
-		}
-		return {
-			startHr: fromhalf === 'pm' ? fromhr + 12 : fromhr,
-			startMin: frommin,
-			endHr: tohalf === 'pm' ? tohr + 12 : tohr,
-			endMin: tomin
-		};
-		// return `${fromhr}${frommin ? `:${frommin < 10 ? `0${frommin}` : frommin}` : ''}${fromhalf}-${tohr}${tomin ? `:${tomin < 10 ? `0${tomin}` : tomin}` : ''}${tohalf}`;
-	}
 	async function markAs(i: number, status: string) {
-		const availRange = getAvailRange(i, status);
-		const { startHr, startMin, endHr, endMin } = availRange;
+		const availRangeParts = getAvailRangeParts(unsaved[i], status);
+		const { startHr, startMin, endHr, endMin } = availRangeParts;
+		let startTime = DateTime.now(),
+			endTime = DateTime.now();
 		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) {
+			unsaved[i].notes = '';
+			unsaved[i].emoticons = new Set();
+			unsaved[i].availRange = ''; // empty so time range input will be empty when editor opened
 			rows[i].notes = '';
 			rows[i].emoticons = new Set();
 		} else if (status === AvailabilityStatus.AVAILABLE) {
-			if (Object.keys(availRange).length === 0) {
+			if (Object.keys(availRangeParts).length === 0) {
 				timeErrs.add(i);
 				timeErrs = new Set(timeErrs);
 				return;
 			}
 			// check whether the end time is greater than the start time
-			const tempStart = new Date();
+			const tempStart = new Date(unsaved[i].monthDay);
 			const tempEnd = new Date(tempStart);
 			tempStart.setHours(startHr ?? 0);
 			tempStart.setMinutes(startMin ?? 0);
@@ -151,32 +117,40 @@
 				alert('Please ensure that the difference in time is positive.');
 				return;
 			}
+			startTime = DateTime.fromJSDate(tempStart).toUTC();
+			endTime = DateTime.fromJSDate(tempEnd).toUTC();
 		}
 		const response = await writeReq('/db', {
 			type: 'schedule',
-			monthDay: rows[i].monthDay,
 			status,
-			notes: rows[i].notes,
-			emoticons: Array.from(rows[i].emoticons).join(','),
-			startHr,
-			startMin,
-			endHr,
-			endMin
+			notes: unsaved[i].notes,
+			emoticons: Array.from(unsaved[i].emoticons).join(','),
+			monthDay: unsaved[i].monthDay,
+			startTime: startTime.toJSDate(),
+			endTime: endTime.toJSDate()
 		});
 		if (response.status == 200) {
 			await invalidate('data:calendar');
-			availabilityDates = $page.data.availabilityDates;
-			rows.forEach((x, i) => {
-				const { monthDay } = x;
-				let availRange; // one of 'BUSY', 'Unspecified', and some time range
-				if (availabilityDates && monthDay in availabilityDates) {
-					availRange = availabilityDates[monthDay].availRange;
-				}
-				rows[i] = {
-					...rows[i],
-					availRange
-				};
-			});
+			const { notes } = await response.json();
+			let newAvailRange;
+			if (status === AvailabilityStatus.BUSY) newAvailRange = 'Busy';
+			else if (status === AvailabilityStatus.UNSPECIFIED) newAvailRange = '';
+			else
+				newAvailRange = `${dateTo12Hour(startTime.toLocal())}-${dateTo12Hour(endTime.toLocal())}`;
+
+			rows[i] = {
+				...rows[i],
+				notes,
+				availRange: newAvailRange,
+				emoticons: unsaved[i].emoticons,
+				...availRangeParts
+			};
+			unsaved[i] = {
+				...unsaved[i],
+				notes,
+				availRange: status === AvailabilityStatus.BUSY ? '' : newAvailRange,
+				...availRangeParts
+			};
 			schedDiffs = generateDiffSchedule(ogRows, rows);
 			schedFull = generateFullSchedule(rows);
 			return 'ok';
@@ -187,12 +161,12 @@
 	}
 
 	function toggleEmoticon(i: number, emoticon: string) {
-		if (rows[i].emoticons.has(emoticon)) {
-			rows[i].emoticons.delete(emoticon);
+		if (unsaved[i].emoticons.has(emoticon)) {
+			unsaved[i].emoticons.delete(emoticon);
 		} else {
-			rows[i].emoticons.add(emoticon);
+			unsaved[i].emoticons.add(emoticon);
 		}
-		rows[i].emoticons = new Set(rows[i].emoticons);
+		unsaved[i].emoticons = new Set(unsaved[i].emoticons);
 	}
 
 	let notified = new Set();
@@ -207,7 +181,8 @@
 			await writeReq('/twilio', {
 				phone,
 				type: 'circleNotif',
-				sched: diff ? schedDiffs.join('\n') : schedFull.join('\n')
+				sched: diff ? schedDiffs.join('\n') : schedFull.join('\n'),
+				diff
 			});
 			notified.add(phone);
 			notified = new Set(notified);
@@ -223,19 +198,10 @@
 		});
 	}
 
-	async function sanitizeNotes(i: number) {
-		const v = rows[i].notes;
-		if (!v) return; // empty notes are totally valid
-		const res = await fetch(`/sanitize?which=dateNotes&notes=${encodeURIComponent(v)}`);
-		const { notes, message } = await res.json();
-		if (res.status !== 200) {
-			console.error(message);
-			throw new Error(message); // don't continue on to saving
-		} else {
-			rows[i].notes = notes;
-		}
+	function showEditor(i: number) {
+		shownRows.add(i);
+		shownRows = new Set(shownRows);
 	}
-
 	let diff = false;
 </script>
 
@@ -248,42 +214,24 @@
 					<td
 						class:blue={shownRows.has(i)}
 						class="day"
-						on:click={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-						on:keyup={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
+						on:click={() => showEditor(i)}
+						on:keyup={() => showEditor(i)}
 					>
 						{row.englishDay}
 					</td>
 					<td
 						class:blue={shownRows.has(i)}
 						class="date"
-						on:click={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-						on:keyup={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
+						on:click={() => showEditor(i)}
+						on:keyup={() => showEditor(i)}
 					>
 						{row.monthDay}
 					</td>
 					<td
 						colspan="2"
 						class="time"
-						on:click={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
-						on:keyup={() => {
-							shownRows.add(i);
-							shownRows = new Set(shownRows);
-						}}
+						on:click={() => showEditor(i)}
+						on:keyup={() => showEditor(i)}
 					>
 						{#if !row.availRange}
 							<p>Unspecified (<span class="edit">edit</span>)</p>
@@ -291,7 +239,7 @@
 							<p>Busy (<span class="edit">edit</span>)</p>
 						{:else}
 							<p class="timeDisplay">{row.availRange}</p>
-							{#if row.emoticons}
+							{#if row.emoticons.size}
 								<p class="emoticonsDisplay">
 									{#each Array.from(row.emoticons) as emojiStr}
 										{EMOTICONS_REVERSE[emojiStr]}
@@ -339,7 +287,7 @@
 									<input type="text"
 										class="text-inherit"
 										placeholder='Enter a valid time range. Ex. "2:30pm-7 or 5-6"'
-										bind:value={row.availRange}
+										bind:value={unsaved[i].availRange}
 										on:keydown={() => {
 											timeErrs.delete(i);
 											timeErrs = new Set(timeErrs);
@@ -350,10 +298,10 @@
 									{/if}
 								</div>
 								<div class="v-center-h-space">
-									{#key row.emoticons}
+									{#key unsaved[i].emoticons}
 										{#each Object.entries(EMOTICONS) as [emoji, english]}
 											<div
-												class="emoji {row.emoticons.has(english) ? 'chosen' : ''}"
+												class="emoji {unsaved[i].emoticons.has(english) ? 'chosen' : ''}"
 												on:click={() => toggleEmoticon(i, english)}
 												on:keyup={() => toggleEmoticon(i, english)}
 											>
@@ -372,7 +320,7 @@
 								</div>
 								<div class="v-center-h-space">
 									<textarea
-										bind:value={row.notes}
+										bind:value={unsaved[i].notes}
 										class="text-inherit"
 										name="notes"
 										placeholder="(add notes)"
@@ -381,7 +329,6 @@
 								<div class="editor-btns">
 									<Button
 										onClick={async () => {
-											await sanitizeNotes(i);
 											const res = await markAs(i, AvailabilityStatus.AVAILABLE);
 											if (res === 'ok') {
 												shownRows.delete(i);
@@ -426,7 +373,7 @@
 			<div id="preview-notif">
 				{`${user.firstName}${user.lastName && user.lastName.length ? ` ${user.lastName}` : ''}`} (parent
 				of {kidNames}) has {diff ? 'changed the following days on' : 'updated'}
-				{PRONOUNS[user.pronouns].split(',')[1]} tentative schedule:
+				{getObjectivePronoun(user.pronouns)} tentative schedule:
 				<br />
 				Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)
 				<br /><br />

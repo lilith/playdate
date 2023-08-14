@@ -3,6 +3,7 @@ import { error } from '@sveltejs/kit';
 import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
 import { toLocalTimezone } from '../date';
+import { dateNotes } from './sanitize';
 
 const prisma = new PrismaClient();
 
@@ -284,10 +285,8 @@ async function saveSchedule(
 		status: AvailabilityStatus;
 		notes: string | undefined;
 		emoticons: string | undefined;
-		startHr: number;
-		startMin: number;
-		endHr: number;
-		endMin: number;
+		startTime: Date;
+		endTime: Date;
 	},
 	user: User
 ) {
@@ -298,20 +297,17 @@ async function saveSchedule(
 		});
 	}
 	const { monthDay, status, notes, emoticons } = req;
-	let { startHr, startMin, endHr, endMin } = req;
-
-	if (startHr === undefined) startHr = 0;
-	if (startMin === undefined) startMin = 0;
-	if (endHr === undefined) endHr = 0;
-	if (endMin === undefined) endMin = 0;
+	const startTime = new Date(req.startTime);
+	const endTime = new Date(req.endTime);
 	const date = new Date(monthDay);
-	const startTime = new Date(date);
-	const endTime = new Date(date);
-
-	startTime.setHours(startHr);
-	startTime.setMinutes(startMin);
-	endTime.setHours(endHr);
-	endTime.setMinutes(endMin);
+	const res = {
+		date,
+		status,
+		notes: '',
+		emoticons,
+		startTime,
+		endTime
+	};
 
 	if (status === AvailabilityStatus.UNSPECIFIED) {
 		await prisma.availabilityDate.delete({
@@ -322,10 +318,11 @@ async function saveSchedule(
 				}
 			}
 		});
-		return;
+		return res;
 	}
 	// if an entry for this date already exists in the db, then patch it
 	// otherwise create it
+	const sanitizedNotes = dateNotes(notes ?? '');
 	await prisma.availabilityDate.upsert({
 		where: {
 			householdId_date: {
@@ -335,7 +332,7 @@ async function saveSchedule(
 		},
 		update: {
 			status,
-			notes,
+			notes: sanitizedNotes,
 			emoticons,
 			startTime,
 			endTime
@@ -344,12 +341,14 @@ async function saveSchedule(
 			householdId,
 			date,
 			status,
-			notes,
+			notes: sanitizedNotes,
 			emoticons,
 			startTime,
 			endTime
 		}
 	});
+	res.notes = sanitizedNotes;
+	return res;
 }
 
 async function createHouseholdInvite(

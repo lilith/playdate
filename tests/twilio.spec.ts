@@ -23,7 +23,8 @@ test("User can't send circleNotif msg without session cookie", async ({ page, co
 		data: {
 			phone: '+1xxxxxxxxxx',
 			type: 'circleNotif',
-			schedDiffs: '{ some: schedDiff }'
+			schedDiffs: '{ some: schedDiff }',
+			diff: true
 		}
 	});
 
@@ -48,7 +49,8 @@ test("User 2 can't send circleNotif msg (no household)", async ({ page, context 
 		data: {
 			phone: '+1xxxxxxxxxx',
 			type: 'circleNotif',
-			schedDiffs: '{ some: schedDiff }'
+			schedDiffs: '{ some: schedDiff }',
+			diff: true
 		}
 	});
 	// endpoint itself has a check for this but gonna get stopped by hooks routing even before raeching that point
@@ -72,7 +74,8 @@ test("User 6 can't send circleNotif msg to nonexistent user", async ({ page, con
 		data: {
 			phone: '+1xxxxxxxxxx',
 			type: 'circleNotif',
-			schedDiffs: '{ some: schedDiff }'
+			schedDiffs: '{ some: schedDiff }',
+			diff: true
 		}
 	});
 
@@ -98,7 +101,8 @@ test("User 6 can't send circleNotif msg to user w/ no household", async ({ page,
 		data: {
 			phone: '+12015550121',
 			type: 'circleNotif',
-			schedDiffs: '{ some: schedDiff }'
+			schedDiffs: '{ some: schedDiff }',
+			diff: true
 		}
 	});
 
@@ -124,7 +128,8 @@ test("User 6 can't send circleNotif msg to user outside of circle", async ({ pag
 		data: {
 			phone: '+12015550123',
 			type: 'circleNotif',
-			schedDiffs: '{ some: schedDiff }'
+			schedDiffs: '{ some: schedDiff }',
+			diff: true
 		}
 	});
 

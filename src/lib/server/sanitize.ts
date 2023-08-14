@@ -1,11 +1,10 @@
-import { PrismaClient, Pronoun, type User } from '@prisma/client';
+import { getObjectivePronoun } from '$lib/parse';
+import { PrismaClient, type User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
 const prisma = new PrismaClient();
 import sanitizerFunc from 'sanitize';
 
 const sanitizer = sanitizerFunc();
-
-type PRONOUNS_ENUM = keyof typeof Pronoun;
 
 export const getParams = (url: URL, paramNames: string[]) => {
 	const params = paramNames.map((x) => url.searchParams.get(x)).filter(Boolean) as string[];
@@ -15,19 +14,9 @@ export const getParams = (url: URL, paramNames: string[]) => {
 
 const sanitize = (input: string) => sanitizer.value(input, 'str');
 
-export const circleNotif = async (schedDiffs: string, user: User) => {
-	const sanitizedSchedDiffs = sanitize(schedDiffs);
-	let objectivePronoun = Pronoun[user.pronouns as PRONOUNS_ENUM].split('_')[2];
-	const { SHE_HER_HERS, THEY_THEM_THEIRS, XE_XEM_XYRS, ZEZIE_HIR_HIRS } = Pronoun;
-	// turn from possessive noun to possessive adjective
-	switch (user.pronouns) {
-		case SHE_HER_HERS:
-		case THEY_THEM_THEIRS:
-		case XE_XEM_XYRS:
-		case ZEZIE_HIR_HIRS:
-			objectivePronoun = objectivePronoun.slice(0, -1).toLowerCase();
-	}
-
+export const circleNotif = async (sched: string, user: User, diff: boolean) => {
+	const sanitizedSched = sanitize(sched);
+	const objectivePronoun = getObjectivePronoun(user.pronouns);
 	let kidNames = '';
 
 	if (!user.householdId) {
@@ -48,7 +37,9 @@ export const circleNotif = async (schedDiffs: string, user: User) => {
 
 	return `${user.firstName}${
 		user.lastName && user.lastName.length ? ` ${user.lastName}` : ''
-	} (parent of ${kidNames}) has updated ${objectivePronoun} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSchedDiffs}`;
+	} (parent of ${kidNames}) has ${
+		diff ? 'changed the following days on' : 'updated'
+	} ${objectivePronoun} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSched}`;
 };
 
 export const dateNotes = (notes: string) => sanitize(notes);

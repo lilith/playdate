@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 
-import type { Pronoun } from '@prisma/client';
+import type { AvailabilityStatus, Pronoun } from '@prisma/client';
 import {
 	saveUser,
 	saveHousehold,
@@ -28,9 +28,16 @@ export async function POST({
 }) {
 	const sessionToken = cookies.get('session');
 	const { user, phone } = await getProfileFromSession(sessionToken);
+	if (!phone) {
+		throw error(401, {
+			message: 'No session found'
+		});
+	}
 	const req = await request.json();
 
-	const res: { [key: string]: string | Pronoun | number | Date | boolean } = {};
+	let res: {
+		[key: string]: string | Pronoun | number | Date | boolean | undefined | AvailabilityStatus;
+	} = {};
 	if (req.type === 'user') {
 		res['id'] = await saveUser(req, phone, user);
 		return json(res);
@@ -45,7 +52,7 @@ export async function POST({
 	} else if (req.type === 'inviteToHousehold') {
 		await createHouseholdInvite(req, user);
 	} else if (req.type === 'schedule') {
-		await saveSchedule(req, user);
+		res = await saveSchedule(req, user);
 	} else if (req.type === 'inviteToCircle') {
 		await createCircleInvite(req, user);
 	} else if (req.type === 'acceptFriendReq') {
