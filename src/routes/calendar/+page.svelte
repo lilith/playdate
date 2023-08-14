@@ -89,7 +89,6 @@
 	let schedDiffs: string[] = [];
 
 	async function markAs(i: number, status: string) {
-		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
 		const availRangeParts =
 			status === AvailabilityStatus.AVAILABLE
 				? getAvailRangeParts(unsaved[i].availRange as string)
