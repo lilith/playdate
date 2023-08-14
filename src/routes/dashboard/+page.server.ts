@@ -93,10 +93,9 @@ const getFormattedAvailability = (
 				}
 			} else {
 				let emoticons = '';
-				const { startHr, startMin, endHr, endMin } = getAvailRangeParts(
-					availRange,
-					AvailabilityStatus.AVAILABLE
-				) as { [key: string]: number };
+				const { startHr, startMin, endHr, endMin } = getAvailRangeParts(availRange) as {
+					[key: string]: number;
+				};
 				const notes = allAvailableDates[monthDay].notes;
 				if (allAvailableDates[monthDay].emoticons) {
 					for (const emoji of allAvailableDates[monthDay].emoticons.split(',')) {

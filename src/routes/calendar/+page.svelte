@@ -50,7 +50,7 @@
 					availRange !== AvailabilityStatus.BUSY
 				) {
 					// it's gonna be formatted like h(:mm)a - h(:mm)a
-					const timeParts = getAvailRangeParts(availRange, AvailabilityStatus.AVAILABLE);
+					const timeParts = getAvailRangeParts(availRange);
 					startHr = timeParts.startHr;
 					startMin = timeParts.startMin;
 					endHr = timeParts.endHr;
@@ -89,7 +89,9 @@
 	let schedDiffs: string[] = [];
 
 	async function markAs(i: number, status: string) {
-		const availRangeParts = getAvailRangeParts(unsaved[i].availRange, status);
+		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
+		const availRangeParts =
+			status === AvailabilityStatus.AVAILABLE ? getAvailRangeParts(unsaved[i].availRange) : {};
 		const { startHr, startMin, endHr, endMin } = availRangeParts;
 		let startTime = DateTime.now(),
 			endTime = DateTime.now();

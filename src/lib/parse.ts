@@ -1,12 +1,10 @@
-import { AvailabilityStatus } from '@prisma/client';
 import { PRONOUNS, type PRONOUNS_ENUM } from './constants';
 
-export function getAvailRangeParts(availRange: string | undefined, status: string) {
-	if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
+export function getAvailRangeParts(availRange: string) {
 	// validator and formatter
 	const regexpRange =
 		/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm|AM|PM)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm|AM|PM)?\s*/i;
-	const t = (availRange as string).match(regexpRange)?.groups;
+	const t = availRange.match(regexpRange)?.groups;
 	if (!t) {
 		return {};
 	}
