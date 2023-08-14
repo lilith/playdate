@@ -91,7 +91,9 @@
 	async function markAs(i: number, status: string) {
 		if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
 		const availRangeParts =
-			status === AvailabilityStatus.AVAILABLE ? getAvailRangeParts(unsaved[i].availRange) : {};
+			status === AvailabilityStatus.AVAILABLE
+				? getAvailRangeParts(unsaved[i].availRange as string)
+				: {};
 		const { startHr, startMin, endHr, endMin } = availRangeParts;
 		let startTime = DateTime.now(),
 			endTime = DateTime.now();
@@ -108,19 +110,36 @@
 				return;
 			}
 			// check whether the end time is greater than the start time
-			const tempStart = new Date(unsaved[i].monthDay);
-			const tempEnd = new Date(tempStart);
-			tempStart.setHours(startHr ?? 0);
-			tempStart.setMinutes(startMin ?? 0);
-			tempEnd.setHours(endHr ?? 0);
-			tempEnd.setMinutes(endMin ?? 0);
+			const [m, d] = unsaved[i].monthDay.split('/');
+			const tempStart = DateTime.fromObject(
+				{
+					month: parseInt(m),
+					day: parseInt(d),
+					hour: startHr ?? 0,
+					minute: startMin ?? 0
+				},
+				{
+					zone: user.timeZone
+				}
+			);
+			const tempEnd = DateTime.fromObject(
+				{
+					month: parseInt(m),
+					day: parseInt(d),
+					hour: endHr ?? 0,
+					minute: endMin ?? 0
+				},
+				{
+					zone: user.timeZone
+				}
+			);
 
-			if (tempEnd.getTime() - tempStart.getTime() <= 0) {
+			if (tempEnd.toMillis() - tempStart.toMillis() <= 0) {
 				alert('Please ensure that the difference in time is positive.');
 				return;
 			}
-			startTime = DateTime.fromJSDate(tempStart).toUTC();
-			endTime = DateTime.fromJSDate(tempEnd).toUTC();
+			startTime = tempStart.toUTC();
+			endTime = tempEnd.toUTC();
 		}
 		const response = await writeReq('/db', {
 			type: 'schedule',
