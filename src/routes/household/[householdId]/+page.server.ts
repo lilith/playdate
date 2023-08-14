@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { PrismaClient, type Pronoun, type User } from '@prisma/client';
+import type { Pronoun, User } from '@prisma/client';
+import prisma from '$lib/prisma';
 
-const prisma = new PrismaClient();
 export const load = (async ({ params }) => {
 	const householdInfo: {
 		householdId: number | null;

@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { PrismaClient, AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
+import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
 import {
 	DAYS,
 	type Dates,
@@ -11,8 +11,7 @@ import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import { getAvailRangeParts } from '$lib/parse';
 import type { Household } from './constants';
 import { DateTime } from 'luxon';
-
-const prisma = new PrismaClient();
+import prisma from '$lib/prisma';
 
 const getHousehold = (household: Household) => {
 	return {

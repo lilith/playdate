@@ -1,7 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { PrismaClient } from '@prisma/client';
+import prisma from '$lib/prisma';
 
-const prisma = new PrismaClient();
 export const load = (async ({ parent, depends }) => {
 	depends('data:invite');
 	const { user } = await parent();

@@ -1,8 +1,8 @@
 import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import type { PageServerLoad } from './$types';
-import { PrismaClient, AvailabilityStatus } from '@prisma/client';
+import { AvailabilityStatus } from '@prisma/client';
+import prisma from '$lib/prisma';
 
-const prisma = new PrismaClient();
 export const load = (async ({ parent, depends }) => {
 	depends('data:calendar');
 	const { user } = await parent();

@@ -1,11 +1,10 @@
 import { error } from '@sveltejs/kit';
 
-import { AvailabilityStatus, PrismaClient, type Pronoun } from '@prisma/client';
+import { AvailabilityStatus, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
 import { toLocalTimezone } from '../date';
 import { dateNotes } from './sanitize';
-
-const prisma = new PrismaClient();
+import prisma from '$lib/prisma';
 
 async function findHouseholdInvite(reqId: number) {
 	return await prisma.joinHouseholdRequest.findUnique({

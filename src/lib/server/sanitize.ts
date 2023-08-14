@@ -1,7 +1,7 @@
 import { getObjectivePronoun } from '$lib/parse';
-import { PrismaClient, type User } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
-const prisma = new PrismaClient();
+import prisma from '$lib/prisma';
 import sanitizerFunc from 'sanitize';
 
 const sanitizer = sanitizerFunc();

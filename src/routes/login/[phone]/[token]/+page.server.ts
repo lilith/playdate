@@ -1,8 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '$lib/prisma';
 
 export const load = (async ({ params, cookies }) => {
 	let magicLinkInfo;

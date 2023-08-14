@@ -2,13 +2,13 @@ import { env as private_env } from '$env/dynamic/private';
 import { env as public_env } from '$env/dynamic/public';
 import { error, json } from '@sveltejs/kit';
 import Twilio from 'twilio';
-import { PrismaClient, type User } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
 import { toLocalTimezone } from '../date';
 import { DateTime } from 'luxon';
+import prisma from '$lib/prisma';
 
-const prisma = new PrismaClient();
 const MessagingResponse = Twilio.twiml.MessagingResponse;
 
 const msgToSend = async (

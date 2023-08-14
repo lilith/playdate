@@ -1,11 +1,9 @@
 import type { Handle, RequestEvent } from '@sveltejs/kit';
-import { PrismaClient } from '@prisma/client';
 import type { User, PhoneContactPermissions } from '@prisma/client';
 import * as cron from 'node-cron';
 import { sendNotif } from '$lib/server/twilio';
 import { toLocalTimezone } from '$lib/date';
-
-const prisma = new PrismaClient();
+import prisma from '$lib/prisma';
 
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
