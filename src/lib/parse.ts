@@ -1,5 +1,5 @@
-import { AvailabilityStatus, Pronoun } from '@prisma/client';
-import type { PRONOUNS_ENUM } from './constants';
+import { AvailabilityStatus } from '@prisma/client';
+import { PRONOUNS, type PRONOUNS_ENUM } from './constants';
 
 export function getAvailRangeParts(availRange: string | undefined, status: string) {
 	if (status === AvailabilityStatus.UNSPECIFIED || status === AvailabilityStatus.BUSY) return {};
@@ -52,14 +52,13 @@ export function getAvailRangeParts(availRange: string | undefined, status: strin
 }
 
 export function getObjectivePronoun(pronouns: PRONOUNS_ENUM) {
-	let objectivePronoun = Pronoun[pronouns].split('_')[2].toLowerCase();
-	const { SHE_HER_HERS, THEY_THEM_THEIRS, XE_XEM_XYRS, ZEZIE_HIR_HIRS } = Pronoun;
+	let objectivePronoun = PRONOUNS[pronouns].split(', ')[2].toLowerCase();
 	// turn from possessive noun to possessive adjective
 	switch (pronouns) {
-		case SHE_HER_HERS:
-		case THEY_THEM_THEIRS:
-		case XE_XEM_XYRS:
-		case ZEZIE_HIR_HIRS:
+		case 'SHE_HER_HERS':
+		case 'THEY_THEM_THEIRS':
+		case 'XE_XEM_XYRS':
+		case 'ZEZIE_HIR_HIRS':
 			objectivePronoun = objectivePronoun.slice(0, -1);
 	}
 	return objectivePronoun;

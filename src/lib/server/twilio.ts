@@ -233,14 +233,9 @@ export const sendMsg = async (
 		console.error(err);
 		console.error('message create request parameters:');
 		console.error(createMessageRequest);
-		return new Response(
-			JSON.stringify({
-				message: err
-			}),
-			{
-				status: 500
-			}
-		);
+		throw error(500, {
+			message: 'There was a problem sending you a magic link'
+		})
 	}
 
 	// It's a security issue to share the auth link with the client
