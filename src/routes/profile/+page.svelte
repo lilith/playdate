@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
-	import { writeReq } from '../../utils';
+	import { writeReq } from '$lib/utils';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,

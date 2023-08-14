@@ -10,6 +10,7 @@ import {
 import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import { getAvailRangeParts } from '$lib/parse';
 import type { Household } from './constants';
+import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient();
 
@@ -276,13 +277,13 @@ export const load = (async ({ parent }) => {
 						(start2 <= start1 && end1 <= end2) ||
 						(start1 <= start2 && end2 <= end1)
 					) {
-						const start = new Date(Math.max(start1, start2));
-						const end = new Date(Math.min(end1, end2));
-						circleDateDetails.startHr = start.getHours();
-						circleDateDetails.startMin = start.getMinutes();
-						circleDateDetails.endHr = end.getHours();
-						circleDateDetails.endMin = end.getMinutes();
-
+						const start = DateTime.fromMillis(Math.max(start1, start2));
+						const end = DateTime.fromMillis(Math.min(end1, end2));
+						circleDateDetails.startHr = start.hour;
+						circleDateDetails.startMin = start.minute;
+						circleDateDetails.endHr = end.hour;
+						circleDateDetails.endMin = end.minute;
+						circleDateDetails.availRange = `${dateTo12Hour(start)}-${dateTo12Hour(end)}`;
 						if (monthDay in overlaps) {
 							overlaps[`${englishDay} ${monthDay}`].push(circleDateDetails);
 						} else {

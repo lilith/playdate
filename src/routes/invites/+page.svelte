@@ -5,7 +5,7 @@
 	import AcceptIcon from '../../Icons/checkIcon.svelte';
 	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
-	import { writeReq } from '../../utils';
+	import { writeReq } from '$lib/utils';
 
 	let { friendReqsInfo, householdInvites } = $page.data;
 	afterUpdate(() => {

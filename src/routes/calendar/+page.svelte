@@ -7,7 +7,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
-	import { writeReq } from '../../utils';
+	import { writeReq } from '$lib/utils';
 	import { dateTo12Hour } from '$lib/date';
 	import { getAvailRangeParts, getObjectivePronoun } from '$lib/parse';
 	import { DateTime } from 'luxon';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { env as public_env } from '$env/dynamic/public';
-	import { writeReq } from '../utils';
+	import { writeReq } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import intlTelInput from 'intl-tel-input';
 

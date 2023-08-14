@@ -3,7 +3,6 @@
 	import NavBar from '../NavBar.svelte';
 	import { page } from '$app/stores';
 	import type { Dates, DateDetails, BusyDetails } from '$lib/constants';
-	import { formatMin } from '../../utils';
 	import type { Household } from './constants';
 	import { goto } from '$app/navigation';
 
@@ -85,9 +84,7 @@
 					)
 				</a>
 				<p class="bold">
-					{overlap.startHr}:{formatMin(overlap.startMin)} - {overlap.endHr}:{formatMin(
-						overlap.endMin
-					)}
+					{overlap.availRange}
 				</p>
 				<div class="tooltip-container">
 					<div class="tooltip">

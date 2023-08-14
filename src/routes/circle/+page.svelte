@@ -4,7 +4,7 @@
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
-	import { writeReq } from '../../utils';
+	import { writeReq } from '$lib/utils';
 	import Modal from '../Modal.svelte';
 	import { PRONOUNS, type PRONOUNS_ENUM } from '$lib/constants';
 

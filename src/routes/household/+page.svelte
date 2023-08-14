@@ -6,7 +6,7 @@
 	import Modal from '../Modal.svelte';
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
-	import { writeReq } from '../../utils';
+	import { writeReq } from '$lib/utils';
 	import { DateTime } from 'luxon';
 
 	enum ModalReason {
