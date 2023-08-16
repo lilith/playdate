@@ -19,3 +19,28 @@ async function getProfileFromSession(sessionToken: string) {
 }
 
 export { getProfileFromSession };
+
+export async function findHouseConnection(hId1: number, hId2: number) {
+	const existingFriend1 = await prisma.householdConnection.findUnique({
+		where: {
+			householdId_friendHouseholdId: {
+				householdId: hId1,
+				friendHouseholdId: hId2
+			}
+		}
+	});
+
+	const existingFriend2 = await prisma.householdConnection.findUnique({
+		where: {
+			householdId_friendHouseholdId: {
+				friendHouseholdId: hId1,
+				householdId: hId2
+			}
+		}
+	});
+
+	return {
+		existingFriend1,
+		existingFriend2
+	};
+}

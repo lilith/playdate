@@ -4,43 +4,58 @@
 	import NavBar from '../../NavBar.svelte';
 
 	export let data: PageData;
-	const { householdInfo: household } = data;
+	const { householdInfo: household, authorized } = data;
 </script>
 
 <svelte:head>
 	<title>Household</title>
 	<meta name="description" content="Playdate app" />
 </svelte:head>
-<div style="margin-bottom: 2rem;">
+<div class:mb={authorized} class:full-screen={!authorized}>
 	<NavBar pageName={household.name} />
-	<p class="subtitle">FAQ</p>
-	<div class="faq">
-		{household.publicNotes.length ? household.publicNotes : 'Nothing of note'}
-	</div>
-
-	<p class="subtitle">Kids</p>
-	{#each household.kids as kid}
-		<div class="card">
-			<p>{kid.firstName} {kid.lastName ?? ''}</p>
-			<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
-			<p class="small-font">Age: {kid.age}</p>
+	{#if authorized}
+		<p class="subtitle">FAQ</p>
+		<div class="faq">
+			{household.publicNotes.length ? household.publicNotes : 'Nothing of note'}
 		</div>
-	{/each}
 
-	<p class="subtitle">Adults</p>
-	{#each household.adults as adult}
-		<div class="card">
-			<p>{adult.firstName} {adult.lastName ?? ''}</p>
-			<p class="small-font">Pronouns: {PRONOUNS[adult.pronouns]}</p>
-			<p class="small-font">
-				Phone: <a href="tel:{adult.phone}">{adult.phone}</a>
-			</p>
-			<p class="small-font">Time Zone: {adult.timeZone}</p>
+		<p class="subtitle">Kids</p>
+		{#each household.kids as kid}
+			<div class="card">
+				<p>{kid.firstName} {kid.lastName ?? ''}</p>
+				<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
+				<p class="small-font">Age: {kid.age}</p>
+			</div>
+		{/each}
+
+		<p class="subtitle">Adults</p>
+		{#each household.adults as adult}
+			<div class="card">
+				<p>{adult.firstName} {adult.lastName ?? ''}</p>
+				<p class="small-font">Pronouns: {PRONOUNS[adult.pronouns]}</p>
+				<p class="small-font">
+					Phone: <a href="tel:{adult.phone}">{adult.phone}</a>
+				</p>
+				<p class="small-font">Time Zone: {adult.timeZone}</p>
+			</div>
+		{/each}
+	{:else}
+		<div style="flex-grow: 1; display: contents;">
+			<h1 style="margin: auto;">
+				You must add this household to your circle before being able to view their page!
+			</h1>
 		</div>
-	{/each}
+	{/if}
 </div>
 
 <style>
+	.mb {
+		margin-bottom: 2rem;
+	}
+	.full-screen {
+		height: calc(100vh - 2rem);
+		display: contents;
+	}
 	a {
 		color: #5a5a5a;
 	}

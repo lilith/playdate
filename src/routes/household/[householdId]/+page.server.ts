@@ -1,8 +1,12 @@
 import type { PageServerLoad } from './$types';
 import type { Pronoun, User } from '@prisma/client';
 import prisma from '$lib/prisma';
+import { findHouseConnection } from '$lib/server/shared';
 
-export const load = (async ({ params }) => {
+export const load = (async ({ params, parent }) => {
+	const { user } = await parent();
+
+	let authorized = false;
 	const householdInfo: {
 		householdId: number | null;
 		name: string;
@@ -25,6 +29,12 @@ export const load = (async ({ params }) => {
 	};
 
 	const householdId = Number(params.householdId);
+	if (user.householdId === householdId) authorized = true;
+	const { existingFriend1, existingFriend2 } = await findHouseConnection(
+		user.householdId,
+		householdId
+	);
+	if (existingFriend1 || existingFriend2) authorized = true;
 	const household = await prisma.household.findUnique({
 		where: {
 			id: householdId
@@ -67,5 +77,5 @@ export const load = (async ({ params }) => {
 		});
 	}
 
-	return { householdInfo };
+	return { householdInfo, authorized };
 }) satisfies PageServerLoad;

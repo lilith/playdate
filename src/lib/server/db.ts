@@ -5,6 +5,7 @@ import type { User } from '@prisma/client';
 import { toLocalTimezone } from '../date';
 import { dateNotes } from './sanitize';
 import prisma from '$lib/prisma';
+import { findHouseConnection } from './shared';
 
 async function findHouseholdInvite(reqId: number) {
 	return await prisma.joinHouseholdRequest.findUnique({
@@ -108,28 +109,11 @@ async function createCircleInvite(
 		}
 	});
 	if (targetUser && targetUser.householdId) {
-		const existingFriend1 = await prisma.householdConnection.findUnique({
-			where: {
-				householdId_friendHouseholdId: {
-					householdId: fromHouseholdId,
-					friendHouseholdId: targetUser.householdId
-				}
-			}
-		});
-		if (existingFriend1)
-			throw error(400, {
-				message: 'The user associated with this number is already in your circle.'
-			});
-
-		const existingFriend2 = await prisma.householdConnection.findUnique({
-			where: {
-				householdId_friendHouseholdId: {
-					friendHouseholdId: fromHouseholdId,
-					householdId: targetUser.householdId
-				}
-			}
-		});
-		if (existingFriend2)
+		const { existingFriend1, existingFriend2 } = await findHouseConnection(
+			fromHouseholdId,
+			targetUser.householdId
+		);
+		if (existingFriend1 || existingFriend2)
 			throw error(400, {
 				message: 'The user associated with this number is already in your circle.'
 			});
