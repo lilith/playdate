@@ -14,6 +14,9 @@
 		await goto('/');
 		location.reload();
 	}
+	function clickOverlay() {
+		if (show) show = false;
+	}
 </script>
 
 <div>
@@ -25,7 +28,12 @@
 	</div>
 
 	{#key show}
-		<div class="overlay" class:overlay-open={show} />
+		<div
+			class="overlay"
+			class:overlay-open={show}
+			on:click|stopPropagation={clickOverlay}
+			on:keyup|stopPropagation={clickOverlay}
+		/>
 		<div class="menu right" class:menu-open={show}>
 			<div on:click={() => (show = !show)} on:keyup={() => (show = !show)} class="p-4">
 				<CloseIcon />
@@ -34,7 +42,7 @@
 				{#if !path.includes('profile')}
 					<a href="/profile">Profile</a>
 				{/if}
-				{#if !path.includes('household') && user.firstName}
+				{#if (!path.includes('household') || path.includes('household/')) && user.firstName}
 					<a href="/household">Household</a>
 				{/if}
 				{#if !path.includes('invites') && user.householdId}
@@ -74,16 +82,15 @@
 	.overlay {
 		z-index: 2;
 		position: fixed;
+		display: none;
 		top: 0;
 		left: 0;
-		opacity: 0;
 		width: 100%;
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.5);
-		pointer-events: none;
 	}
 	.overlay-open {
-		opacity: 100%;
+		display: block;
 	}
 
 	#hamburger {
