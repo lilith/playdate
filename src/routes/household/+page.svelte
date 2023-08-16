@@ -256,10 +256,6 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Household</title>
-	<meta name="description" content="Playdate app" />
-</svelte:head>
 <div>
 	<Modal showModal={showClickToTextLink}>
 		<h2 slot="header">Pre-filled SMS Invite</h2>
@@ -369,6 +365,12 @@
 			Everything you enter on this page is shared with your Circle. Don't enter sensitive
 			information.
 		</p>
+		{#if $page.data.householdInfo.name}
+			<p class="subtitle-2">
+				Click <a href={`/household/${householdId}`} class="link">here</a> to see what your circle can
+				see.
+			</p>
+		{/if}
 		<p class="subtitle">Kids</p>
 		{#each kids as kid, ind}
 			<div class="card">
@@ -459,6 +461,10 @@
 </div>
 
 <style>
+	.link {
+		text-decoration: underline;
+		color: #4578ff;
+	}
 	.sms {
 		background: #6ad36a;
 		color: white;
@@ -530,9 +536,6 @@
 		font-weight: 400;
 		font-size: 20px;
 		line-height: 30px;
-		display: flex;
-		align-items: center;
-
 		color: #5a5a5a;
 	}
 

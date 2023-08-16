@@ -3,6 +3,10 @@
 	import './styles.css';
 </script>
 
+<svelte:head>
+	<title>Playdate</title>
+	<meta name="description" content="Playdate app" />
+</svelte:head>
 <div class="app">
 	<!-- <Header /> -->
 	<main>

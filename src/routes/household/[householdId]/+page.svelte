@@ -7,10 +7,6 @@
 	const { householdInfo: household, authorized } = data;
 </script>
 
-<svelte:head>
-	<title>Household</title>
-	<meta name="description" content="Playdate app" />
-</svelte:head>
 <div class:mb={authorized} class:full-screen={!authorized}>
 	<NavBar pageName={household.name} />
 	{#if authorized}
