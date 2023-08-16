@@ -61,6 +61,7 @@
 	}
 
 	.faq {
+		white-space: pre-line;
 		margin: 1rem auto;
 		width: 80%;
 		font-size: 1.3rem;
