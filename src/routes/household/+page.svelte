@@ -52,7 +52,10 @@
 		const twoWeeksLater = DateTime.now()
 			.setZone($page.data.user.timeZone)
 			.set({
-				hour: $page.data.user.notifHr,
+				hour:
+					$page.data.user.notifMeridiem === 'PM'
+						? $page.data.user.notifHr + 12
+						: $page.data.user.notifHr,
 				minute: $page.data.user.notifMin
 			})
 			.plus({ days: 6 })
@@ -100,7 +103,8 @@
 			dateOfBirth: new Date(e.target[3].value)
 		});
 		if (response.status == 200) {
-			if (newHouse) schedTipMsg();
+			// NOTE: turn off till twilio is more stable
+			// if (newHouse) schedTipMsg();
 			await invalidate('data:householdId');
 			const { id } = await response.json();
 			kids = [
