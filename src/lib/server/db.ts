@@ -619,6 +619,18 @@ async function deleteHousehold(user: User) {
 		}
 	});
 
+	// delete all friends with this household
+	const deleteFriends1 = prisma.householdConnection.deleteMany({
+		where: {
+			householdId
+		}
+	});
+	const deleteFriends2 = prisma.householdConnection.deleteMany({
+		where: {
+			friendHouseholdId: householdId
+		}
+	});
+
 	const householdUsers = await prisma.user.findMany({
 		where: {
 			householdId
@@ -655,6 +667,8 @@ async function deleteHousehold(user: User) {
 		deleteHouseholdInvites,
 		deleteFriendReqs1,
 		deleteFriendReqs2,
+		deleteFriends1,
+		deleteFriends2,
 		resetHousehold
 	]);
 }
