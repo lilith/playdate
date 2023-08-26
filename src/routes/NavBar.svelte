@@ -39,23 +39,23 @@
 				<CloseIcon />
 			</div>
 			<div class="menu-contents right">
-				{#if !path.includes('profile')}
-					<a href="/profile">Profile</a>
-				{/if}
-				{#if (!path.includes('household') || path.includes('household/')) && user.firstName}
-					<a href="/household">Household</a>
-				{/if}
-				{#if !path.includes('invites') && user.householdId}
-					<a href="/invites">Invites</a>
+				{#if !path.includes('dashboard') && user.householdId}
+					<a href="/dashboard">Dashboard</a>
 				{/if}
 				{#if !path.includes('calendar') && user.householdId}
 					<a href="/calendar">Calendar</a>
 				{/if}
+				{#if !path.includes('invites') && user.householdId}
+					<a href="/invites">Invites</a>
+				{/if}
 				{#if !path.includes('circle') && user.householdId}
 					<a href="/circle">Circle</a>
 				{/if}
-				{#if !path.includes('dashboard') && user.householdId}
-					<a href="/dashboard">Dashboard</a>
+				{#if (!path.includes('household') || path.includes('household/')) && user.firstName}
+					<a href="/household">Household</a>
+				{/if}
+				{#if !path.includes('profile')}
+					<a href="/profile">Profile</a>
 				{/if}
 				<button on:click={logout} class="right">Log out</button>
 			</div>
