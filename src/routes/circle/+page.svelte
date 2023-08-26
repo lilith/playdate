@@ -6,7 +6,7 @@
 	import { invalidate } from '$app/navigation';
 	import { writeReq } from '$lib/utils';
 	import Modal from '../Modal.svelte';
-	import { PRONOUNS, type PRONOUNS_ENUM } from '$lib/constants';
+	import { circleInviteMsg } from '$lib/format';
 
 	let phoneInput: object;
 	let inviteesPhone: string;
@@ -54,10 +54,7 @@
 	}
 
 	function smsInvite(inviteesPhone: string) {
-		let objectivePronoun = PRONOUNS[user.pronouns as PRONOUNS_ENUM].split(', ')[2];
-		if (objectivePronoun === 'hers') objectivePronoun = objectivePronoun.slice(0, -1);
-		const msg = `${user.firstName} (parent of ${kidNames}) has invited you to ${objectivePronoun} circle at playdate.help to simplify scheduling and social time. First, verify ${objectivePronoun} real phone number is ${user.phone} for safety. If it is valid, click https://playdate.help?phone=${inviteesPhone} to join.`;
-		return msg;
+		return circleInviteMsg(user, kidNames, inviteesPhone);
 	}
 	function smsInviteEncoded(msg: string) {
 		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;

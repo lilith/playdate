@@ -1,4 +1,5 @@
 import { EMOTICONS_REVERSE, type Row } from '$lib/constants';
+import { getObjectivePronoun } from './parse';
 
 function getScheduleItem(row: Row): string {
 	let scheduleItem = '';
@@ -108,4 +109,9 @@ export function timeToParts(t: string) {
 	return {
 		h
 	};
+}
+
+export function circleInviteMsg(user: any, kidNames: string, toPhone: string) {
+	const objectivePronoun = getObjectivePronoun(user.pronouns);
+	return `Join my circle on playdate.help to streamline scheduling and social time! ${user.firstName} (parent of ${kidNames}) has pre-authorized you ([${toPhone}]) to view ${objectivePronoun} schedule and get availability notifications. [https://playdate.help?phone=${toPhone}]`;
 }
