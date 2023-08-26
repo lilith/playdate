@@ -4,7 +4,7 @@
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
 	import { invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '$lib/utils';
@@ -221,6 +221,9 @@
 	function showEditor(i: number) {
 		shownRows.add(i);
 		shownRows = new Set(shownRows);
+		tick().then(() => {
+			document.getElementById(`editor-${i}`)?.focus();
+		});
 	}
 	let diff = false;
 </script>
@@ -304,7 +307,9 @@
 							<form on:submit|preventDefault={() => {}}>
 								<div class="v-center-h-space flex-col" style="gap: 0.1rem;">
 									<!-- prettier-ignore -->
-									<input type="text"
+									<input
+										id={`editor-${i}`}
+										type="text"
 										class="text-inherit"
 										placeholder='Enter a valid time range. Ex. "2:30pm-7 or 5-6"'
 										bind:value={unsaved[i].availRange}
