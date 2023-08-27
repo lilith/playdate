@@ -92,7 +92,9 @@
 	{/if}
 	{#each circleInfo as household}
 		<div class="card">
-			<p class="household-name">{household.name}</p>
+			<a class="household-name" href="/household/{household.id}">
+				{household.name}
+			</a>
 			<div>
 				{#each household.parents as parent}
 					<p
@@ -157,7 +159,10 @@
 	}
 
 	.household-name {
-		text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+		text-decoration: underline;
+		color: #5a5a5a;
+		font-size: 1.4rem;
+		/* text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2); */
 	}
 
 	.card {

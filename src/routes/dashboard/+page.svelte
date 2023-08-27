@@ -78,7 +78,7 @@
 		<p class="bold larger">{overlapDay}</p>
 		{#each overlapArr as overlap}
 			<div class="summary">
-				<a class="bold household" href="/household/{overlap.householdId}">
+				<a class="household" href="/household/{overlap.householdId}">
 					{households[overlap.householdId].name} (
 					{households[overlap.householdId].kids}
 					)
@@ -159,7 +159,7 @@
 
 	<p class="subtitle">Your Circle's Schedules</p>
 	{#each Object.entries(circleDatesMap) as [householdId, scheds]}
-		<a href="/household/{householdId}" class="bold larger"
+		<a href="/household/{householdId}" class="larger household"
 			>{households[householdId].name} ({households[householdId].kids.join(', ')})</a
 		>
 		{#each households[householdId].parents as contact}
@@ -250,7 +250,8 @@
 		text-align: center;
 	}
 	.household {
-		color: black;
+		text-decoration: underline;
+		color: #001430;
 		font-size: large;
 	}
 	.parent {
