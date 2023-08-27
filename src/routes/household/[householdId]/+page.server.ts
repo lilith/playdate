@@ -16,7 +16,7 @@ export const load = (async ({ params, parent }) => {
 			pronouns: Pronoun;
 			lastName: string | null;
 			id: number;
-			age: number | null;
+			age: number | undefined;
 		}[];
 		adults: User[];
 		[key: string]: number | string | Array<object | User> | null;
@@ -54,7 +54,7 @@ export const load = (async ({ params, parent }) => {
 
 		householdInfo.kids = kids.map((kid) => {
 			const { firstName, pronouns, lastName, id, dateOfBirth } = kid;
-			let age = null;
+			let age;
 			if (dateOfBirth) {
 				// https://stackoverflow.com/questions/8152426/how-can-i-calculate-the-number-of-years-between-two-dates
 				const ageDifMs = new Date().getTime() - dateOfBirth.getTime();

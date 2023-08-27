@@ -379,6 +379,8 @@
 		{#each kids as kid, ind}
 			<div class="card">
 				<p>{kid.firstName} {kid.lastName ?? ''}</p>
+				<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
+				<p class="small-font">Age: {isNaN(kid.age) ? 'N/A' : kid.age}</p>
 				<button class="delete-btn" on:click|preventDefault={() => deleteKid(ind)}><hr /></button>
 			</div>
 			<hr class="inner-section" />
@@ -478,6 +480,9 @@
 	.subtitle-3 {
 		font-size: 15px;
 		margin: 2rem 0 0;
+	}
+	.small-font {
+		font-size: 1.2rem;
 	}
 	.center-text {
 		text-align: center;

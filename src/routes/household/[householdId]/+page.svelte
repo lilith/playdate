@@ -20,7 +20,7 @@
 			<div class="card">
 				<p>{kid.firstName} {kid.lastName ?? ''}</p>
 				<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
-				<p class="small-font">Age: {kid.age}</p>
+				<p class="small-font">Age: {isNaN(kid.age) ? 'N/A' : kid.age}</p>
 			</div>
 		{/each}
 
