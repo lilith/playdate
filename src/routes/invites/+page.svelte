@@ -72,7 +72,15 @@
 		If you reject an invitation, the other party will not be notified.
 	</p>
 	{#if !friendReqsInfo.length}
-		<p class="subtitle-2">No invites at this time</p>
+		<p class="subtitle-2">
+			No invites at this time
+			<br />
+			<a
+				class="subtitle-2"
+				style="text-decoration: underline; font-weight: 400; font-size: 18px;"
+				href="/circle">(Invite a friend to your circle)</a
+			>
+		</p>
 	{/if}
 
 	{#each friendReqsInfo as household}
