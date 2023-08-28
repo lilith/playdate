@@ -44,7 +44,7 @@ export const load = (async ({ parent, depends }) => {
 			}
 		}
 	};
-	let kidNames = '';
+	let kidNames: string[] = [];
 	if (householdId) {
 		const circle = await prisma.householdConnection.findMany({
 			where: {
@@ -122,9 +122,7 @@ export const load = (async ({ parent, depends }) => {
 			}
 		});
 
-		kidNames = kids
-			.map((kid) => `${kid.firstName}${kid.lastName ? ` ${kid.lastName}` : ''}`)
-			.join(', ');
+		kidNames = kids.map((kid) => `${kid.firstName}${kid.lastName ? ` ${kid.lastName}` : ''}`);
 	}
 	return {
 		friendReqsInfo,

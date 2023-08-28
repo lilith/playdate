@@ -73,15 +73,14 @@
 			<p class="sms">{smsInvite(inviteesPhone)}</p>
 		</div>
 
-		<div slot="close" let:dialog>
-			<button
+		<div style="display: flex; justify-content: center;" slot="close" let:dialog>
+			<a
+				href={smsInviteEncoded(smsInvite(inviteesPhone))}
+				class="send-btn"
 				on:click={async () => {
 					dialog.close();
-				}}
+				}}>Send a message</a
 			>
-				<a href={smsInviteEncoded(smsInvite(inviteesPhone))} style="color: white;">Send a message</a
-				>
-			</button>
 		</div>
 	</Modal>
 	<NavBar pageName="Circle" />
@@ -124,6 +123,12 @@
 </div>
 
 <style>
+	.send-btn {
+		background: #73a4eb;
+		color: white;
+		padding: 0.8rem 1rem;
+		border-radius: 10px;
+	}
 	.sms {
 		background: #6ad36a;
 		color: white;

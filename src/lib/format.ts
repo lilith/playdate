@@ -111,7 +111,10 @@ export function timeToParts(t: string) {
 	};
 }
 
-export function circleInviteMsg(user: any, kidNames: string, toPhone: string) {
-	const objectivePronoun = getObjectivePronoun(user.pronouns);
-	return `Join my circle on playdate.help to streamline scheduling and social time! ${user.firstName} (parent of ${kidNames}) has pre-authorized you ([${toPhone}]) to view ${objectivePronoun} schedule and get availability notifications. [https://playdate.help?phone=${toPhone}]`;
+export function circleInviteMsg(user: any, kidNames: string[], toPhone: string) {
+	return `Let's use https://playdate.help to streamline social time with ${kidNames.join(
+		' and '
+	)} - it's way better than a group text. I've added ${toPhone} to our circle, so you can view our schedule and get a notification text when we update it. You don't need to remember a password, it just sends you a login link when you enter your phone number. -${
+		user.firstName
+	}`;
 }
