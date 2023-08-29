@@ -108,7 +108,7 @@
 				<p>Contacts to set up a play date:</p>
 				<ul>
 					{#each households[overlap.householdId].parents as contact}
-						<li>{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></li>
+						<li>{contact.name} - <a href="sms:{contact.phone}">{contact.phone}</a></li>
 					{/each}
 				</ul>
 			</div>
@@ -163,7 +163,7 @@
 			>{households[householdId].name} ({households[householdId].kids.join(', ')})</a
 		>
 		{#each households[householdId].parents as contact}
-			<p class="parent">{contact.name} - <a href="tel:{contact.phone}">{contact.phone}</a></p>
+			<p class="parent">{contact.name} - <a href="sms:{contact.phone}">{contact.phone}</a></p>
 		{/each}
 
 		{#if !scheds.length}

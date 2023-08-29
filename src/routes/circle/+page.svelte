@@ -57,7 +57,7 @@
 		return circleInviteMsg(user, kidNames, inviteesPhone);
 	}
 	function smsInviteEncoded(msg: string) {
-		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;
+		return `sms:${inviteesPhone};?&body=${encodeURIComponent(msg)}`;
 	}
 </script>
 
