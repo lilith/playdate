@@ -30,7 +30,7 @@
 				<p>{adult.firstName} {adult.lastName ?? ''}</p>
 				<p class="small-font">Pronouns: {PRONOUNS[adult.pronouns]}</p>
 				<p class="small-font">
-					Phone: <a href="tel:{adult.phone}">{adult.phone}</a>
+					Phone: <a href="sms:{adult.phone}">{adult.phone}</a>
 				</p>
 				<p class="small-font">Time Zone: {adult.timeZone}</p>
 			</div>

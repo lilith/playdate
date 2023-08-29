@@ -91,7 +91,7 @@
 					<p>{parent.firstName} {parent.lastName ?? ''}</p>
 				{/each}
 			</div>
-			<a href="tel:{household.phone}">{household.phone}</a>
+			<a href="sms:{household.phone}">{household.phone}</a>
 			<div class="w-full">
 				<div style="display: flex;">
 					<div
