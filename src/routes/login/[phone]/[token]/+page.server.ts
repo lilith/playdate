@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/prisma';
 
 export const load = (async ({ params, cookies }) => {
+	console.log('LOAD LOGIN');
 	let magicLinkInfo;
 	try {
 		// validate token against what's stored in the DB
@@ -11,8 +12,10 @@ export const load = (async ({ params, cookies }) => {
 				token: params.token
 			}
 		});
+
+		if (!magicLinkInfo) throw Error;
 	} catch {
-		console.error("Can't verify token");
+		console.error(`Can't verify token ${params.token} for phone ${params.phone}`);
 		throw redirect(308, `/?phone=${params.phone}`);
 	}
 
@@ -46,7 +49,7 @@ export const load = (async ({ params, cookies }) => {
 		maxAge: 60 * 60
 	});
 
-	await prisma.session.create({
+	const session = await prisma.session.create({
 		data: {
 			token: sessionToken,
 			phone,
@@ -54,6 +57,7 @@ export const load = (async ({ params, cookies }) => {
 			createdAt: sessionCreatedAt
 		}
 	});
+	console.log('CREATED SESSION', session);
 
 	throw redirect(308, '/dashboard');
 }) satisfies PageServerLoad;
