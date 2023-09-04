@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/prisma';
 
-export const load = (async ({ params, cookies }) => {
+export const load = (async ({ params, cookies, setHeaders }) => {
 	console.log('LOAD LOGIN');
 	let magicLinkInfo;
 	try {
@@ -58,6 +58,10 @@ export const load = (async ({ params, cookies }) => {
 		}
 	});
 	console.log('CREATED SESSION', session);
+
+	setHeaders({
+		'cache-control': 'no-store, max-age=0'
+	});
 
 	throw redirect(308, '/dashboard');
 }) satisfies PageServerLoad;
