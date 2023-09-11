@@ -103,7 +103,7 @@ export const handle = (async ({ event, resolve }) => {
 	// }
 
 	const cookie = event.cookies.get('session');
-	console.log(event.url.pathname, cookie);
+	console.log(event.url.pathname);
 	// check whether authenticated
 	if (
 		event.url.pathname !== '/' &&
