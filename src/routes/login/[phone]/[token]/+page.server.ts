@@ -16,7 +16,7 @@ export const load = (async ({ params, cookies, setHeaders }) => {
 		if (!magicLinkInfo) throw Error;
 	} catch {
 		console.error(`Can't verify token ${params.token} for phone ${params.phone}`);
-		throw redirect(308, `/?phone=${params.phone}`);
+		throw redirect(308, `/?phone=${params.phone}&status=403`);
 	}
 
 	// check DB's expiration date
@@ -24,7 +24,7 @@ export const load = (async ({ params, cookies, setHeaders }) => {
 
 	if (expires < new Date()) {
 		console.error('Token has expired');
-		throw redirect(308, `/?phone=${params.phone}`);
+		throw redirect(308, `/?phone=${params.phone}&status=403`);
 	}
 
 	let crypto;
@@ -32,7 +32,7 @@ export const load = (async ({ params, cookies, setHeaders }) => {
 		crypto = await import('node:crypto');
 	} catch (err) {
 		console.error('crypto support is disabled!');
-		throw redirect(308, `/?phone=${params.phone}`);
+		throw redirect(308, `/?phone=${params.phone}&status=500`);
 	}
 
 	const sessionCreatedAt = new Date();

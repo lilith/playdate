@@ -15,6 +15,8 @@
 		if (input && input.style) input.style.width = '100%';
 	}
 
+	let authErr = false;
+	let serverErr = false;
 	onMount(() => {
 		const input = document.querySelector('#phone');
 		phoneInput = intlTelInput(input, {
@@ -24,6 +26,11 @@
 			stylePhoneInput();
 		}, 0);
 		if (data.phone) phoneInput.telInput.value = data.phone;
+		if (data.status === '403') {
+			authErr = true;
+		} else if (data.status === '500') {
+			serverErr = true;
+		}
 	});
 
 	async function login() {
@@ -82,6 +89,25 @@
 
 <div id="wrapper">
 	<div id="main">
+		<dialog
+			class="err-dialog"
+			open={authErr || serverErr}
+			on:click={() => {
+				authErr = false;
+				serverErr = false;
+			}}
+			on:keyup={() => {
+				authErr = false;
+				serverErr = false;
+			}}
+		>
+			<span style="margin-right: 0.5rem;">❌</span>
+			{#if authErr}
+				Invalid / expired magic link
+			{:else if serverErr}
+				Something went wrong with logging in
+			{/if}
+		</dialog>
 		<div class="inner" style="padding:0">
 			<section id="home-section">
 				<div id="container04" class="style1 container default full">
@@ -260,6 +286,17 @@
 </div>
 
 <style>
+	.err-dialog {
+		position: fixed;
+		bottom: 2rem;
+		border-radius: 1rem;
+		overflow: hidden;
+		z-index: 2;
+		background: #ffd9d9;
+		color: red;
+		padding: 1.2rem 1.5rem;
+	}
+
 	#text41 {
 		padding-bottom: 0.8rem;
 	}
