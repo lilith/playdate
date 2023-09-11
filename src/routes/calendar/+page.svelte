@@ -88,7 +88,7 @@
 	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
 
-	async function markAs(i: number, status: string) {
+	async function markAs(i: number, status: string, updateUI = true) {
 		const availRangeParts =
 			status === AvailabilityStatus.AVAILABLE
 				? getAvailRangeParts(unsaved[i].availRange as string)
@@ -150,34 +150,57 @@
 			endTime: endTime.toJSDate()
 		});
 		if (response.status == 200) {
-			await invalidate('data:calendar');
-			const { notes } = await response.json();
-			let newAvailRange;
-			if (status === AvailabilityStatus.BUSY) newAvailRange = 'Busy';
-			else if (status === AvailabilityStatus.UNSPECIFIED) newAvailRange = undefined;
-			else
-				newAvailRange = `${dateTo12Hour(startTime.toLocal())}-${dateTo12Hour(endTime.toLocal())}`;
+			if (updateUI) {
+				await invalidate('data:calendar');
+				const { notes } = await response.json();
+				let newAvailRange;
+				if (status === AvailabilityStatus.BUSY) newAvailRange = 'Busy';
+				else if (status === AvailabilityStatus.UNSPECIFIED) newAvailRange = undefined;
+				else
+					newAvailRange = `${dateTo12Hour(startTime.toLocal())}-${dateTo12Hour(endTime.toLocal())}`;
 
-			rows[i] = {
-				...rows[i],
-				notes,
-				availRange: newAvailRange,
-				emoticons: unsaved[i].emoticons,
-				...availRangeParts
-			};
-			unsaved[i] = {
-				...unsaved[i],
-				notes,
-				availRange: status === AvailabilityStatus.AVAILABLE ? newAvailRange : '',
-				...availRangeParts
-			};
-			schedDiffs = generateDiffSchedule(ogRows, rows);
-			schedFull = generateFullSchedule(rows);
+				rows[i] = {
+					...rows[i],
+					notes,
+					availRange: newAvailRange,
+					emoticons: unsaved[i].emoticons,
+					...availRangeParts
+				};
+				unsaved[i] = {
+					...unsaved[i],
+					notes,
+					availRange: status === AvailabilityStatus.AVAILABLE ? newAvailRange : '',
+					...availRangeParts
+				};
+				schedDiffs = generateDiffSchedule(ogRows, rows);
+				schedFull = generateFullSchedule(rows);
+			}
 			return 'ok';
-		} else {
-			alert('Something went wrong with saving');
-			return 'err';
 		}
+
+		alert('Something went wrong with saving');
+		return 'err';
+	}
+
+	async function markAllBusy() {
+		await Promise.all(
+			[...Array(rows.length).keys()].map((i) => markAs(i, AvailabilityStatus.BUSY, false))
+		);
+		// now update UI all at once
+		rows = rows.map((r) => ({
+			...r,
+			notes: '',
+			availRange: 'Busy',
+			emoticons: new Set()
+		}));
+		unsaved = unsaved.map((r) => ({
+			...r,
+			notes: '',
+			availRange: '',
+			emoticons: new Set()
+		}));
+		schedDiffs = generateDiffSchedule(ogRows, rows);
+		schedFull = generateFullSchedule(rows);
 	}
 
 	function toggleEmoticon(i: number, emoticon: string) {
@@ -386,6 +409,9 @@
 				{/if}
 			{/each}
 		</table>
+		<button class="mark-all-busy-btn" style="margin: 1rem;" on:click={markAllBusy}
+			>Mark all days as busy</button
+		>
 		{#key schedDiffs}
 			<p class="subtitle">Notify Circle</p>
 			<p id="preview-notif-subtitle">Preview of your notification message(s)</p>
@@ -595,7 +621,8 @@
 	.blue {
 		background: #a0e3ff;
 	}
-	.notif-btn {
+	.notif-btn,
+	.mark-all-busy-btn {
 		padding: 0.2rem 1rem;
 		border-radius: 17px;
 		background: white;
