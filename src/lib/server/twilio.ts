@@ -30,7 +30,8 @@ const msgToSend = async (
 					id: friendReqId
 				},
 				select: {
-					fromHouseholdId: true
+					fromHouseholdId: true,
+					targetPhone: true
 				}
 			});
 
@@ -44,6 +45,11 @@ const msgToSend = async (
 			if (!initiator) {
 				throw error(401, {
 					message: 'Request was not initiated by app user'
+				});
+			}
+			if (initiator.phone !== friendReq.targetPhone) {
+				throw error(401, {
+					message: 'Friend req is not to you'
 				});
 			}
 

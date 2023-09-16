@@ -140,3 +140,61 @@ test("User 6 can't send circleNotif msg to user outside of circle", async ({ pag
 	expect(res.status()).toEqual(401);
 	await page.close();
 });
+
+test("User 2 can't get sched msg for user for nonexistent friend req", async ({
+	page,
+	context
+}) => {
+	context.addCookies([
+		{
+			name: 'session',
+			value: 'user2session',
+			url: host
+		}
+	]);
+	const res = await context.request.fetch(host + '/twilio', {
+		method: 'post',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		data: {
+			phone: '+12015550122',
+			type: 'newFriendSched',
+			friendReqId: -1
+		}
+	});
+
+	const { message } = await res.json();
+	expect(message).toEqual('Friend request -1 not found');
+	expect(res.status()).toEqual(404);
+	await page.close();
+});
+
+test("User 2 can't get sched msg for user for whom they don't have friend req", async ({
+	page,
+	context
+}) => {
+	context.addCookies([
+		{
+			name: 'session',
+			value: 'user2session',
+			url: host
+		}
+	]);
+	const res = await context.request.fetch(host + '/twilio', {
+		method: 'post',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		data: {
+			phone: '+12015550122',
+			type: 'newFriendSched',
+			friendReqId: 3
+		}
+	});
+
+	const { message } = await res.json();
+	expect(message).toEqual('Friend req is not to you');
+	expect(res.status()).toEqual(401);
+	await page.close();
+});
