@@ -2,15 +2,17 @@ import { env as private_env } from '$env/dynamic/private';
 import { env as public_env } from '$env/dynamic/public';
 import { error, json } from '@sveltejs/kit';
 import Twilio from 'twilio';
+import type * as TwilioTypes from 'twilio';
 import { AvailabilityStatus, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
 import { dateTo12Hour, toLocalTimezone } from '../date';
 import { DateTime } from 'luxon';
 import prisma from '$lib/prisma';
-import { generateFullSchedule } from '$lib/format';
+import { fullName, generateFullSchedule } from '$lib/format';
 import { DAYS } from '$lib/constants';
 import { getAvailRangeParts } from '$lib/parse';
+import { findHouseConnection } from './shared';
 
 const MessagingResponse = Twilio.twiml.MessagingResponse;
 
@@ -23,34 +25,32 @@ const msgToSend = async (
 	const url = public_env.PUBLIC_URL;
 	let msg;
 	switch (type) {
-		case 'newFriendSched': {
-			const { friendReqId } = msgComps;
-			const friendReq = await prisma.friendRequest.findUnique({
-				where: {
-					id: friendReqId
-				},
-				select: {
-					fromHouseholdId: true,
-					targetPhone: true
-				}
-			});
-
-			if (!friendReq) {
-				throw error(404, {
-					message: `Friend request ${friendReqId} not found`
-				});
-			}
-
-			// get availability dates from local today to local 21 days
+		case 'newFriend': {
 			if (!initiator) {
+				throw error(500, {
+					message: 'Missing initiator when constructing newFriend msg'
+				})
+			}
+			msg = `You are now in ${fullName(initiator.firstName, initiator.lastName)}`;
+			break;
+		}
+		case 'newFriendSched': {
+			const { friendHouseholdId } = msgComps;
+			// get availability dates from local today to local 21 days
+			if (!initiator?.householdId) {
 				throw error(401, {
-					message: 'Request was not initiated by app user'
+					message: "Request was not initiated by app user or app user doesn't have household"
 				});
 			}
-			if (initiator.phone !== friendReq.targetPhone) {
+			const { existingFriend1, existingFriend2 } = await findHouseConnection(
+				initiator.householdId,
+				friendHouseholdId
+			);
+			const connection = existingFriend1 || existingFriend2;
+			if (!connection) {
 				throw error(401, {
-					message: 'Friend req is not to you'
-				});
+					message: `Household ${initiator.householdId} is not friends with Household ${friendHouseholdId}`
+				})
 			}
 
 			const now = new Date();
@@ -58,10 +58,9 @@ const msgToSend = async (
 			const endDate = new Date(startDate);
 			endDate.setDate(endDate.getDate() + 21);
 
-			const { fromHouseholdId } = friendReq;
 			const dates = await prisma.availabilityDate.findMany({
 				where: {
-					householdId: fromHouseholdId,
+					householdId: friendHouseholdId,
 					date: {
 						gte: startDate,
 						lte: endDate
@@ -269,8 +268,6 @@ export const sendMsg = async (
 			logLevel: 'debug'
 		});
 	}
-	let message;
-	let createMessageRequest;
 
 	const recipient = await prisma.user.findUnique({
 		where: { phone }
@@ -300,7 +297,63 @@ export const sendMsg = async (
 	}
 
 	const body = await msgToSend(type, recipient, initiator, { ...rest, phone });
+	try {
+		invokeTwilio(body, phone, sendAt, client);
+	} catch (e) {
+		throw e;
+	}
+	
+	// any additional msgs to send to diff number(s)
+	switch (type) {
+		case 'newFriendSched': {
+			const { friendReqId } = rest as { friendReqId: number };
+			const friendReq = await prisma.friendRequest.findUnique({
+				where: {
+					id: friendReqId
+				},
+				select: {
+					fromUserId: true,
+				}
+			});
+			if (!friendReq) {
+				// should never get here since we alr do this check in msgToSend but this msg type
+				// so more for TS than anything else
+				throw error(404, {
+					message: `Friend request ${friendReqId} not found`
+				});
+			}
+			const { fromUserId } = friendReq;
+			const friendReqSender = await prisma.user.findUnique({
+				where: {
+					id: fromUserId,
+				},
+			})
 
+			if (!friendReqSender) {
+				throw error(404, {
+					message: `User ${fromUserId} not found`
+				});
+			}
+
+			const body2 = await msgToSend(type, friendReqSender, initiator, {});
+			try {
+				invokeTwilio(body2, friendReqSender.phone, sendAt, client);
+			} catch (e) {
+				throw e;
+			}
+			break;
+		}
+		default:
+	}
+
+	// It's a security issue to share the auth link with the client
+	// edit: so never pass it on
+	return json({});
+};
+
+export const invokeTwilio = async (body: string, phone: string, sendAt?: Date, client: TwilioTypes.Twilio) => {
+	let message;
+	let createMessageRequest;
 	try {
 		createMessageRequest = {
 			body,
@@ -332,11 +385,7 @@ export const sendMsg = async (
 			message: 'There was a problem sending you a magic link'
 		});
 	}
-
-	// It's a security issue to share the auth link with the client
-	// edit: so never pass it on
-	return json({});
-};
+}
 
 export const getMsg = async (url: URL) => {
 	const body = url.searchParams.get('Body')?.toLowerCase();

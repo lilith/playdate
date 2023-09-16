@@ -21,14 +21,12 @@
 		if (response.status == 200) {
 			await invalidate('data:invite');
 
-			// send new friend's sched to you
+			// send new friend's sched to you and let them know that you're in each other's mutual circle now
 			await writeReq('/twilio', {
 				phone: $page.data.user.phone,
 				type: 'newFriendSched',
-				friendReqId
+				senderHouseholdId: reqSenderHouseholdId
 			});
-
-			// tell new friend that they're in your circle now
 		} else {
 			alert('Something went wrong with accepting this connection');
 		}
@@ -91,7 +89,6 @@
 			>
 		</p>
 	{/if}
-
 	{#each friendReqsInfo as household}
 		<div class="card">
 			<p class="household-name">{household.name}</p>
@@ -112,8 +109,8 @@
 					</div>
 					<div
 						class="btn-wrapper success w-half"
-						on:click={() => acceptFriendReq(household.reqId)}
-						on:keyup={() => acceptFriendReq(household.reqId)}
+						on:click={() => acceptFriendReq(household.reqId, household.id)}
+						on:keyup={() => acceptFriendReq(household.reqId, household.id)}
 					>
 						<AcceptIcon />
 					</div>

@@ -1,5 +1,4 @@
 import { EMOTICONS_REVERSE, type Row } from '$lib/constants';
-import { getObjectivePronoun } from './parse';
 
 function getScheduleItem(row: Row): string {
 	let scheduleItem = '';
@@ -117,4 +116,8 @@ export function circleInviteMsg(user: any, kidNames: string[], toPhone: string) 
 	)} - it's way better than a group text. I've added ${toPhone} to our circle, so you can view our schedule and get a notification text when we update it. You don't need to remember a password, it just sends you a login link when you enter your phone number. -${
 		user.firstName
 	}`;
+}
+
+export function fullName(firstName: string, lastName: string | null) {
+	return `${firstName}${lastName ? ` ${lastName}` : ''}`;
 }

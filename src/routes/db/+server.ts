@@ -18,6 +18,7 @@ import {
 	removeHouseholdAdult
 } from '$lib/server/db';
 import { getProfileFromSession } from '$lib/server/shared';
+import { writeReq } from '$lib/utils';
 
 export async function POST({
 	request,
@@ -56,7 +57,13 @@ export async function POST({
 	} else if (req.type === 'inviteToCircle') {
 		await createCircleInvite(req, user);
 	} else if (req.type === 'acceptFriendReq') {
-		await acceptFriendReq(req, user);
+		const friendHouseholdId = await acceptFriendReq(req, user);
+		// send new friend's sched to req recipient (A) and let req sender (B) know that B is in A's circle now
+		await writeReq('/twilio', {
+			phone: user.phone,
+			type: 'newFriendSched',
+			friendHouseholdId
+		});
 	} else if (req.type === 'rejectFriendReq') {
 		await deleteFriendReq(req, user);
 	} else if (req.type === 'deleteFriend') {
