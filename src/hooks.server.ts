@@ -146,6 +146,11 @@ export const handle = (async ({ event, resolve }) => {
 
 		await setLocal(user, session.phone, event);
 
+		if (event.url.pathname === '/twilio') {
+			// all twilio calls validated by here
+			return await resolve(event);
+		}
+
 		// F-C, if their profile has no name, pronouns, zone, language, or accepted_terms_on date, or notification specification
 		if (!user) {
 			return redirectOrContinue(event, '/profile', resolve);

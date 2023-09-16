@@ -2,12 +2,15 @@ import { env as private_env } from '$env/dynamic/private';
 import { env as public_env } from '$env/dynamic/public';
 import { error, json } from '@sveltejs/kit';
 import Twilio from 'twilio';
-import type { User } from '@prisma/client';
+import { AvailabilityStatus, type User } from '@prisma/client';
 import { circleNotif } from './sanitize';
 import { generate, save } from './login';
-import { toLocalTimezone } from '../date';
+import { dateTo12Hour, toLocalTimezone } from '../date';
 import { DateTime } from 'luxon';
 import prisma from '$lib/prisma';
+import { generateFullSchedule } from '$lib/format';
+import { DAYS } from '$lib/constants';
+import { getAvailRangeParts } from '$lib/parse';
 
 const MessagingResponse = Twilio.twiml.MessagingResponse;
 
@@ -20,6 +23,92 @@ const msgToSend = async (
 	const url = public_env.PUBLIC_URL;
 	let msg;
 	switch (type) {
+		case 'newFriendSched': {
+			const { friendReqId } = msgComps;
+			const friendReq = await prisma.friendRequest.findUnique({
+				where: {
+					id: friendReqId
+				},
+				select: {
+					fromHouseholdId: true
+				}
+			});
+
+			if (!friendReq) {
+				throw error(404, {
+					message: `Friend request ${friendReqId} not found`
+				});
+			}
+
+			// get availability dates from local today to local 21 days
+			if (!initiator) {
+				throw error(401, {
+					message: 'Request was not initiated by app user'
+				});
+			}
+
+			const now = new Date();
+			const startDate = new Date(`${now.getMonth() + 1}/${now.getDate()}`);
+			const endDate = new Date(startDate);
+			endDate.setDate(endDate.getDate() + 21);
+
+			const { fromHouseholdId } = friendReq;
+			const dates = await prisma.availabilityDate.findMany({
+				where: {
+					householdId: fromHouseholdId,
+					date: {
+						gte: startDate,
+						lte: endDate
+					}
+				},
+				orderBy: [
+					{
+						date: 'asc'
+					}
+				]
+			});
+
+			const rows = dates.map((d) => {
+				const { date, status, startTime, endTime, notes, emoticons } = d;
+				const englishDay = DAYS[date.getDay()];
+				const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
+
+				let availRange;
+				let startHr;
+				let startMin;
+				let endHr;
+				let endMin;
+				let emoticonSet = new Set<string>(emoticons?.split(','));
+				if (status === AvailabilityStatus.AVAILABLE) {
+					availRange = 'Available';
+					if (startTime && endTime)
+						availRange = `${dateTo12Hour(
+							toLocalTimezone(startTime, initiator.timeZone)
+						)}-${dateTo12Hour(toLocalTimezone(endTime, initiator.timeZone))}`;
+					const timeParts = getAvailRangeParts(availRange);
+					startHr = timeParts.startHr;
+					startMin = timeParts.startMin;
+					endHr = timeParts.endHr;
+					endMin = timeParts.endMin;
+				} else if (status === AvailabilityStatus.BUSY) {
+					availRange = 'Busy';
+				}
+
+				return {
+					englishDay,
+					monthDay,
+					availRange,
+					notes: notes ?? undefined,
+					emoticons: emoticonSet,
+					startHr,
+					startMin,
+					endHr,
+					endMin
+				};
+			});
+			msg = await circleNotif(generateFullSchedule(rows).join('\n'), initiator, false);
+			break;
+		}
 		case 'login': {
 			const { phone, token, timeZone } = msgComps;
 			const magicLink = await prisma.magicLink

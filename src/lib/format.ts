@@ -32,7 +32,7 @@ function updateLastScheduleItem(schedule: string[], newDate: string): void {
 		dates[dates.length - 1] = newDate;
 		schedule[schedule.length - 1] = dates.join('-');
 	} else {
-		schedule[schedule.length - 1] += `-${newDate}`;
+		schedule[schedule.length - 1] = `${schedule[schedule.length - 1].trim()}-${newDate}`;
 	}
 }
 

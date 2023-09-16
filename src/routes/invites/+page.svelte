@@ -20,6 +20,15 @@
 		});
 		if (response.status == 200) {
 			await invalidate('data:invite');
+
+			// send new friend's sched to you
+			await writeReq('/twilio', {
+				phone: $page.data.user.phone,
+				type: 'newFriendSched',
+				friendReqId
+			});
+
+			// tell new friend that they're in your circle now
 		} else {
 			alert('Something went wrong with accepting this connection');
 		}
