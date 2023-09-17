@@ -238,6 +238,8 @@ async function acceptFriendReq(
 	});
 	console.log('leftover householdInvites', leftoverReqs3);
 	leftoverReqs3.forEach(({ id }) => deleteHouseholdInvite({ id }, user));
+
+	return friendHouseholdId;
 }
 
 async function findFriendReq(reqId: number) {

@@ -20,6 +20,10 @@ const msgToSend = async (
 	const url = public_env.PUBLIC_URL;
 	let msg;
 	switch (type) {
+		case 'householdFaq':
+			const { otherHouseholdName, otherHouseholdId } = msgComps;
+			msg = `Your household and ${otherHouseholdName} are now connected. Please check out their FAQ here: ${url}/household/${otherHouseholdId}`;
+			break;
 		case 'login': {
 			const { phone, token, timeZone } = msgComps;
 			const magicLink = await prisma.magicLink
@@ -151,7 +155,7 @@ const msgToSend = async (
 };
 
 export const sendMsg = async (
-	request: { phone: string; sendAt?: Date; type: string },
+	request: { phone: string; sendAt?: Date; type: string; [key: string]: any },
 	initiator: User | null
 ) => {
 	const { phone, sendAt, type, ...rest } = request;

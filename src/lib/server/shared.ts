@@ -44,3 +44,30 @@ export async function findHouseConnection(hId1: number, hId2: number) {
 		existingFriend2
 	};
 }
+
+export async function getPhoneNumsInHousehold(id: number | null) {
+	if (!id) return [];
+	const users = await prisma.user.findMany({
+		where: {
+			householdId: id
+		},
+		select: {
+			phone: true
+		}
+	});
+	return users.map((u) => u.phone);
+}
+
+export async function getHousehold(id: number | null, attrs: string[]) {
+	if (!id) return {};
+	const select: { [key: string]: true } = {};
+	attrs.forEach((attr) => {
+		select[attr] = true;
+	});
+	return await prisma.household.findUnique({
+		where: {
+			id
+		},
+		select
+	});
+}
