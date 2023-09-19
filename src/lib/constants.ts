@@ -201,3 +201,6 @@ export type Row = {
 	endHr: number | undefined;
 	endMin: number | undefined;
 };
+
+export const LEGEND_STR =
+	'Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)\n';

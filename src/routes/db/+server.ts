@@ -15,10 +15,11 @@ import {
 	deleteHouseholdInvite,
 	deleteKid,
 	deleteHousehold,
-	removeHouseholdAdult
+	removeHouseholdAdult,
+	sendFaqLinks,
+	sendSched
 } from '$lib/server/db';
-import { getHousehold, getPhoneNumsInHousehold, getProfileFromSession } from '$lib/server/shared';
-import { sendMsg } from '$lib/server/twilio';
+import { getHousehold, getProfileFromSession, getUserAttrsInHousehold } from '$lib/server/shared';
 
 export async function POST({
 	request,
@@ -60,14 +61,15 @@ export async function POST({
 		// get each household's id
 		const otherHouseholdId = await acceptFriendReq(req, user);
 
-		// get users' phones in both households
-		const [phones1, phones2] = await Promise.all([
-			await getPhoneNumsInHousehold(otherHouseholdId),
-			await getPhoneNumsInHousehold(user.householdId)
+		// get users' phones, time zones in both households
+		const userAttrs = ['phone', 'timeZone'];
+		const [adults1, adults2] = await Promise.all([
+			await getUserAttrsInHousehold(otherHouseholdId, userAttrs),
+			await getUserAttrsInHousehold(user.householdId, userAttrs)
 		]);
 
 		// get names for both households
-		const attrs = ['name'];
+		const attrs = ['name', 'id'];
 		const household1 = await getHousehold(otherHouseholdId, attrs);
 		if (!household1) {
 			throw error(404, {
@@ -81,31 +83,8 @@ export async function POST({
 			});
 		}
 
-		// go through each number and send the FAQ links
-		await Promise.all([
-			...phones1.map(async (phone: string) =>
-				sendMsg(
-					{
-						phone,
-						type: 'householdFaq',
-						otherHouseholdName: household2.name,
-						otherHouseholdId: user.householdId
-					},
-					user
-				)
-			),
-			...phones2.map(async (phone: string) =>
-				sendMsg(
-					{
-						phone,
-						type: 'householdFaq',
-						otherHouseholdName: household1.name,
-						otherHouseholdId: otherHouseholdId
-					},
-					user
-				)
-			)
-		]);
+		await sendFaqLinks(adults1, adults2, household1, household2, user);
+		await sendSched(adults1, adults2, household1, household2, user);
 	} else if (req.type === 'rejectFriendReq') {
 		await deleteFriendReq(req, user);
 	} else if (req.type === 'deleteFriend') {
