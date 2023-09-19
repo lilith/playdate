@@ -2,10 +2,14 @@ import { error } from '@sveltejs/kit';
 
 import { AvailabilityStatus, type Pronoun } from '@prisma/client';
 import type { User } from '@prisma/client';
-import { toLocalTimezone } from '../date';
+import { dateTo12Hour, toLocalTimezone } from '../date';
 import { dateNotes } from './sanitize';
 import prisma from '$lib/prisma';
 import { findHouseConnection } from './shared';
+import { sendMsg } from './twilio';
+import { DAYS } from '$lib/constants';
+import { getAvailRangeParts } from '$lib/parse';
+import { generateFullSchedule } from '$lib/format';
 
 async function findHouseholdInvite(reqId: number) {
 	return await prisma.joinHouseholdRequest.findUnique({
@@ -699,7 +703,142 @@ async function removeHouseholdAdult(req: { id: number }, user: User) {
 	});
 }
 
+async function sendFaqLinks(
+	adults1: { phone: string }[],
+	adults2: { phone: string }[],
+	household1: { name: string; id: number },
+	household2: { name: string; id: number },
+	initiator: User
+) {
+	// go through each number and send the FAQ links
+	return await Promise.all([
+		...adults1.map(async ({ phone }: { phone: string }) =>
+			sendMsg(
+				{
+					phone,
+					type: 'householdFaq',
+					otherHouseholdName: household2.name,
+					otherHouseholdId: household2.id
+				},
+				initiator
+			)
+		),
+		...adults2.map(async ({ phone }: { phone: string }) =>
+			sendMsg(
+				{
+					phone,
+					type: 'householdFaq',
+					otherHouseholdName: household1.name,
+					otherHouseholdId: household1.id
+				},
+				initiator
+			)
+		)
+	]);
+}
+
+async function getHouseholdsFullSched(householdId: number, user: { timeZone: string }) {
+	const now = new Date();
+	const startDate = new Date(`${now.getMonth() + 1}/${now.getDate()}`);
+	const endDate = new Date(startDate);
+	endDate.setDate(endDate.getDate() + 21);
+
+	const dates = await prisma.availabilityDate.findMany({
+		where: {
+			householdId,
+			date: {
+				gte: startDate,
+				lte: endDate
+			}
+		},
+		orderBy: [
+			{
+				date: 'asc'
+			}
+		]
+	});
+
+	const rows = dates.map((d) => {
+		const { date, status, startTime, endTime, notes, emoticons } = d;
+		const englishDay = DAYS[date.getDay()];
+		const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
+
+		let availRange;
+		let startHr;
+		let startMin;
+		let endHr;
+		let endMin;
+		let emoticonSet = new Set<string>(emoticons?.split(','));
+		if (status === AvailabilityStatus.AVAILABLE) {
+			availRange = 'Available';
+			if (startTime && endTime)
+				availRange = `${dateTo12Hour(toLocalTimezone(startTime, user.timeZone))}-${dateTo12Hour(
+					toLocalTimezone(endTime, user.timeZone)
+				)}`;
+			const timeParts = getAvailRangeParts(availRange);
+			startHr = timeParts.startHr;
+			startMin = timeParts.startMin;
+			endHr = timeParts.endHr;
+			endMin = timeParts.endMin;
+		} else if (status === AvailabilityStatus.BUSY) {
+			availRange = 'Busy';
+		}
+
+		return {
+			englishDay,
+			monthDay,
+			availRange,
+			notes: notes ?? undefined,
+			emoticons: emoticonSet,
+			startHr,
+			startMin,
+			endHr,
+			endMin
+		};
+	});
+
+	return generateFullSchedule(rows);
+}
+
+async function sendSched(
+	adults1: { phone: string; timeZone: string }[],
+	adults2: { phone: string; timeZone: string }[],
+	household1: { name: string; id: number },
+	household2: { name: string; id: number },
+	initiator: User
+) {
+	// go through each number and send sched
+	return await Promise.all([
+		...adults1.map(async (recipient: { phone: string; timeZone: string }) => {
+			const sched = await getHouseholdsFullSched(household2.id, recipient);
+			return await sendMsg(
+				{
+					phone: recipient.phone,
+					type: 'newFriendNotif',
+					sched: sched.join('\n'),
+					otherHouseholdName: household2.name
+				},
+				initiator
+			);
+		}),
+		...adults2.map(async (recipient: { phone: string; timeZone: string }) => {
+			const sched = await getHouseholdsFullSched(household1.id, recipient);
+			return await sendMsg(
+				{
+					phone: recipient.phone,
+					type: 'newFriendNotif',
+					sched: sched.join('\n'),
+					otherHouseholdName: household1.name
+				},
+				initiator
+			);
+		})
+	]);
+}
+
 export {
+	sendSched,
+	sendFaqLinks,
 	deleteHouseholdInvite,
 	acceptHouseholdInvite,
 	createCircleInvite,

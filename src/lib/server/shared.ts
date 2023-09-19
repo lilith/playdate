@@ -45,17 +45,19 @@ export async function findHouseConnection(hId1: number, hId2: number) {
 	};
 }
 
-export async function getPhoneNumsInHousehold(id: number | null) {
+export async function getUserAttrsInHousehold(id: number | null, attrs: string[]) {
 	if (!id) return [];
+	const select: { [key: string]: true } = {};
+	attrs.forEach((attr) => {
+		select[attr] = true;
+	});
 	const users = await prisma.user.findMany({
 		where: {
 			householdId: id
 		},
-		select: {
-			phone: true
-		}
+		select
 	});
-	return users.map((u) => u.phone);
+	return users;
 }
 
 export async function getHousehold(id: number | null, attrs: string[]) {

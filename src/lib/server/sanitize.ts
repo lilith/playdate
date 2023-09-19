@@ -3,6 +3,8 @@ import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
 import prisma from '$lib/prisma';
 import sanitizerFunc from 'sanitize';
+import { fullName } from '$lib/format';
+import { LEGEND_STR } from '$lib/constants';
 
 const sanitizer = sanitizerFunc();
 
@@ -35,11 +37,14 @@ export const circleNotif = async (sched: string, user: User, diff: boolean) => {
 		.map((kid) => `${kid.firstName}${kid.lastName ? ` ${kid.lastName}` : ''}`)
 		.join(', ');
 
-	return `${user.firstName}${
-		user.lastName && user.lastName.length ? ` ${user.lastName}` : ''
-	} (parent of ${kidNames}) has ${
+	return `${fullName(user.firstName, user.lastName)} (parent of ${kidNames}) has ${
 		diff ? 'changed the following days on' : 'updated'
-	} ${objectivePronoun} tentative schedule:\nLegend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)\n\n${sanitizedSched}`;
+	} ${objectivePronoun} tentative schedule:\n${LEGEND_STR}\n${sanitizedSched}`;
+};
+
+export const newFriendNotif = async (sched: string, otherHouseholdName: string) => {
+	const sanitizedSched = sanitize(sched);
+	return `The tentative schedule of ${otherHouseholdName} is:\n${LEGEND_STR}\n${sanitizedSched}`;
 };
 
 export const dateNotes = (notes: string) => sanitize(notes);
