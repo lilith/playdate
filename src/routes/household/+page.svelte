@@ -7,6 +7,7 @@
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '$lib/utils';
+	import { fullName } from '$lib/format';
 	import { DateTime } from 'luxon';
 
 	enum ModalReason {
@@ -170,8 +171,10 @@
 							"Are you sure that you'd like to disconnect from this household? The household's info will be saved, but you won't be able to access it until another adult in the household sends you an invite.";
 					} else {
 						modalText.heading = 'Disconnect Adult';
-						modalText.content =
-							"Are you sure that you'd like to disconnect this adult from this household?";
+						modalText.content = `Are you sure that you'd like to disconnect ${fullName(
+							adults[ind].firstName,
+							adults[ind].lastName
+						)} from this household?`;
 					}
 				}
 				break;
@@ -315,6 +318,9 @@
 					{#each householdInvites[0].household.children as kid}
 						<p style="font-size: 18px;">{kid.firstName} {kid.lastName ?? ''}</p>
 					{/each}
+					{#if !householdInvites[0].household.children.length}
+						<p>None added yet</p>
+					{/if}
 				</div>
 
 				<div slot="close" let:dialog>

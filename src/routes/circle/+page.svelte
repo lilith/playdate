@@ -41,6 +41,13 @@
 		showClickToTextLink = true;
 	}
 
+	let friendToDelete:
+		| {
+				connectionId: number;
+				name: string;
+		  }
+		| undefined;
+	$: showDeleteFriendModal = !!friendToDelete;
 	async function deleteFriend(connectionId: number) {
 		const response = await writeReq('/db', {
 			type: 'deleteFriend',
@@ -83,6 +90,31 @@
 			>
 		</div>
 	</Modal>
+	<Modal bind:showModal={showDeleteFriendModal}>
+		<h2 slot="header" style="margin-top: 0px;">Unfriend</h2>
+
+		<p>Are you sure that you'd like to unfriend {friendToDelete?.name}?</p>
+
+		<div slot="close" let:dialog>
+			<button
+				on:click={async () => {
+					if (friendToDelete) await deleteFriend(friendToDelete.connectionId);
+					friendToDelete = undefined;
+					dialog.close();
+				}}
+			>
+				Yes
+			</button>
+			<button
+				on:click={() => {
+					friendToDelete = undefined;
+					dialog.close();
+				}}
+			>
+				No
+			</button>
+		</div>
+	</Modal>
 	<NavBar pageName="Circle" />
 	<p class="subtitle">Your Circle</p>
 	<p>Names that are crossed out indicate friends who have turned off their notifications.</p>
@@ -107,9 +139,8 @@
 				{/each}
 			</div>
 			<div class="btn-wrapper delete w-full">
-				<button
-					class="delete-btn"
-					on:click|preventDefault={() => deleteFriend(household.connectionId)}><hr /></button
+				<button class="delete-btn" on:click|preventDefault={() => (friendToDelete = household)}
+					><hr /></button
 				>
 			</div>
 		</div>
