@@ -4,7 +4,7 @@
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
 	import { invalidate } from '$app/navigation';
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, afterUpdate } from 'svelte';
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '$lib/utils';
@@ -241,13 +241,36 @@
 		});
 	}
 
+	const rowColors = [...Array(21).keys()].map((_, i) => getRowColor(i));
+	function getRowColor(i: number) {
+		if (i >= rows.length) return i % 2 ? '#f2f2f2' : 'white';
+		if (rows[i].availRange && rows[i].availRange !== 'Busy' && !shownRows.has(i)) {
+			return '#dbf4ff';
+		}
+		return i % 2 ? '#f2f2f2' : 'white';
+	}
+
+	$: [...Array(21).keys()].map((_, i) => {
+		tick().then(() => {
+			rowColors[i] = getRowColor(i);
+		});
+	});
+
 	function showEditor(i: number) {
 		shownRows.add(i);
 		shownRows = new Set(shownRows);
 		tick().then(() => {
 			document.getElementById(`editor-${i}`)?.focus();
 		});
+		rowColors[i] = getRowColor(i);
 	}
+
+	function closeEditor(i: number) {
+		shownRows.delete(i);
+		shownRows = new Set(shownRows);
+		rowColors[i] = getRowColor(i);
+	}
+
 	let diff = false;
 </script>
 
@@ -256,7 +279,7 @@
 	<div style="text-align: center; margin: 2rem 0;">
 		<table id="schedule">
 			{#each rows as row, i}
-				<tr style="background-color: {i % 2 ? '#f2f2f2' : 'white'};">
+				<tr style="background-color: {rowColors[i]};">
 					<td
 						class:blue={shownRows.has(i)}
 						class="day"
@@ -305,14 +328,6 @@
 							class="busy"
 						>
 							Busy
-						</td>
-					{:else if row.availRange === 'Busy'}
-						<td
-							class="clear"
-							on:click={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
-							on:keyup={() => markAs(i, AvailabilityStatus.UNSPECIFIED)}
-						>
-							Clear
 						</td>
 					{:else}
 						<td
@@ -379,8 +394,7 @@
 										onClick={async () => {
 											const res = await markAs(i, AvailabilityStatus.AVAILABLE);
 											if (res === 'ok') {
-												shownRows.delete(i);
-												shownRows = new Set(shownRows);
+												closeEditor(i);
 											}
 										}}
 										disabled={timeErrs.has(i)}
@@ -393,8 +407,7 @@
 									<Button
 										onClick={(e) => {
 											e?.preventDefault();
-											shownRows.delete(i);
-											shownRows = new Set(shownRows);
+											closeEditor(i);
 										}}
 										content={'Cancel'}
 										bgColor={'rgba(255, 233, 184, 0.78)'}
