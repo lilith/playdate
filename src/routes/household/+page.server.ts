@@ -4,6 +4,7 @@ import prisma from '$lib/prisma';
 
 export const load = (async ({ parent, depends }) => {
 	depends('data:householdId');
+	const { user } = await parent();
 	const householdInfo: {
 		householdId: number | null;
 		name: string;
@@ -25,7 +26,6 @@ export const load = (async ({ parent, depends }) => {
 		adults: []
 	};
 
-	const { user } = await parent();
 	const householdId = user.householdId;
 	if (householdId) {
 		const household = await prisma.household.findUnique({
