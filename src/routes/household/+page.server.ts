@@ -20,7 +20,7 @@ export const load = (async ({ parent, depends }) => {
 		[key: string]: number | string | Array<object | User> | null;
 	} = {
 		householdId: null,
-		name: '',
+		name: user.lastName ? `${user.lastName} Family` : '',
 		publicNotes: '',
 		kids: [],
 		adults: []
