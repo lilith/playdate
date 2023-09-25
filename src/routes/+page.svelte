@@ -40,6 +40,8 @@
 		}
 
 		const phone = phoneInput.getNumber();
+		document.cookie = `phone=${phone}`;
+
 		const res = await writeReq('/login', {
 			phone
 		});
