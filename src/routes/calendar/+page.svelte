@@ -4,7 +4,7 @@
 	import Legend from '../Legend.svelte';
 	import Button from '../Button.svelte';
 	import { invalidate } from '$app/navigation';
-	import { onMount, tick, afterUpdate } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import NavBar from '../NavBar.svelte';
 	import { writeReq } from '$lib/utils';
@@ -87,6 +87,23 @@
 	let shownRows = new Set();
 	let timeErrs = new Set();
 	let schedDiffs: string[] = [];
+
+	const rowColors = [...Array(21).keys()].map((_, i) => getRowColor(i));
+	function getRowColor(i: number) {
+		if (i >= rows.length) return i % 2 ? '#f2f2f2' : 'white';
+		if (rows[i].availRange && rows[i].availRange !== 'Busy' && !shownRows.has(i)) {
+			return '#dbf4ff';
+		}
+		return i % 2 ? '#f2f2f2' : 'white';
+	}
+
+	const updateRowColors = () => {
+		[...Array(21).keys()].map((_, i) => {
+			tick().then(() => {
+				rowColors[i] = getRowColor(i);
+			});
+		});
+	};
 
 	async function markAs(i: number, status: string, updateUI = true) {
 		const availRangeParts =
@@ -174,6 +191,7 @@
 				};
 				schedDiffs = generateDiffSchedule(ogRows, rows);
 				schedFull = generateFullSchedule(rows);
+				updateRowColors();
 			}
 			return 'ok';
 		}
@@ -201,6 +219,8 @@
 		}));
 		schedDiffs = generateDiffSchedule(ogRows, rows);
 		schedFull = generateFullSchedule(rows);
+
+		updateRowColors();
 	}
 
 	function toggleEmoticon(i: number, emoticon: string) {
@@ -241,20 +261,7 @@
 		});
 	}
 
-	const rowColors = [...Array(21).keys()].map((_, i) => getRowColor(i));
-	function getRowColor(i: number) {
-		if (i >= rows.length) return i % 2 ? '#f2f2f2' : 'white';
-		if (rows[i].availRange && rows[i].availRange !== 'Busy' && !shownRows.has(i)) {
-			return '#dbf4ff';
-		}
-		return i % 2 ? '#f2f2f2' : 'white';
-	}
-
-	$: [...Array(21).keys()].map((_, i) => {
-		tick().then(() => {
-			rowColors[i] = getRowColor(i);
-		});
-	});
+	$: updateRowColors();
 
 	function showEditor(i: number) {
 		shownRows.add(i);
