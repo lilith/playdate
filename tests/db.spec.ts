@@ -32,6 +32,7 @@ that info is derived from the session cookie
 - User 2 fails to issue invitations for others to join User 3's household
 - User 2 fails to alter User 1's schedule
 - User 2 fails to issue friend reqs to others from User 3's household
+- User 6 fails to delete another user
 */
 
 test("User 4 fails to accept friend request on User 3's behalf", async ({ page, context }) => {
@@ -149,7 +150,7 @@ test("User 4 fails to decline household invite on User 2's behalf", async ({ pag
 		}
 	});
 	const { message } = await res.json();
-	expect(message).toEqual("You can't delete a household invite tht wsan't issued to you");
+	expect(message).toEqual("You can't delete a household invite that wsan't issued to you");
 	expect(res.status()).toEqual(401);
 	await page.close();
 });

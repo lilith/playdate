@@ -12,7 +12,8 @@
 
 	enum ModalReason {
 		DISCONNECT_ADULT,
-		DELETE_HOUSEHOLD
+		DELETE_HOUSEHOLD,
+		DELETE_ACCOUNT
 	}
 
 	let phoneInput: object;
@@ -182,6 +183,14 @@
 				modalText.heading = 'Delete Household';
 				modalText.content =
 					"Are you sure that you'd like to delete your household? This will delete all basic household info and associated children but leave all adult users' accounts intact.";
+				break;
+			case ModalReason.DELETE_ACCOUNT:
+				modalText.heading = 'Delete Account';
+				modalText.content =
+					"Are you sure that you'd like to delete your account? This will delete all basic household info and associated children but leave all adult users' accounts intact. Additionally, we'll delete your profile info, but keep track of your phone permission settings.";
+				break;
+			default:
+				throw new Error(`Undefined modal reason type ${type}`);
 		}
 		modalReason = type;
 		showModal = true;
@@ -260,6 +269,19 @@
 
 	function smsInviteEncoded(msg: string) {
 		return `sms:${inviteesPhone}?&body=${encodeURIComponent(msg)}`;
+	}
+
+	async function deleteAcc() {
+		const response = await writeReq('/db', {
+			type: 'deleteUser'
+		});
+		if (response.status == 200) {
+			document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+			await goto('/');
+			location.reload();
+		} else {
+			window.alert('Something went wrong with deleting the account');
+		}
 	}
 </script>
 
@@ -355,6 +377,7 @@
 				on:click={async () => {
 					if (modalReason === ModalReason.DISCONNECT_ADULT) disconnectAdult();
 					else if (modalReason === ModalReason.DELETE_HOUSEHOLD) deleteHousehold();
+					else if (modalReason === ModalReason.DELETE_ACCOUNT) deleteAcc();
 					dialog.close();
 				}}
 			>
@@ -468,6 +491,10 @@
 					>Delete Household</button
 				>
 			{/if}
+			<button
+				class="btn important-delete-btn"
+				on:click|preventDefault={() => openModal(ModalReason.DELETE_ACCOUNT)}>Delete Account</button
+			>
 		</div>
 	</form>
 </div>
@@ -558,7 +585,7 @@
 		display: flex;
 		flex-direction: column;
 		margin: 3rem 3rem 4rem;
-		gap: 20px;
+		gap: 2rem;
 	}
 
 	.important-delete-btn {
