@@ -94,11 +94,9 @@ export async function POST({
 		await acceptHouseholdInvite(req, user);
 	} else if (req.type === 'rejectHouseholdInvite') {
 		await deleteHouseholdInvite(req, user);
-	} else if (req.type === 'deleteUser') {
-		await deleteUser(user);
 	} else {
 		throw error(400, {
-			message: `The request type ${req.type} isn't supported`
+			message: `The request type ${req.type} isn't supported in /db POST req`
 		});
 	}
 
@@ -120,6 +118,12 @@ export async function DELETE({
 
 	if (req.type === 'householdChild') await deleteKid(req, user);
 	else if (req.type === 'household') await deleteHousehold(user);
+	else if (req.type === 'user') await deleteUser(user);
+	else {
+		throw error(400, {
+			message: `The request type ${req.type} isn't supported in /db DELETE req`
+		});
+	}
 	return json('success');
 }
 
