@@ -272,9 +272,13 @@
 	}
 
 	async function deleteAcc() {
-		const response = await writeReq('/db', {
-			type: 'deleteUser'
-		});
+		const response = await writeReq(
+			'/db',
+			{
+				type: 'user'
+			},
+			'DELETE'
+		);
 		if (response.status == 200) {
 			document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 			await goto('/');
@@ -368,7 +372,7 @@
 	{/key}
 
 	<Modal bind:showModal>
-		<h2 slot="header">{modalText.heading}</h2>
+		<h2 slot="header" style="margin-top: 0">{modalText.heading}</h2>
 
 		<p>{modalText.content}</p>
 
