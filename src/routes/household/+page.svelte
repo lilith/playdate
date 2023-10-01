@@ -187,7 +187,7 @@
 			case ModalReason.DELETE_ACCOUNT:
 				modalText.heading = 'Delete Account';
 				modalText.content =
-					"Are you sure that you'd like to delete your account? This will delete all basic household info and associated children but leave all adult users' accounts intact. Additionally, we'll delete your profile info, but keep track of your phone permission settings.";
+					"Are you sure that you'd like to delete your account? If you are the last adult in your household, this will delete all basic household info and associated children. Otherwise, the household's info and other adult users' accounts will remain intact. Additionally, we'll delete your profile info, but keep track of your phone permission settings.";
 				break;
 			default:
 				throw new Error(`Undefined modal reason type ${type}`);

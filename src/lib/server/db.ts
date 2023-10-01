@@ -849,8 +849,15 @@ async function deleteUser(user: User) {
 		});
 	}
 
-	// delete their household
-	if (user.householdId) await deleteHousehold(user);
+	// delete their household if they're the last member of their household
+	if (user.householdId) {
+		const householdUsers = await prisma.user.findMany({
+			where: {
+				householdId: user.householdId
+			}
+		});
+		if (householdUsers.length === 1) await deleteHousehold(user);
+	}
 
 	// delete the user
 	await prisma.user.delete({
