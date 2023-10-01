@@ -17,7 +17,8 @@ import {
 	deleteHousehold,
 	removeHouseholdAdult,
 	sendFaqLinks,
-	sendSched
+	sendSched,
+	deleteUser
 } from '$lib/server/db';
 import { getHousehold, getProfileFromSession, getUserAttrsInHousehold } from '$lib/server/shared';
 
@@ -93,6 +94,8 @@ export async function POST({
 		await acceptHouseholdInvite(req, user);
 	} else if (req.type === 'rejectHouseholdInvite') {
 		await deleteHouseholdInvite(req, user);
+	} else if (req.type === 'deleteUser') {
+		await deleteUser(user);
 	} else {
 		throw error(400, {
 			message: `The request type ${req.type} isn't supported`

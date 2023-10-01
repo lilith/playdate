@@ -25,7 +25,7 @@ async function deleteHouseholdInvite(req: { id: number }, user: User) {
 	const invite = await findHouseholdInvite(id);
 	if (!invite || invite.targetPhone !== user.phone) {
 		throw error(401, {
-			message: "You can't delete a household invite tht wsan't issued to you"
+			message: "You can't delete a household invite that wsan't issued to you"
 		});
 	}
 
@@ -836,6 +836,30 @@ async function sendSched(
 	]);
 }
 
+async function deleteUser(user: User) {
+	const userToDelete = await prisma.user.findUnique({
+		where: {
+			phone: user.phone
+		}
+	});
+
+	if (!userToDelete) {
+		throw error(400, {
+			message: "Can't delete another user"
+		});
+	}
+
+	// delete their household
+	if (user.householdId) await deleteHousehold(user);
+
+	// delete the user
+	await prisma.user.delete({
+		where: {
+			phone: user.phone
+		}
+	});
+}
+
 export {
 	sendSched,
 	sendFaqLinks,
@@ -853,5 +877,6 @@ export {
 	saveKid,
 	deleteKid,
 	deleteHousehold,
-	removeHouseholdAdult
+	removeHouseholdAdult,
+	deleteUser
 };
