@@ -46,7 +46,7 @@
 		"eslint-config-prettier": "^8.8.0",
 		"eslint-plugin-svelte3": "^4.0.0",
 		"intl-tel-input": "^18.1.6",
-		"postcss": "^8.4.24",
+		"postcss": "^8.4.31",
 		"prettier": "^2.8.8",
 		"prettier-plugin-svelte": "^2.10.1",
 		"prisma": "^4.15.0",
