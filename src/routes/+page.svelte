@@ -228,13 +228,11 @@
 				>
 					<div class="wrapper">
 						<div class="inner" data-onvisible-trigger="1">
-							<h3 id="text04" class="style2"><mark>work in progress</mark> sorry</h3>
-							<h2 id="text14" class="style1">thanks for your patience</h2>
-							<p id="text15" class="style3">
-								We&#39;re not quite ready yet. Want to <a href="https://github.com/lilith/playdate"
-									>help</a
-								>?
-							</p>
+							<!-- svelte-ignore a11y-media-has-caption -->
+							<video width="320" controls style="margin: auto;">
+								<source src="/playdate_vid.mov" type="video/mp4" />
+								Your browser does not support the video tag.
+							</video>
 							<p id="text16" class="style5">© lilith river 2023</p>
 						</div>
 					</div>
