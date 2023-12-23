@@ -200,23 +200,41 @@
 		return 'err';
 	}
 
-	async function markAllBusy() {
-		await Promise.all(
-			[...Array(rows.length).keys()].map((i) => markAs(i, AvailabilityStatus.BUSY, false))
-		);
-		// now update UI all at once
-		rows = rows.map((r) => ({
-			...r,
-			notes: '',
-			availRange: 'Busy',
-			emoticons: new Set()
-		}));
-		unsaved = unsaved.map((r) => ({
-			...r,
-			notes: '',
-			availRange: '',
-			emoticons: new Set()
-		}));
+	async function markUnspecifiedBusy() {
+		const unspecifiedInds = rows
+			.map((r, i) => {
+				if (!r.availRange) return i;
+				return null;
+			})
+			.filter((i) => i !== null);
+		await Promise.all(unspecifiedInds.map((i) => markAs(i!, AvailabilityStatus.BUSY, false)));
+
+		// // now update UI all at once
+		const unspecifiedIndsSet = new Set(unspecifiedInds);
+		rows = rows.map((r, i) => {
+			if (unspecifiedIndsSet.has(i)) {
+				return {
+					...r,
+					notes: '',
+					availRange: 'Busy',
+					emoticons: new Set()
+				};
+			}
+			return r;
+		});
+
+		unsaved = unsaved.map((r, i) => {
+			if (unspecifiedIndsSet.has(i)) {
+				return {
+					...r,
+					notes: '',
+					availRange: '',
+					emoticons: new Set()
+				};
+			}
+			return r;
+		});
+
 		schedDiffs = generateDiffSchedule(ogRows, rows);
 		schedFull = generateFullSchedule(rows);
 
@@ -429,8 +447,8 @@
 				{/if}
 			{/each}
 		</table>
-		<button class="mark-all-busy-btn" style="margin: 1rem;" on:click={markAllBusy}
-			>Mark all days as busy</button
+		<button class="mark-all-busy-btn" style="margin: 1rem;" on:click={markUnspecifiedBusy}
+			>Mark unspecified days as busy</button
 		>
 		{#key schedDiffs}
 			<p class="subtitle">Notify Circle</p>
