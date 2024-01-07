@@ -51,9 +51,7 @@ const msgToSend = async (
 			const localTime = toLocalTimezone(magicLink.expires, timeZone).toLocaleString(
 				DateTime.TIME_SIMPLE
 			);
-			msg = `Your login link to playdate.help will expire at ${localTime}: ${url}/login/${phone.slice(
-				1
-			)}/${token}`;
+			msg = `Your login link to playdate.help will expire at ${localTime}: ${url}/login/${token}`;
 			break;
 		}
 		case 'circleNotif': {

@@ -3,7 +3,6 @@ import { redirect } from '@sveltejs/kit';
 import prisma from '$lib/prisma';
 
 export const load = (async ({ params, cookies, setHeaders }) => {
-	console.log('LOAD LOGIN');
 	let magicLinkInfo;
 	try {
 		// validate token against what's stored in the DB
@@ -16,15 +15,14 @@ export const load = (async ({ params, cookies, setHeaders }) => {
 		if (!magicLinkInfo) throw Error;
 	} catch {
 		console.error(`Can't verify token ${params.token} for phone ${params.phone}`);
-		throw redirect(308, `/?phone=${params.phone}&status=403`);
+		throw redirect(308, `/?phone=${cookies.get('phone')}&status=403`);
 	}
 
 	// check DB's expiration date
 	const { phone, expires } = magicLinkInfo as { phone: string; expires: Date };
-
 	if (expires < new Date()) {
 		console.error('Token has expired');
-		throw redirect(308, `/?phone=${params.phone}&status=403`);
+		throw redirect(308, `/?phone=${phone}&status=403`);
 	}
 
 	let crypto;
@@ -32,7 +30,7 @@ export const load = (async ({ params, cookies, setHeaders }) => {
 		crypto = await import('node:crypto');
 	} catch (err) {
 		console.error('crypto support is disabled!');
-		throw redirect(308, `/?phone=${params.phone}&status=500`);
+		throw redirect(308, `/?phone=${phone}&status=500`);
 	}
 
 	const sessionCreatedAt = new Date();
@@ -57,7 +55,6 @@ export const load = (async ({ params, cookies, setHeaders }) => {
 			createdAt: sessionCreatedAt
 		}
 	});
-	console.log('CREATED SESSION', session);
 
 	setHeaders({
 		'cache-control': 'no-store, max-age=0'
