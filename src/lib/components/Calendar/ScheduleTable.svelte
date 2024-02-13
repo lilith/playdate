@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { EMOTICONS, UNAVAILABLE } from '$lib/logics/Calendar/_shared/constants';
 	import { EMOTICONS_REVERSE } from '$lib/constants';
-	import type { Row } from '$lib/types';
+	import type { Row, Unavailable } from '$lib/types';
 	import Legend from '$lib/components/Legend.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import {
@@ -9,7 +9,9 @@
 		getRowColor,
 		isAvailableOnRow,
 		markRowAsAvailable,
-		markRowAsUnavailable,
+		markRowUnavailableLocally,
+		requestToMarkOneRow,
+		// markRowAsUnavailable,
 		showEditor,
 		toggleEmoticon
 	} from '$lib/logics/Calendar/ScheduleTable/logic';
@@ -18,7 +20,6 @@
 	export let rows: Row[];
 	export let timeZone: string;
 
-	let rowLabels: string[] = [];
 	let openedRows = new Set<number>(); // row inds which have open editors
 	let rowIndsWithTimeErrs = new Set<number>();
 	/*
@@ -29,11 +30,6 @@
 		4. light blue - unopened and available
 	*/
 	let rowColors: string[] = [];
-
-	$: rowLabels = rows.map((row) => {
-		if (row.availRange === AvailabilityStatus.BUSY) return 'Busy';
-		return '';
-	});
 
 	$: {
 		if (!rows.length) break $;
@@ -51,6 +47,33 @@
 	const handleEditorOpen = (i: number) => {
 		openedRows = showEditor({ i, openedRows });
 	};
+
+	const markRowAsUnavailable = async ({
+		i,
+		status
+	}: {
+		i: number;
+		status: Unavailable;
+	}) => {
+		const dbRows = [...rows]
+		rows = markRowUnavailableLocally({ i, displayedRows: rows, status });
+
+		try {
+			await requestToMarkOneRow({
+				i,
+				status,
+				// dbRows,
+				displayedRows: rows,
+				availableDetails: null
+			});
+			closeEditor({ i, openedRows });
+		} catch (err) {
+			console.error(err);
+			console.error('Something went wrong with marking row as unavailable');
+
+			rows = [...dbRows]
+		}
+};
 </script>
 
 <table id="schedule">
@@ -78,9 +101,9 @@
 				on:click={() => handleEditorOpen(i)}
 				on:keyup={() => handleEditorOpen(i)}
 			>
-				{#if !row.availRange}
+				{#if row.availRange === AvailabilityStatus.UNSPECIFIED}
 					<p>Unspecified (<span class="edit">edit</span>)</p>
-				{:else if row.availRange === 'Busy'}
+				{:else if row.availRange === AvailabilityStatus.BUSY}
 					<p>Busy (<span class="edit">edit</span>)</p>
 				{:else}
 					<p class="timeDisplay">{row.availRange}</p>
@@ -97,7 +120,7 @@
 					<p class="changeTime">(edit)</p>
 				{/if}
 			</td>
-			{#if !row.availRange}
+			{#if row.availRange === AvailabilityStatus.UNSPECIFIED}
 				<td
 					on:click={() => {
 						markRowAsUnavailable({

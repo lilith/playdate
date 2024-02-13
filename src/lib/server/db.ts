@@ -5,7 +5,7 @@ import type { User } from '@prisma/client';
 import { dateTo12Hour, toLocalTimezone } from '../date';
 import { dateNotes } from './sanitize';
 import prisma from '$lib/prisma';
-import { findHouseConnection } from './shared';
+import { findHouseConnection, getHousehold, getUserAttrsInHousehold } from './shared';
 import { sendMsg } from './twilio';
 import { DAYS } from '$lib/constants';
 import { destructRange } from '$lib/parse';
@@ -340,44 +340,6 @@ async function saveSchedule(
 	return res;
 }
 
-async function createHouseholdInvite(
-	req: {
-		targetPhone: string;
-	},
-	user: User
-) {
-	const { targetPhone } = req;
-	const { id: fromUserId } = user;
-	const { householdId } = user;
-	if (!householdId) {
-		throw error(401, {
-			message: 'You need to create / join a household before inviting others to join it.'
-		});
-	}
-
-	const existingInvites = await prisma.joinHouseholdRequest.findMany({
-		where: {
-			targetPhone,
-			householdId
-		}
-	});
-	if (existingInvites.length)
-		throw error(400, {
-			message: 'The user associated with this number has already been invited to this household.'
-		});
-	const now = new Date();
-	const expires = now;
-	expires.setDate(now.getDate() + 7); // expire 1 week from now
-	await prisma.joinHouseholdRequest.create({
-		data: {
-			expires,
-			targetPhone,
-			householdId,
-			fromUserId
-		}
-	});
-}
-
 async function saveUser(
 	req: {
 		firstName: string;
@@ -479,92 +441,6 @@ async function saveUser(
 		});
 	}
 	return updatedUser.id;
-}
-
-async function createHousehold(
-	user: User,
-	data?: { name: string; publicNotes: string; updatedAt: Date }
-) {
-	if (user.householdId)
-		throw error(400, {
-			message: "Can't create household for someone who's already in a household"
-		});
-	// create household
-	const household = await prisma.household.create({
-		data: data ?? {
-			name: '',
-			publicNotes: '',
-			updatedAt: new Date()
-		}
-	});
-	console.log('CREATED HOUSEHOLD', household);
-	// then associate user to it
-	await prisma.user.update({
-		where: {
-			id: user.id
-		},
-		data: {
-			householdId: household.id
-		}
-	});
-
-	return household.id;
-}
-
-async function saveHousehold(
-	req: {
-		name: string;
-		publicNotes: string;
-	},
-	user: User
-) {
-	const { name, publicNotes } = req;
-	const { householdId } = user;
-	const data = {
-		name,
-		publicNotes,
-		updatedAt: new Date()
-	};
-
-	if (!householdId) {
-		await createHousehold(user, data);
-	} else {
-		await prisma.household.update({
-			where: {
-				id: householdId
-			},
-			data
-		});
-	}
-}
-
-async function saveKid(
-	req: {
-		firstName: string;
-		pronouns: Pronoun;
-		lastName: string;
-		dateOfBirth: Date;
-	},
-	user: User
-) {
-	const { firstName, pronouns, lastName, dateOfBirth } = req;
-	const { householdId } = user;
-	// ensure the household exists before adding kid to it
-	if (!householdId) {
-		throw error(401, {
-			message: 'Create a household before trying to add a child to it'
-		});
-	}
-	const kid = await prisma.householdChild.create({
-		data: {
-			householdId,
-			firstName,
-			pronouns,
-			lastName,
-			dateOfBirth
-		}
-	});
-	return kid.id;
 }
 
 async function deleteKid(req: { id: number }, user: User) {
@@ -867,7 +743,43 @@ async function deleteUser(user: User) {
 	});
 }
 
+async function acceptFriendReqRoute(
+	req: {
+		friendReqId: number;
+	},
+	user: User
+) {
+	// get each household's id
+	const otherHouseholdId = await acceptFriendReq(req, user);
+
+	// get users' phones, time zones in both households
+	const userAttrs = ['phone', 'timeZone'];
+	const [adults1, adults2] = await Promise.all([
+		await getUserAttrsInHousehold(otherHouseholdId, userAttrs),
+		await getUserAttrsInHousehold(user.householdId, userAttrs)
+	]);
+
+	// get names for both households
+	const attrs = ['name', 'id'];
+	const household1 = await getHousehold(otherHouseholdId, attrs);
+	if (!household1) {
+		throw error(404, {
+			message: `Can't find household ${otherHouseholdId}`
+		});
+	}
+	const household2 = await getHousehold(user.householdId, attrs);
+	if (!household2) {
+		throw error(404, {
+			message: `Can't find household ${user.householdId}`
+		});
+	}
+
+	await sendFaqLinks(adults1, adults2, household1, household2, user);
+	await sendSched(adults1, adults2, household1, household2, user);
+}
+
 export {
+	acceptFriendReqRoute,
 	sendSched,
 	sendFaqLinks,
 	deleteHouseholdInvite,
@@ -877,11 +789,7 @@ export {
 	acceptFriendReq,
 	deleteFriendReq,
 	saveSchedule,
-	createHouseholdInvite,
 	saveUser,
-	createHousehold,
-	saveHousehold,
-	saveKid,
 	deleteKid,
 	deleteHousehold,
 	removeHouseholdAdult,

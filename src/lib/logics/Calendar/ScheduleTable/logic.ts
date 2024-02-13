@@ -21,7 +21,6 @@ export const getRowColor = ({
 	isAvailable: boolean;
 	isRowExpanded: boolean;
 }) => {
-	console.log({ i, numRows, isAvailable, isRowExpanded });
 	if (i >= numRows) return i % 2 ? LIGHT_GRAY : WHITE;
 	if (isAvailable && !isRowExpanded) {
 		return LIGHT_BLUE;
@@ -54,7 +53,7 @@ export const updateRowColors = ({
 	});
 };
 
-const markRowUnavailableLocally = ({
+export const markRowUnavailableLocally = ({
 	i,
 	displayedRows,
 	// dbRow,
@@ -68,6 +67,7 @@ const markRowUnavailableLocally = ({
 	displayedRows[i].notes = '';
 	displayedRows[i].emoticons = new Set();
 	displayedRows[i].availRange = status;
+	return displayedRows;
 	// dbRow.notes = '';
 	// dbRow.emoticons = new Set();
 	// dbRow.availRange = status;
@@ -193,7 +193,7 @@ const updateDisplayedRow = async ({
 	// updateRowColors();
 };
 
-const requestToMarkOneRow = async ({
+export const requestToMarkOneRow = async ({
 	i,
 	status,
 	// dbRows,
@@ -224,6 +224,9 @@ const requestToMarkOneRow = async ({
 			  }
 			: {})
 	});
+	console.log(response)
+	console.log(await response.json())
+
 	return;
 
 	// if (response.status == 200) {
@@ -265,20 +268,20 @@ export const markRowAsUnavailable = async ({
 }) => {
 	markRowUnavailableLocally({ i, displayedRows, status });
 
-	try {
-		await requestToMarkOneRow({
-			i,
-			status,
-			// dbRows,
-			displayedRows,
-			availableDetails: null
-		});
-		closeEditor({ i, openedRows });
-	} catch (err) {
-		console.error(err);
-		console.error('Something went wrong with marking row as unavailable');
-		throw new Error();
-	}
+	// try {
+	// 	await requestToMarkOneRow({
+	// 		i,
+	// 		status,
+	// 		// dbRows,
+	// 		displayedRows,
+	// 		availableDetails: null
+	// 	});
+	// 	closeEditor({ i, openedRows });
+	// } catch (err) {
+	// 	console.error(err);
+	// 	console.error('Something went wrong with marking row as unavailable');
+	// 	throw new Error();
+	// }
 };
 
 export const markRowAsAvailable = async ({
