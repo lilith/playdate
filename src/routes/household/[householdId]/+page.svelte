@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { PRONOUNS } from '$lib/constants';
-	import NavBar from '../../NavBar.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
 
 	export let data: PageData;
 	const { householdInfo: household, authorized } = data;
@@ -12,7 +12,7 @@
 	{#if authorized}
 		<p class="subtitle">FAQ</p>
 		<div class="faq">
-			{household.publicNotes.length ? household.publicNotes : 'Nothing of note'}
+			{household.publicNotes ?? 'Nothing of note'}
 		</div>
 
 		<p class="subtitle">Kids</p>
@@ -20,7 +20,7 @@
 			<div class="card">
 				<p>{kid.firstName} {kid.lastName ?? ''}</p>
 				<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
-				<p class="small-font">Age: {isNaN(kid.age) ? 'N/A' : kid.age}</p>
+				<p class="small-font">Age: {!kid.age || isNaN(kid.age) ? 'N/A' : kid.age}</p>
 			</div>
 		{/each}
 

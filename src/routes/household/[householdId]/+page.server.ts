@@ -10,7 +10,7 @@ export const load = (async ({ params, parent }) => {
 	const householdInfo: {
 		householdId: number | null;
 		name: string;
-		publicNotes: string;
+		publicNotes: string | null;
 		kids: {
 			firstName: string;
 			pronouns: Pronoun;

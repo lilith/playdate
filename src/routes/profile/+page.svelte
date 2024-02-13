@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { PRONOUNS, LANGUAGES } from '$lib/constants';
-	import Modal from '../Modal.svelte';
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
-	import NavBar from '../NavBar.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
 	import { writeReq } from '$lib/utils';
 
 	const WEEKDAYS: { [key: string]: number } = {

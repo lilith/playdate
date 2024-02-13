@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Legend from '../Legend.svelte';
-	import NavBar from '../NavBar.svelte';
+	import Legend from '$lib/components/Legend.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
 	import { page } from '$app/stores';
 	import type { Dates, DateDetails, BusyDetails } from '$lib/types';
 	import type { Household } from './constants';

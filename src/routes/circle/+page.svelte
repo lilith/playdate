@@ -1,11 +1,11 @@
 <script lang="ts">
-	import PhoneInput from '../PhoneInput.svelte';
 	import { onMount, afterUpdate } from 'svelte';
 	import { page } from '$app/stores';
-	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
 	import { writeReq } from '$lib/utils';
-	import Modal from '../Modal.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import PhoneInput from '$lib/components/PhoneInput.svelte';
 	import { circleInviteMsg } from '$lib/format';
 
 	let phoneInput: object;
