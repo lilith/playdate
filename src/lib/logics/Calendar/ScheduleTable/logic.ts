@@ -8,6 +8,7 @@ import { DateTime } from 'luxon';
 import { dateTo12Hour } from '$lib/date';
 import { writeReq } from '$lib/utils';
 import type { AvailRangeParts } from '../Wrapper/types';
+import { UNAVAILABLE } from '../_shared/constants';
 
 export const getRowColor = ({
 	i,
@@ -20,6 +21,7 @@ export const getRowColor = ({
 	isAvailable: boolean;
 	isRowExpanded: boolean;
 }) => {
+	console.log({ i, numRows, isAvailable, isRowExpanded });
 	if (i >= numRows) return i % 2 ? LIGHT_GRAY : WHITE;
 	if (isAvailable && !isRowExpanded) {
 		return LIGHT_BLUE;
@@ -28,7 +30,7 @@ export const getRowColor = ({
 };
 
 export const isAvailableOnRow = (row: Row) =>
-	!!row.availRange && row.availRange !== AvailabilityStatus.BUSY;
+	!!row.availRange && !UNAVAILABLE.includes(row.availRange);
 
 export const updateRowColors = ({
 	rowColors,
@@ -386,13 +388,13 @@ export const toggleEmoticon = ({
 
 export const showEditor = ({ i, openedRows }: { i: number; openedRows: Set<number> }) => {
 	openedRows.add(i);
-	openedRows = new Set(openedRows);
 	tick().then(() => {
 		document.getElementById(`editor-${i}`)?.focus();
 	});
+	return openedRows
 };
 
 export const closeEditor = ({ i, openedRows }: { i: number; openedRows: Set<number> }) => {
 	openedRows.delete(i);
-	openedRows = new Set(openedRows);
+	return openedRows
 };

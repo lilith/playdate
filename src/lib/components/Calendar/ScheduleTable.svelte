@@ -28,19 +28,29 @@
 		3. dark blue - opened
 		4. light blue - unopened and available
 	*/
-	const rowColors = [...Array(21).keys()].map((_, i) =>
-		getRowColor({
-			i,
-			numRows: rows.length,
-			isAvailable: isAvailableOnRow(rows[i]),
-			isRowExpanded: openedRows.has(i)
-		})
-	);
+	let rowColors: string[] = [];
 
 	$: rowLabels = rows.map((row) => {
 		if (row.availRange === AvailabilityStatus.BUSY) return 'Busy';
 		return '';
 	});
+
+	$: {
+		if (!rows.length) break $;
+
+		rowColors = [...Array(21).keys()].map((_, i) =>
+			getRowColor({
+				i,
+				numRows: rows.length,
+				isAvailable: isAvailableOnRow(rows[i]),
+				isRowExpanded: openedRows.has(i)
+			})
+		);
+	}
+
+	const handleEditorOpen = (i: number) => {
+		openedRows = showEditor({ i, openedRows });
+	};
 </script>
 
 <table id="schedule">
@@ -49,24 +59,24 @@
 			<td
 				class:blue={openedRows.has(i)}
 				class="day"
-				on:click={() => showEditor({ i, openedRows })}
-				on:keyup={() => showEditor({ i, openedRows })}
+				on:click={() => handleEditorOpen(i)}
+				on:keyup={() => handleEditorOpen(i)}
 			>
 				{row.englishDay}
 			</td>
 			<td
 				class:blue={openedRows.has(i)}
 				class="date"
-				on:click={() => showEditor({ i, openedRows })}
-				on:keyup={() => showEditor({ i, openedRows })}
+				on:click={() => handleEditorOpen(i)}
+				on:keyup={() => handleEditorOpen(i)}
 			>
 				{row.monthDay}
 			</td>
 			<td
 				colspan="2"
 				class="time"
-				on:click={() => showEditor({ i, openedRows })}
-				on:keyup={() => showEditor({ i, openedRows })}
+				on:click={() => handleEditorOpen(i)}
+				on:keyup={() => handleEditorOpen(i)}
 			>
 				{#if !row.availRange}
 					<p>Unspecified (<span class="edit">edit</span>)</p>
@@ -194,7 +204,7 @@
 											timeZone,
 											rowIndsWithTimeErrs
 										});
-										closeEditor({ i, openedRows });
+										openedRows = closeEditor({ i, openedRows });
 									} catch {}
 								}}
 								disabled={rowIndsWithTimeErrs.has(i)}
@@ -207,7 +217,7 @@
 							<Button
 								onClick={(e) => {
 									e?.preventDefault();
-									closeEditor({ i, openedRows });
+									openedRows = closeEditor({ i, openedRows });
 								}}
 								content={'Cancel'}
 								bgColor={'rgba(255, 233, 184, 0.78)'}
@@ -294,7 +304,7 @@
 	.blue {
 		background: #a0e3ff;
 	}
-	
+
 	#preview-notif-subtitle {
 		font-size: large;
 		text-align: left;

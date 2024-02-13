@@ -23,12 +23,10 @@ const extractAvailRange = ({
 };
 
 const initRow = ({
-	dbDates,
-	monthDay,
+	dbDate,
 	timeZone
 }: {
-	dbDates: AvailabilityDates;
-	monthDay: string;
+	dbDate: AvailabilityDate | undefined;
 	timeZone: string;
 }) => {
 	const row: Pick<
@@ -44,18 +42,18 @@ const initRow = ({
 		emoticons: new Set()
 	};
 
-	if (!dbDates?.[monthDay]) return row;
+	if (!dbDate) return row;
 
 	// user had previously set this day in the db -- load it in
 	row.availRange = extractAvailRange({
-		dbDate: dbDates[monthDay],
+		dbDate,
 		timeZone
 	});
 	if (UNAVAILABLE.includes(row.availRange)) return row;
 
-	row.notes = dbDates[monthDay].notes ?? '';
+	row.notes = dbDate.notes ?? '';
 
-	for (const emoji of dbDates[monthDay].emoticons?.split(',') ?? []) {
+	for (const emoji of dbDate.emoticons?.split(',') ?? []) {
 		row.emoticons.add(emoji);
 	}
 
@@ -71,7 +69,7 @@ const initRow = ({
 /*
   init rows with next 21 days, including today
 */
-const initRows = (dbVals: { dbDates: AvailabilityDates; timeZone: string }) => {
+const initRows = ({dbDates, timeZone}: { dbDates: AvailabilityDates; timeZone: string }) => {
 	const now = new Date();
 	return [...Array(21).keys()].map((x) => {
 		const date = new Date(new Date().setDate(now.getDate() + x));
@@ -81,10 +79,7 @@ const initRows = (dbVals: { dbDates: AvailabilityDates; timeZone: string }) => {
 		return {
 			englishDay,
 			monthDay,
-			...initRow({
-				...dbVals,
-				monthDay
-			})
+			...initRow({dbDate: dbDates?.[monthDay], timeZone})
 		};
 	});
 };
