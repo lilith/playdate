@@ -1,11 +1,12 @@
 <script lang="ts">
-	import PhoneInput from '../PhoneInput.svelte';
 	import { page } from '$app/stores';
 	import { onMount, afterUpdate } from 'svelte';
-	import { PRONOUNS, type PRONOUNS_ENUM } from '$lib/constants';
-	import Modal from '../Modal.svelte';
+	import { PRONOUNS } from '$lib/constants';
+	import type { PRONOUNS_ENUM } from '$lib/types';
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
-	import NavBar from '../NavBar.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
+	import PhoneInput from '$lib/components/PhoneInput.svelte';
 	import { writeReq } from '$lib/utils';
 	import { fullName } from '$lib/format';
 	import { DateTime } from 'luxon';

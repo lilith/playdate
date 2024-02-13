@@ -1,36 +1,16 @@
-import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import type { PageServerLoad } from './$types';
 import { AvailabilityStatus } from '@prisma/client';
 import prisma from '$lib/prisma';
+import type { AvailabilityDates } from '$lib/logics/Calendar/Wrapper/types';
+import type { CircleInfo } from '$lib/logics/Calendar/_shared/types';
 
 export const load = (async ({ parent, depends }) => {
 	depends('data:calendar');
 	const { user } = await parent();
 	const householdId = user.householdId;
-	const availabilityDates: {
-		[key: string]: {
-			availRange: string;
-			notes: string | null;
-			emoticons: string | null;
-		};
-	} = {};
-	// e.g. MONTH/DAY: {
-	//          AVAILABILITY, // BUSY / UNSPECIFIED / TIME RANGE + EMOTICONS
-	//          NOTES,
-	//      }
-	let circleInfo: {
-		connectionId: number;
-		id: number;
-		name: string;
-		parents: {
-			firstName: string;
-			lastName: string | null;
-			phone: string;
-			phonePermissions: {
-				allowReminders: boolean;
-			};
-		}[];
-	}[] = [];
+	const dbAvailabilityDates: AvailabilityDates = {};
+
+	let circleInfo: CircleInfo = [];
 	const clause = {
 		select: {
 			id: true,
@@ -58,28 +38,24 @@ export const load = (async ({ parent, depends }) => {
 
 		rawAvailabilityDates.forEach((x) => {
 			const key = `${x.date.getMonth() + 1}/${x.date.getDate()}`;
-			let availRange;
-			switch (x.status) {
-				case 'BUSY':
-					availRange = 'Busy';
-					break;
-				case 'UNSPECIFIED':
-					availRange = '';
-					break;
-				default: {
-					availRange = 'AVAILABLE'; // should never actually be rendered as such
-					if (x.startTime && x.endTime) {
-						availRange = `${dateTo12Hour(
-							toLocalTimezone(x.startTime, user.timeZone)
-						)}-${dateTo12Hour(toLocalTimezone(x.endTime, user.timeZone))}`;
-					}
-				}
-			}
-			availabilityDates[key] = {
-				availRange,
-				notes: x.notes,
-				emoticons: x.emoticons
-			};
+			// let availRange;
+			// switch (x.status) {
+			// 	case 'BUSY':
+			// 		availRange = 'Busy';
+			// 		break;
+			// 	case 'UNSPECIFIED':
+			// 		availRange = '';
+			// 		break;
+			// 	default: {
+			// 		availRange = 'AVAILABLE'; // should never actually be rendered as such
+			// 		if (x.startTime && x.endTime) {
+			// 			availRange = `${dateTo12Hour(
+			// 				toLocalTimezone(x.startTime, user.timeZone)
+			// 			)}-${dateTo12Hour(toLocalTimezone(x.endTime, user.timeZone))}`;
+			// 		}
+			// 	}
+			// }
+			dbAvailabilityDates[key] = x;
 		});
 
 		const kids = await prisma.householdChild.findMany({
@@ -133,7 +109,7 @@ export const load = (async ({ parent, depends }) => {
 
 		return {
 			AvailabilityStatus,
-			availabilityDates,
+			dbAvailabilityDates,
 			kidNames,
 			circleInfo
 		};

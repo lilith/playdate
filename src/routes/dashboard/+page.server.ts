@@ -1,14 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
-import {
-	DAYS,
-	type Dates,
-	type DateDetails,
-	type BusyDetails,
-	EMOTICONS_REVERSE
-} from '$lib/constants';
+import { DAYS, EMOTICONS_REVERSE } from '$lib/constants';
+import type { Dates, DateDetails, BusyDetails } from '$lib/types';
 import { dateTo12Hour, toLocalTimezone } from '$lib/date';
-import { getAvailRangeParts } from '$lib/parse';
+import { destructRange } from '$lib/parse';
 import type { Household } from './constants';
 import { DateTime } from 'luxon';
 import prisma from '$lib/prisma';
@@ -92,7 +87,7 @@ const getFormattedAvailability = (
 				}
 			} else {
 				let emoticons = '';
-				const { startHr, startMin, endHr, endMin } = getAvailRangeParts(availRange) as {
+				const { startHr, startMin, endHr, endMin } = destructRange(availRange) as {
 					[key: string]: number;
 				};
 				const notes = allAvailableDates[monthDay].notes;

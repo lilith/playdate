@@ -12,8 +12,6 @@ export const PRONOUNS = {
 	ZEZIE_HIR_HIRS: 'ze/zie, hir, hirs'
 };
 
-export type PRONOUNS_ENUM = keyof typeof PRONOUNS;
-
 export const LANGUAGES = [
 	{ name: 'Afrikaans', code: 'af' },
 	{ name: 'Albanian - shqip', code: 'sq' },
@@ -168,38 +166,6 @@ export const EMOTICONS_REVERSE: { [key: string]: string } = {
 	star1: '⭐️',
 	star2: '🌟',
 	star3: '🙏'
-};
-
-export type DateDetails = {
-	englishDay: string;
-	monthDay: string;
-	availRange: string;
-	notes: string | null;
-	emoticons: string;
-	startHr: number;
-	startMin: number;
-	endHr: number;
-	endMin: number;
-	householdId: number;
-	status?: string;
-};
-
-export type BusyDetails = {
-	status: 'Busy';
-	availRange: string;
-};
-export type Dates = { [key: string]: DateDetails[] };
-
-export type Row = {
-	englishDay: string;
-	monthDay: string;
-	availRange: string | undefined;
-	notes: string | undefined;
-	emoticons: Set<string>;
-	startHr: number | undefined;
-	startMin: number | undefined;
-	endHr: number | undefined;
-	endMin: number | undefined;
 };
 
 export const LEGEND_STR =

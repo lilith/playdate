@@ -8,7 +8,7 @@ import prisma from '$lib/prisma';
 import { findHouseConnection } from './shared';
 import { sendMsg } from './twilio';
 import { DAYS } from '$lib/constants';
-import { getAvailRangeParts } from '$lib/parse';
+import { destructRange } from '$lib/parse';
 import { generateFullSchedule } from '$lib/format';
 
 async function findHouseholdInvite(reqId: number) {
@@ -775,7 +775,7 @@ async function getHouseholdsFullSched(householdId: number, user: { timeZone: str
 				availRange = `${dateTo12Hour(toLocalTimezone(startTime, user.timeZone))}-${dateTo12Hour(
 					toLocalTimezone(endTime, user.timeZone)
 				)}`;
-			const timeParts = getAvailRangeParts(availRange);
+			const timeParts = destructRange(availRange);
 			startHr = timeParts.startHr;
 			startMin = timeParts.startMin;
 			endHr = timeParts.endHr;
