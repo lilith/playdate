@@ -1,6 +1,6 @@
-import prisma from "$lib/prisma";
-import type { User } from "@prisma/client";
-import { error } from "@sveltejs/kit";
+import type { User } from '@prisma/client';
+import { error } from '@sveltejs/kit';
+import HouseholdInviteRepository from '../repository/HouseholdInvite';
 
 export default async function createHouseholdInvite(
 	req: {
@@ -17,12 +17,11 @@ export default async function createHouseholdInvite(
 		});
 	}
 
-	const existingInvites = await prisma.joinHouseholdRequest.findMany({
-		where: {
-			targetPhone,
-			householdId
-		}
+	const existingInvites = await HouseholdInviteRepository.findAll({
+		targetPhone,
+		householdId
 	});
+
 	if (existingInvites.length)
 		throw error(400, {
 			message: 'The user associated with this number has already been invited to this household.'
@@ -30,12 +29,10 @@ export default async function createHouseholdInvite(
 	const now = new Date();
 	const expires = now;
 	expires.setDate(now.getDate() + 7); // expire 1 week from now
-	await prisma.joinHouseholdRequest.create({
-		data: {
-			expires,
-			targetPhone,
-			householdId,
-			fromUserId
-		}
+	await HouseholdInviteRepository.create({
+		expires,
+		targetPhone,
+		householdId,
+		fromUserId
 	});
 }

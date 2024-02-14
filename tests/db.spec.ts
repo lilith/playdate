@@ -15,7 +15,7 @@ test("User can't save profile without session cookie", async ({ page, context })
 			'Content-Type': 'application/json'
 		},
 		data: {
-			type: 'user',
+			type: 'upsertUser',
 			name: 'Fake name'
 		}
 	});
@@ -154,3 +154,5 @@ test("User 4 fails to decline household invite on User 2's behalf", async ({ pag
 	expect(res.status()).toEqual(401);
 	await page.close();
 });
+
+// TODO: Can't create household for someone who's already in a household

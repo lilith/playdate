@@ -1,8 +1,8 @@
-import prisma from "$lib/prisma";
 import type { Pronoun, User } from "@prisma/client";
 import { error } from "@sveltejs/kit";
+import HouseholdChildRepository from "../repository/HouseholdChild";
 
-export default async function saveKid(
+export default async function createKid(
 	req: {
 		firstName: string;
 		pronouns: Pronoun;
@@ -19,14 +19,14 @@ export default async function saveKid(
 			message: 'Create a household before trying to add a child to it'
 		});
 	}
-	const kid = await prisma.householdChild.create({
-		data: {
-			householdId,
-			firstName,
-			pronouns,
-			lastName,
-			dateOfBirth
-		}
-	});
+
+	const kid = await HouseholdChildRepository.create({
+		householdId,
+		firstName,
+		pronouns,
+		lastName,
+		dateOfBirth
+	})
+
 	return kid.id;
 }

@@ -64,7 +64,7 @@
 
 	async function saveToDB() {
 		const response = await writeReq('/db', {
-			type: 'user',
+			type: 'upsertUser',
 			firstName,
 			lastName,
 			pronouns,

@@ -212,7 +212,7 @@ export const requestToMarkOneRow = async ({
 }) => {
 	const displayedRow = displayedRows[i];
 	const response = await writeReq('/db', {
-		type: 'schedule',
+		type: 'upsertDate',
 		status,
 		notes: displayedRow.notes,
 		emoticons: Array.from(displayedRow.emoticons).join(','),

@@ -1,7 +1,7 @@
-import createHousehold from './createHousehold';
+import upsertHousehold from './upsertHousehold';
 import createKid from './createKid';
 
 export {
-    createHousehold,
+    upsertHousehold,
     createKid
 }

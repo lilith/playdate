@@ -2,11 +2,9 @@ import { json, error } from '@sveltejs/kit';
 
 import type { AvailabilityStatus, Pronoun } from '@prisma/client';
 import {
-	saveUser,
 	// createHousehold,
 	// saveKid,
 	// createHouseholdInvite,
-	// saveSchedule,
 	// createCircleInvite,
 	// acceptFriendReqRoute,
 	// deleteFriendReq,
@@ -20,6 +18,7 @@ import {
 } from '$lib/server/db';
 import { getProfileFromSession } from '$lib/server/shared';
 import * as routes from '$lib/server/dbRoutes'
+import upsertUser from '$lib/server/dbRoutes/upsertUser';
 
 export async function POST({
 	request,
@@ -41,7 +40,7 @@ export async function POST({
 		[key: string]: string | Pronoun | number | Date | boolean | undefined | AvailabilityStatus;
 	} = {};
 	if (req.type === 'user') {
-		res['id'] = await saveUser(req, phone, user);
+		res['id'] = await upsertUser(req, phone, user);
 		return json(res);
 	}
 
@@ -59,6 +58,7 @@ export async function POST({
 	// 	res = await saveSchedule(req, user);
 	// } else if (req.type === 'inviteToCircle') {
 	// 	await createCircleInvite(req, user);
+
 	// } else if (req.type === 'acceptFriendReq') {
 	// 	acceptFriendReqRoute(req, user)
 	// } else if (req.type === 'rejectFriendReq') {

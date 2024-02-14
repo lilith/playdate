@@ -33,7 +33,7 @@
 			return;
 		}
 		await writeReq('/db', {
-			type: 'inviteToCircle',
+			type: 'createCircleInvite',
 			targetPhone: phoneInput.getNumber()
 		});
 		inviteesPhone = phoneInput.getNumber();

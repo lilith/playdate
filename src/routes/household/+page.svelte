@@ -72,7 +72,7 @@
 
 	async function saveToDB() {
 		const response = await writeReq('/db', {
-			type: 'createHousehold',
+			type: 'upsertHousehold',
 			name: name,
 			publicNotes: publicNotes
 		});
@@ -89,7 +89,7 @@
 		if (!householdId) {
 			newHouse = true;
 			const response = await writeReq('/db', {
-				type: 'createHousehold',
+				type: 'upsertHousehold',
 				name: '',
 				publicNotes: ''
 			});
@@ -222,7 +222,7 @@
 			return;
 		}
 		await writeReq('/db', {
-			type: 'inviteToHousehold',
+			type: 'createHouseholdInvite',
 			targetPhone: phoneInput.getNumber()
 		});
 		inviteesPhone = phoneInput.getNumber();
