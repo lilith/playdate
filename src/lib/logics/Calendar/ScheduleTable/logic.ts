@@ -56,21 +56,16 @@ export const updateRowColors = ({
 export const markRowUnavailableLocally = ({
 	i,
 	displayedRows,
-	// dbRow,
 	status
 }: {
 	i: number;
 	displayedRows: Row[];
-	// dbRow: Row;
 	status: Unavailable;
 }) => {
 	displayedRows[i].notes = '';
 	displayedRows[i].emoticons = new Set();
 	displayedRows[i].availRange = status;
 	return displayedRows;
-	// dbRow.notes = '';
-	// dbRow.emoticons = new Set();
-	// dbRow.availRange = status;
 };
 
 const getDateTimeFromObj = ({
@@ -157,52 +152,50 @@ const convertToDateTime = ({
 	};
 };
 
-const updateDisplayedRow = async ({
-	i,
-	response,
-	startTime,
-	endTime,
-	status,
-	displayedRows,
-	dbRows,
-	availRangeParts
-}: {
-	i: number;
-	response: Response;
-	startTime: DateTime;
-	endTime: DateTime;
-	status: AvailabilityStatus;
-	displayedRows: Row[];
-	dbRows: Row[];
-	availRangeParts: AvailRangeParts;
-}) => {
-	await invalidate('data:calendar');
-	const { notes } = await response.json();
-	let newAvailRange: AvailabilityStatus | string = status;
-	if (status === AvailabilityStatus.AVAILABLE)
-		newAvailRange = `${dateTo12Hour(startTime.toLocal())}-${dateTo12Hour(endTime.toLocal())}`;
+// const updateDisplayedRow = async ({
+// 	i,
+// 	response,
+// 	startTime,
+// 	endTime,
+// 	status,
+// 	displayedRows,
+// 	dbRows,
+// 	availRangeParts
+// }: {
+// 	i: number;
+// 	response: Response;
+// 	startTime: DateTime;
+// 	endTime: DateTime;
+// 	status: AvailabilityStatus;
+// 	displayedRows: Row[];
+// 	dbRows: Row[];
+// 	availRangeParts: AvailRangeParts;
+// }) => {
+// 	await invalidate('data:calendar');
+// 	const { notes } = await response.json();
+// 	let newAvailRange: AvailabilityStatus | string = status;
+// 	if (status === AvailabilityStatus.AVAILABLE)
+// 		newAvailRange = `${dateTo12Hour(startTime.toLocal())}-${dateTo12Hour(endTime.toLocal())}`;
 
-	displayedRows[i] = {
-		...displayedRows[i],
-		notes,
-		availRange: newAvailRange,
-		...availRangeParts
-	};
-	dbRows[i] = { ...displayedRows[i] };
+// 	displayedRows[i] = {
+// 		...displayedRows[i],
+// 		notes,
+// 		availRange: newAvailRange,
+// 		...availRangeParts
+// 	};
+// 	dbRows[i] = { ...displayedRows[i] };
 
-	// updateRowColors();
-};
+// 	// updateRowColors();
+// };
 
 export const requestToMarkOneRow = async ({
 	i,
 	status,
-	// dbRows,
 	displayedRows,
 	availableDetails
 }: {
 	i: number;
 	status: AvailabilityStatus;
-	// dbRows: Row[];
 	displayedRows: Row[];
 	availableDetails: {
 		startTime: DateTime;
@@ -224,10 +217,7 @@ export const requestToMarkOneRow = async ({
 			  }
 			: {})
 	});
-	console.log(response)
-	console.log(await response.json())
-
-	return;
+	if (response.status === 200) return
 
 	// if (response.status == 200) {
 	// 	if (availableDetails)
@@ -242,8 +232,7 @@ export const requestToMarkOneRow = async ({
 	// 	return;
 	// }
 
-	alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
-	throw new Error('Something went wrong with saving'); // TODO: get err from req
+	throw new Error((await response.json() as Error).message);
 };
 
 const requestToMarkMultipleRowsAsBusy = async (monthDays: string[]) => {
@@ -253,36 +242,36 @@ const requestToMarkMultipleRowsAsBusy = async (monthDays: string[]) => {
 	});
 };
 
-export const markRowAsUnavailable = async ({
-	i,
-	displayedRows,
-	// dbRows,
-	openedRows,
-	status
-}: {
-	i: number;
-	displayedRows: Row[];
-	// dbRows: Row[];
-	openedRows: Set<number>;
-	status: Unavailable;
-}) => {
-	markRowUnavailableLocally({ i, displayedRows, status });
+// export const markRowAsUnavailable = async ({
+// 	i,
+// 	displayedRows,
+// 	// dbRows,
+// 	openedRows,
+// 	status
+// }: {
+// 	i: number;
+// 	displayedRows: Row[];
+// 	// dbRows: Row[];
+// 	openedRows: Set<number>;
+// 	status: Unavailable;
+// }) => {
+// 	markRowUnavailableLocally({ i, displayedRows, status });
 
-	// try {
-	// 	await requestToMarkOneRow({
-	// 		i,
-	// 		status,
-	// 		// dbRows,
-	// 		displayedRows,
-	// 		availableDetails: null
-	// 	});
-	// 	closeEditor({ i, openedRows });
-	// } catch (err) {
-	// 	console.error(err);
-	// 	console.error('Something went wrong with marking row as unavailable');
-	// 	throw new Error();
-	// }
-};
+// 	// try {
+// 	// 	await requestToMarkOneRow({
+// 	// 		i,
+// 	// 		status,
+// 	// 		// dbRows,
+// 	// 		displayedRows,
+// 	// 		availableDetails: null
+// 	// 	});
+// 	// 	closeEditor({ i, openedRows });
+// 	// } catch (err) {
+// 	// 	console.error(err);
+// 	// 	console.error('Something went wrong with marking row as unavailable');
+// 	// 	throw new Error();
+// 	// }
+// };
 
 export const markRowAsAvailable = async ({
 	i,

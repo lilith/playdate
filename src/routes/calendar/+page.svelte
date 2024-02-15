@@ -30,7 +30,7 @@
 <div>
 	<NavBar pageName="Calendar" />
 	<div style="text-align: center; margin: 2rem 0;">
-		<ScheduleTable bind:rows={displayedRows} timeZone={user.timeZone} />
+		<ScheduleTable rows={displayedRows} timeZone={user.timeZone} on:changed:rows={(e) => displayedRows = e.detail} />
 		<button
 			class="mark-all-busy-btn"
 			style="margin: 1rem;"

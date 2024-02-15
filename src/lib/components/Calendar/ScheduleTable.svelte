@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { EMOTICONS, UNAVAILABLE } from '$lib/logics/Calendar/_shared/constants';
-	import { EMOTICONS_REVERSE } from '$lib/constants';
-	import type { Row, Unavailable } from '$lib/types';
-	import Legend from '$lib/components/Legend.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import Legend from '$lib/components/Legend.svelte';
+	import { EMOTICONS_REVERSE } from '$lib/constants';
 	import {
 		closeEditor,
 		getRowColor,
@@ -11,11 +9,15 @@
 		markRowAsAvailable,
 		markRowUnavailableLocally,
 		requestToMarkOneRow,
-		// markRowAsUnavailable,
 		showEditor,
 		toggleEmoticon
 	} from '$lib/logics/Calendar/ScheduleTable/logic';
+	import { EMOTICONS, UNAVAILABLE } from '$lib/logics/Calendar/_shared/constants';
+	import type { Row, Unavailable } from '$lib/types';
 	import { AvailabilityStatus } from '@prisma/client';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	export let rows: Row[];
 	export let timeZone: string;
@@ -48,32 +50,26 @@
 		openedRows = showEditor({ i, openedRows });
 	};
 
-	const markRowAsUnavailable = async ({
-		i,
-		status
-	}: {
-		i: number;
-		status: Unavailable;
-	}) => {
-		const dbRows = [...rows]
+	const markRowAsUnavailable = async ({ i, status }: { i: number; status: Unavailable }) => {
+		const dbRow = { ...rows[i] };
 		rows = markRowUnavailableLocally({ i, displayedRows: rows, status });
-
+		dispatch('changed:rows', rows)
 		try {
 			await requestToMarkOneRow({
 				i,
 				status,
-				// dbRows,
 				displayedRows: rows,
 				availableDetails: null
 			});
 			closeEditor({ i, openedRows });
 		} catch (err) {
-			console.error(err);
-			console.error('Something went wrong with marking row as unavailable');
-
-			rows = [...dbRows]
+			alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
+			console.error('Something went wrong with marking row as unavailable', err);
+			rows[i] = dbRow;
+			dispatch('changed:rows', rows)
 		}
-};
+	};
+
 </script>
 
 <table id="schedule">
@@ -320,17 +316,6 @@
 		background: #a0e3ff;
 	}
 
-	#preview-notif-subtitle {
-		font-size: large;
-		text-align: left;
-	}
-	#preview-notif {
-		box-shadow: 0px 0px 4px 0px #00000096;
-		text-align: left;
-		padding: 0.7rem 0.5rem;
-		border-radius: 6px;
-		background: white;
-	}
 	.emoji.chosen {
 		border: 1px solid black;
 	}
