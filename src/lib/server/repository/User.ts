@@ -2,14 +2,10 @@ import prisma from '$lib/prisma';
 import type { Prisma } from '@prisma/client';
 
 export default class UserRepository {
-	static async findOne(phone: string) {
+	static async findOne(where: Prisma.UserWhereUniqueInput, select?: Prisma.UserSelect) {
 		return await prisma.user.findUnique({
-			where: {
-				phone
-			},
-			select: {
-				householdId: true
-			}
+			where,
+			select
 		});
 	}
 

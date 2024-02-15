@@ -65,15 +65,20 @@ export default async function upsertUser(
 	let updatedUser;
 	if (user) {
 		// user exists
-		updatedUser = await new UserRepository(phone).update({
-			...baseUser,
-			phonePermissions: {
-				update: {
-					allowInvites,
-					allowReminders
+		updatedUser = await UserRepository.update(
+			{
+				phone
+			},
+			{
+				...baseUser,
+				phonePermissions: {
+					update: {
+						allowInvites,
+						allowReminders
+					}
 				}
 			}
-		});
+		);
 	} else {
 		updatedUser = await UserRepository.create({
 			...baseUser,
@@ -93,5 +98,5 @@ export default async function upsertUser(
 			}
 		});
 	}
-	return updatedUser.id;
+	return { id: updatedUser.id };
 }

@@ -13,8 +13,24 @@ export default class HouseholdInviteRepository {
 		});
 	}
 
-	static async findAll(where: Prisma.JoinHouseholdRequestWhereInput) {
+	static async delete(where: Prisma.JoinHouseholdRequestWhereUniqueInput) {
+		return await prisma.joinHouseholdRequest.delete({
+			where
+		});
+	}
+
+	static async findAll(
+		where: Prisma.JoinHouseholdRequestWhereInput,
+		select?: Prisma.JoinHouseholdRequestSelect
+	) {
 		return await prisma.joinHouseholdRequest.findMany({
+			where,
+			select
+		});
+	}
+
+	static async findOne(where: Prisma.JoinHouseholdRequestWhereUniqueInput) {
+		return await prisma.joinHouseholdRequest.findUnique({
 			where
 		});
 	}

@@ -1,4 +1,3 @@
-import prisma from '$lib/prisma';
 import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
 import UserRepository from '../repository/User';
@@ -30,7 +29,14 @@ export default async function createCircleInvite(
 			message: 'The user associated with this number has already been invited to this circle.'
 		});
 
-	const targetUser = await UserRepository.findOne(targetPhone);
+	const targetUser = await UserRepository.findOne(
+		{
+			phone: targetPhone
+		},
+		{
+			householdId: true
+		}
+	);
 
 	if (targetUser && targetUser.householdId) {
 		const { existingFriend1, existingFriend2 } = await findHouseConnection(

@@ -10,6 +10,13 @@ export default class HouseholdRepository {
 		});
 	}
 
+	static async findOne(where: Prisma.HouseholdWhereUniqueInput, select: Prisma.HouseholdSelect) {
+		return await prisma.household.findUnique({
+			where,
+			select
+		});
+	}
+
 	static async update(
 		householdId: number,
 		data: Prisma.XOR<Prisma.HouseholdUpdateInput, Prisma.HouseholdUncheckedUpdateInput>

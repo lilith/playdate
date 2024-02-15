@@ -1,6 +1,6 @@
-import type { Pronoun, User } from "@prisma/client";
-import { error } from "@sveltejs/kit";
-import HouseholdChildRepository from "../repository/HouseholdChild";
+import type { Pronoun, User } from '@prisma/client';
+import { error } from '@sveltejs/kit';
+import HouseholdChildRepository from '../repository/HouseholdChild';
 
 export default async function createKid(
 	req: {
@@ -26,7 +26,7 @@ export default async function createKid(
 		pronouns,
 		lastName,
 		dateOfBirth
-	})
+	});
 
-	return kid.id;
+	return { id: kid.id };
 }

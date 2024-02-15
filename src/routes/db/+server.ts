@@ -1,23 +1,7 @@
 import { json, error } from '@sveltejs/kit';
-
-import type { AvailabilityStatus, Pronoun } from '@prisma/client';
-import {
-	// createHousehold,
-	// saveKid,
-	// createHouseholdInvite,
-	// createCircleInvite,
-	// acceptFriendReqRoute,
-	// deleteFriendReq,
-	// deleteFriend,
-	// acceptHouseholdInvite,
-	// deleteHouseholdInvite,
-	deleteKid,
-	deleteHousehold,
-	removeHouseholdAdult,
-	deleteUser
-} from '$lib/server/db';
+import { deleteKid, deleteHousehold, removeHouseholdAdult, deleteUser } from '$lib/server/db';
 import { getProfileFromSession } from '$lib/server/shared';
-import * as routes from '$lib/server/dbRoutes'
+import * as routes from '$lib/server/dbRoutes';
 import upsertUser from '$lib/server/dbRoutes/upsertUser';
 
 export async function POST({
@@ -34,48 +18,33 @@ export async function POST({
 			message: 'No session found'
 		});
 	}
-	const req = await request.json();
+	const req: { type: keyof typeof routes; [key: string]: any } = await request.json();
 
 	let res: {
-		[key: string]: string | Pronoun | number | Date | boolean | undefined | AvailabilityStatus;
+		[key: string]: any;
 	} = {};
-	if (req.type === 'user') {
-		res['id'] = await upsertUser(req, phone, user);
+
+	if (req.type === 'upsertUser') {
+		res = await upsertUser(req, phone, user);
 		return json(res);
 	}
 
 	if (!user) throw error(401, { message: 'You must be logged in.' });
 
-	if (routes[req.type]) {
-		await routes[req.type](req, user)
-	// if (req.type === 'household') {
-	// 	await createHousehold(req, user);
-	// } else if (req.type === 'householdChild') {
-	// 	res['id'] = await saveKid(req, user);
-	// } else if (req.type === 'inviteToHousehold') {
-	// 	await createHouseholdInvite(req, user);
-	// } else if (req.type === 'schedule') {
-	// 	res = await saveSchedule(req, user);
-	// } else if (req.type === 'inviteToCircle') {
-	// 	await createCircleInvite(req, user);
-
-	// } else if (req.type === 'acceptFriendReq') {
-	// 	acceptFriendReqRoute(req, user)
-	// } else if (req.type === 'rejectFriendReq') {
-	// 	await deleteFriendReq(req, user);
-	// } else if (req.type === 'deleteFriend') {
-	// 	await deleteFriend(req, user);
-	// } else if (req.type === 'acceptHouseholdInvite') {
-	// 	await acceptHouseholdInvite(req, user);
-	// } else if (req.type === 'rejectHouseholdInvite') {
-	// 	await deleteHouseholdInvite(req, user);
-	} else {
+	if (!routes[req.type])
 		throw error(400, {
 			message: `The request type ${req.type} isn't supported in /db POST req`
 		});
-	}
 
-	return json(res);
+	try {
+		res = await routes[req.type](req, user);
+		return json(res);
+	} catch (err) {
+		console.error(err);
+		throw error(500, {
+			message: `${req.type} for user ${user.id} failed`
+		});
+	}
 }
 
 export async function DELETE({

@@ -8,6 +8,16 @@ export default class AvailabilityDateRepository {
 		});
 	}
 
+	static async findAll(
+		where: Prisma.AvailabilityDateWhereInput,
+		orderBy?: Prisma.Enumerable<Prisma.AvailabilityDateOrderByWithRelationInput>
+	) {
+		return await prisma.availabilityDate.findMany({
+			where,
+			orderBy
+		});
+	}
+
 	static async upsert({
 		householdId,
 		date,

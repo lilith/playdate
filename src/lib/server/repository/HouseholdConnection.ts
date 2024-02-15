@@ -12,4 +12,16 @@ export default class HouseholdConnectionRepository {
 			data
 		});
 	}
+
+	static async delete(where: Prisma.HouseholdConnectionWhereUniqueInput) {
+		return await prisma.householdConnection.delete({
+			where
+		});
+	}
+
+	static async findOne(where: Prisma.HouseholdConnectionWhereUniqueInput) {
+		return await prisma.householdConnection.findUnique({
+			where
+		});
+	}
 }

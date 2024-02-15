@@ -125,16 +125,12 @@
 					on:click={() => {
 						markRowAsUnavailable({
 							i,
-							displayedRows: rows,
-							openedRows,
 							status: AvailabilityStatus.BUSY
 						});
 					}}
 					on:keyup={() =>
 						markRowAsUnavailable({
 							i,
-							displayedRows: rows,
-							openedRows,
 							status: AvailabilityStatus.BUSY
 						})}
 					class="busy"
@@ -147,15 +143,11 @@
 					on:click={() =>
 						markRowAsUnavailable({
 							i,
-							displayedRows: rows,
-							openedRows,
 							status: AvailabilityStatus.UNSPECIFIED
 						})}
 					on:keyup={() =>
 						markRowAsUnavailable({
 							i,
-							displayedRows: rows,
-							openedRows,
 							status: AvailabilityStatus.UNSPECIFIED
 						})}
 				>

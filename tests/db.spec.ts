@@ -150,7 +150,7 @@ test("User 4 fails to decline household invite on User 2's behalf", async ({ pag
 		}
 	});
 	const { message } = await res.json();
-	expect(message).toEqual("You can't delete a household invite that wsan't issued to you");
+	expect(message).toEqual("You can't delete a household invite that wasn't issued to you");
 	expect(res.status()).toEqual(401);
 	await page.close();
 });

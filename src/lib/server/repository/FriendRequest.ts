@@ -22,4 +22,10 @@ export default class FriendRequestRepository {
 			where
 		});
 	}
+
+	static async delete(where: Prisma.FriendRequestWhereUniqueInput) {
+		return await prisma.friendRequest.delete({
+			where
+		});
+	}
 }
