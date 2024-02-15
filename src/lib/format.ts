@@ -1,11 +1,13 @@
-import { EMOTICONS_REVERSE, type Row } from '$lib/constants';
+import { EMOTICONS_REVERSE } from '$lib/constants';
+import { AvailabilityStatus } from '@prisma/client';
+import type { Row } from './types';
 
 function getScheduleItem(row: Row): string {
 	let scheduleItem = '';
-	const busy = row.availRange === 'Busy';
-	const unspecified = row.availRange === undefined;
+	const busy = row.availRange === AvailabilityStatus.BUSY;
+	const unspecified = row.availRange === AvailabilityStatus.UNSPECIFIED;
 
-	if (busy) scheduleItem = `${row.availRange} ${row.monthDay}`;
+	if (busy) scheduleItem = `Busy ${row.monthDay}`;
 	else if (unspecified) scheduleItem = `Unspecified ${row.monthDay}`;
 	else scheduleItem = `${row.englishDay} ${row.monthDay} ${row.availRange}`;
 
@@ -46,16 +48,16 @@ export function generateDiffSchedule(ogRows: Row[], rows: Row[]): string[] {
 			const diff = getScheduleItem(newRow);
 
 			if (
-				(lastIsBusy && newRow.availRange === 'Busy') ||
-				(lastIsUnspecified && newRow.availRange === undefined)
+				(lastIsBusy && newRow.availRange === AvailabilityStatus.BUSY) ||
+				(lastIsUnspecified && newRow.availRange === AvailabilityStatus.UNSPECIFIED)
 			) {
 				updateLastScheduleItem(diffs, newRow.monthDay);
 			} else {
 				diffs.push(diff);
 			}
 
-			lastIsBusy = newRow.availRange === 'Busy';
-			lastIsUnspecified = newRow.availRange === undefined;
+			lastIsBusy = newRow.availRange === AvailabilityStatus.BUSY;
+			lastIsUnspecified = newRow.availRange === AvailabilityStatus.UNSPECIFIED;
 		} else {
 			lastIsBusy = false;
 			lastIsUnspecified = false;
@@ -70,11 +72,11 @@ export function generateFullSchedule(rows: Row[]): string[] {
 	let lastIsBusy = false;
 
 	rows.forEach((row) => {
-		if (row.availRange === undefined) {
+		if (row.availRange === AvailabilityStatus.UNSPECIFIED) {
 			lastIsBusy = false;
 			return;
 		}
-		const busy = row.availRange === 'Busy';
+		const busy = row.availRange === AvailabilityStatus.BUSY;
 
 		if (lastIsBusy && busy) {
 			updateLastScheduleItem(schedule, row.monthDay);

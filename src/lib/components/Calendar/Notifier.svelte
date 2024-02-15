@@ -99,6 +99,19 @@
 {/key}
 
 <style>
+	#preview-notif-subtitle {
+		font-size: large;
+		text-align: left;
+	}
+	
+	#preview-notif {
+		box-shadow: 0px 0px 4px 0px #00000096;
+		text-align: left;
+		padding: 0.7rem 0.5rem;
+		border-radius: 6px;
+		background: white;
+	}
+
 	.toggle-label {
 		position: absolute;
 		top: 50%;
