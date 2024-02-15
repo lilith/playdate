@@ -53,7 +53,7 @@
 	const markRowAsUnavailable = async ({ i, status }: { i: number; status: Unavailable }) => {
 		const dbRow = { ...rows[i] };
 		rows = markRowUnavailableLocally({ i, displayedRows: rows, status });
-		dispatch('changed:rows', rows)
+		dispatch('changed:rows', rows);
 		try {
 			await requestToMarkOneRow({
 				i,
@@ -62,14 +62,14 @@
 				availableDetails: null
 			});
 			closeEditor({ i, openedRows });
+			dispatch('markedRow');
 		} catch (err) {
 			alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
 			console.error('Something went wrong with marking row as unavailable', err);
 			rows[i] = dbRow;
-			dispatch('changed:rows', rows)
+			dispatch('changed:rows', rows);
 		}
 	};
-
 </script>
 
 <table id="schedule">
