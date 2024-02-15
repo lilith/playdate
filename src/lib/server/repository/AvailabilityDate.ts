@@ -32,8 +32,8 @@ export default class AvailabilityDateRepository {
 		status: AvailabilityStatus;
 		notes: string;
 		emoticons: string | undefined;
-		startTime: Date | string;
-		endTime: Date | string;
+		startTime: Date | string | undefined;
+		endTime: Date | string | undefined;
 	}) {
 		return await prisma.availabilityDate.upsert({
 			where: {
