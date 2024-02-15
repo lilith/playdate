@@ -6,16 +6,18 @@ import AvailabilityDateRepository from '../repository/AvailabilityDate';
 export default async function upsertDate(
 	req: {
 		monthDay: string;
-	} &
-	({
-		status: Extract<AvailabilityStatus, 'AVAILABLE'>;
-		notes: string | undefined;
-		emoticons: string | undefined;
-		startTime: Date;
-		endTime: Date;
-	} | {
-		status: Extract<AvailabilityStatus, 'UNSPECIFIED' | 'BUSY'>
-	}),
+	} & (
+		| {
+				status: Extract<AvailabilityStatus, 'AVAILABLE'>;
+				notes: string | undefined;
+				emoticons: string | undefined;
+				startTime: Date;
+				endTime: Date;
+		  }
+		| {
+				status: Extract<AvailabilityStatus, 'UNSPECIFIED' | 'BUSY'>;
+		  }
+	),
 	user: User
 ) {
 	const { householdId } = user;
@@ -25,7 +27,7 @@ export default async function upsertDate(
 		});
 	}
 	const { monthDay, status } = req;
-	const isAvailable = status === AvailabilityStatus.AVAILABLE
+	const isAvailable = status === AvailabilityStatus.AVAILABLE;
 	const notes = (isAvailable ? req.notes : undefined) ?? '';
 	const emoticons = isAvailable ? req.emoticons : undefined;
 	const startTime = isAvailable ? new Date(req.startTime) : undefined;

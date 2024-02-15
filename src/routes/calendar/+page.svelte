@@ -31,9 +31,11 @@
 	<NavBar pageName="Calendar" />
 	<div style="text-align: center; margin: 2rem 0;">
 		<ScheduleTable
-			rows={displayedRows}
+			{dbRows}
+			{displayedRows}
 			timeZone={user.timeZone}
-			on:changed:rows={(e) => (displayedRows = e.detail)}
+			on:changed:displayedRows={(e) => (displayedRows = e.detail)}
+			on:changed:displayedRow={(e) => (displayedRows[e.detail.i] = e.detail.row)}
 			on:markedRow={() => (dbRows = displayedRows)}
 		/>
 		<button

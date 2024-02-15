@@ -1,14 +1,11 @@
-import { destructRange } from '$lib/parse';
 import type { Row, Unavailable } from '$lib/types';
-import { LIGHT_GRAY, WHITE, LIGHT_BLUE } from './constants';
-import { AvailabilityStatus } from '@prisma/client';
-import { tick } from 'svelte';
-import { invalidate } from '$app/navigation';
-import { DateTime } from 'luxon';
-import { dateTo12Hour } from '$lib/date';
 import { writeReq } from '$lib/utils';
+import { AvailabilityStatus } from '@prisma/client';
+import type { DateTime } from 'luxon';
+import { tick } from 'svelte';
 import type { AvailRangeParts } from '../Wrapper/types';
 import { UNAVAILABLE } from '../_shared/constants';
+import { LIGHT_BLUE, LIGHT_GRAY, WHITE } from './constants';
 
 export const getRowColor = ({
 	i,
@@ -68,90 +65,6 @@ export const markRowUnavailableLocally = ({
 	return displayedRows;
 };
 
-const getDateTimeFromObj = ({
-	month,
-	day,
-	hour = 0,
-	minute = 0,
-	zone
-}: {
-	month: number;
-	day: number;
-	hour?: number;
-	minute?: number;
-	zone: string;
-}) =>
-	DateTime.fromObject(
-		{
-			month,
-			day,
-			hour,
-			minute
-		},
-		{
-			zone
-		}
-	);
-
-enum AVAILABILITY_VALIDATION_ERR {
-	'EMPTY_AVAIL_RANGE_PARTS',
-	'NON_POS_TIME_RANGE'
-}
-const convertToDateTime = ({
-	availRangeParts,
-	displayedRow,
-	timeZone
-}: {
-	availRangeParts: AvailRangeParts;
-	displayedRow: Row;
-	timeZone: string;
-}):
-	| { err: AVAILABILITY_VALIDATION_ERR; val: null }
-	| { err: null; val: { startTime: DateTime; endTime: DateTime } } => {
-	// user inputted invalid time range
-	if (!Object.keys(availRangeParts).length) {
-		return {
-			err: AVAILABILITY_VALIDATION_ERR.EMPTY_AVAIL_RANGE_PARTS,
-			val: null
-		};
-	}
-
-	// check whether the end time is greater than the start time
-	const { startHr, startMin, endHr, endMin } = availRangeParts;
-	const [m, d] = displayedRow.monthDay.split('/');
-	const month = parseInt(m);
-	const day = parseInt(d);
-	const tempStart = getDateTimeFromObj({
-		month,
-		day,
-		hour: startHr,
-		minute: startMin,
-		zone: timeZone
-	});
-	const tempEnd = getDateTimeFromObj({
-		month,
-		day,
-		hour: endHr,
-		minute: endMin,
-		zone: timeZone
-	});
-
-	if (tempEnd.toMillis() - tempStart.toMillis() <= 0) {
-		alert('Please ensure that the difference in time is positive.');
-		return {
-			err: AVAILABILITY_VALIDATION_ERR.NON_POS_TIME_RANGE,
-			val: null
-		};
-	}
-	return {
-		err: null,
-		val: {
-			startTime: tempStart.toUTC(),
-			endTime: tempEnd.toUTC()
-		}
-	};
-};
-
 // const updateDisplayedRow = async ({
 // 	i,
 // 	response,
@@ -189,21 +102,18 @@ const convertToDateTime = ({
 // };
 
 export const requestToMarkOneRow = async ({
-	i,
 	status,
-	displayedRows,
+	displayedRow,
 	availableDetails
 }: {
-	i: number;
 	status: AvailabilityStatus;
-	displayedRows: Row[];
+	displayedRow: Row;
 	availableDetails: {
 		startTime: DateTime;
 		endTime: DateTime;
 		availRangeParts: AvailRangeParts;
 	} | null;
 }) => {
-	const displayedRow = displayedRows[i];
 	const response = await writeReq('/db', {
 		type: 'upsertDate',
 		status,
@@ -217,22 +127,11 @@ export const requestToMarkOneRow = async ({
 			  }
 			: {})
 	});
-	if (response.status === 200) return
 
-	// if (response.status == 200) {
-	// 	if (availableDetails)
-	// 		updateDisplayedRow({
-	// 			i,
-	// 			response,
-	// 			status,
-	// 			displayedRows,
-	// 			dbRows,
-	// 			...availableDetails
-	// 		});
-	// 	return;
-	// }
+	const payload = await response.json()
+	if (response.status === 200) return payload;
 
-	throw new Error((await response.json() as Error).message);
+	throw new Error((payload as Error).message);
 };
 
 const requestToMarkMultipleRowsAsBusy = async (monthDays: string[]) => {
@@ -273,60 +172,6 @@ const requestToMarkMultipleRowsAsBusy = async (monthDays: string[]) => {
 // 	// }
 // };
 
-export const markRowAsAvailable = async ({
-	i,
-	displayedRows,
-	// dbRows,
-	timeZone,
-	rowIndsWithTimeErrs
-}: {
-	i: number;
-	displayedRows: Row[];
-	// dbRows: Row[];
-	timeZone: string;
-	rowIndsWithTimeErrs: Set<number>;
-}) => {
-	const displayedRow = displayedRows[i];
-	const availRangeParts = destructRange(displayedRow.availRange!);
-
-	let startTime = DateTime.now(),
-		endTime = DateTime.now();
-
-	const availabilityValidation = convertToDateTime({
-		availRangeParts,
-		displayedRow,
-		timeZone
-	});
-
-	if (availabilityValidation.err !== null) {
-		if (availabilityValidation.err === AVAILABILITY_VALIDATION_ERR.EMPTY_AVAIL_RANGE_PARTS) {
-			rowIndsWithTimeErrs.add(i);
-			rowIndsWithTimeErrs = new Set(rowIndsWithTimeErrs);
-		}
-		return;
-	}
-
-	startTime = availabilityValidation.val.startTime;
-	endTime = availabilityValidation.val.endTime;
-
-	try {
-		await requestToMarkOneRow({
-			i,
-			status: AvailabilityStatus.AVAILABLE,
-			// dbRows,
-			displayedRows,
-			availableDetails: {
-				startTime,
-				endTime,
-				availRangeParts
-			}
-		});
-	} catch (err) {
-		console.error(err);
-		console.error('Something went wrong when marking row as available');
-	}
-};
-
 export const markUnspecifiedRowsAsBusy = async ({
 	displayedRows,
 	dbRows
@@ -361,32 +206,15 @@ export const markUnspecifiedRowsAsBusy = async ({
 	}
 };
 
-export const toggleEmoticon = ({
-	i,
-	displayedRows,
-	emoticon
-}: {
-	i: number;
-	displayedRows: Row[];
-	emoticon: string;
-}) => {
-	if (displayedRows[i].emoticons.has(emoticon)) {
-		displayedRows[i].emoticons.delete(emoticon);
-	} else {
-		displayedRows[i].emoticons.add(emoticon);
-	}
-	displayedRows[i].emoticons = new Set(displayedRows[i].emoticons);
-};
-
 export const showEditor = ({ i, openedRows }: { i: number; openedRows: Set<number> }) => {
 	openedRows.add(i);
 	tick().then(() => {
 		document.getElementById(`editor-${i}`)?.focus();
 	});
-	return openedRows
+	return openedRows;
 };
 
 export const closeEditor = ({ i, openedRows }: { i: number; openedRows: Set<number> }) => {
 	openedRows.delete(i);
-	return openedRows
+	return openedRows;
 };
