@@ -33,6 +33,10 @@
 			timeZone={user.timeZone}
 			on:changed:displayedRow={(e) => (displayedRows[e.detail.i] = e.detail.row)}
 			on:markedRow={() => (dbRows = displayedRows)}
+			on:markedRow:available={(e) => {
+				displayedRows[e.detail.i] = e.detail.newRow
+				dbRows = displayedRows
+			}}
 		/>
 		<button
 			class="mark-all-busy-btn"

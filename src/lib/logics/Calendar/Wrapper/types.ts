@@ -14,10 +14,3 @@ import type { AvailabilityDate } from '@prisma/client';
 export type AvailabilityDates = {
 	[key: string]: AvailabilityDate;
 };
-
-export type AvailRangeParts = {
-	startHr?: number;
-	startMin?: number;
-	endHr?: number;
-	endMin?: number;
-};

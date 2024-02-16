@@ -11,3 +11,10 @@ export type CircleInfo = {
 		};
 	}[];
 }[];
+
+export type AvailRangeParts = {
+	startHr?: number;
+	startMin?: number;
+	endHr?: number;
+	endMin?: number;
+};

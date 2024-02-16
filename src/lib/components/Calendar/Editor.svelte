@@ -25,18 +25,22 @@
 
 	const clickOnSave = async () => {
 		try {
-			await markRowAsAvailable({
+			const newRow = await markRowAsAvailable({
 				unsavedRow: unsavedRows[i],
 				timeZone
 			});
-			dispatch('markedRow');
+
+			dispatch('markedRow', {
+				i,
+				newRow
+			});
 		} catch (err) {
 			console.log(err);
 			if (!(err instanceof Response)) {
 				dispatch('markBadTime');
 			}
 
-			// alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
+			alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
 			console.error('Something went wrong with marking row as available', err);
 		}
 	};

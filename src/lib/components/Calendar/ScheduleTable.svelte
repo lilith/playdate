@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { EMOTICONS_REVERSE } from '$lib/constants';
-	import {
-		getRowColor,
-		isAvailableOnRow,
-		markRowUnavailableLocally,
-		requestToMarkOneRow
-	} from '$lib/logics/Calendar/ScheduleTable/logic';
+	import { getRowColor, isAvailableOnRow } from '$lib/logics/Calendar/ScheduleTable/logic';
+	import { requestToMarkOneRow } from '$lib/logics/Calendar/_shared/utils';
 	import type { Row, Unavailable } from '$lib/types';
 	import { AvailabilityStatus } from '@prisma/client';
 	import { createEventDispatcher, tick } from 'svelte';
@@ -174,7 +170,10 @@
 						row: { ...displayedRows[i], emoticons: e.detail }
 					});
 				}}
-				on:markedRow={() => dispatch('markedRow')}
+				on:markedRow={(e) => {
+					dispatch('markedRow:available', e.detail);
+					closeEditor(i);
+				}}
 			/>
 		{/if}
 	{/each}
@@ -183,7 +182,6 @@
 <style>
 	table {
 		border-collapse: collapse;
-		border: 1px solid #dddddd;
 	}
 	#schedule {
 		width: 100%;
@@ -191,7 +189,7 @@
 	#schedule td {
 		padding: 0.4rem 0rem;
 		text-align: center;
-		border-right: 1px solid #dddddd;
+		border: 1px solid #dddddd;
 	}
 	#schedule td.day,
 	#schedule td.date {

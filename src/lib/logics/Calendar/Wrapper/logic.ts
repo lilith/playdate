@@ -1,28 +1,12 @@
 import { DAYS } from '$lib/constants';
-import type { Row } from '$lib/types';
-import { dateTo12Hour, toLocalTimezone } from '$lib/date';
 import { destructRange } from '$lib/parse';
-
-import { UNAVAILABLE } from '$lib/logics/Calendar/_shared/constants';
+import type { Row } from '$lib/types';
 import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
+import { UNAVAILABLE } from '../_shared/constants';
+import { extractAvailRange } from '../_shared/utils';
 import type { AvailabilityDates } from './types';
 
-const extractAvailRange = ({
-	dbDate,
-	timeZone
-}: {
-	dbDate: AvailabilityDate;
-	timeZone: string;
-}) => {
-	if (UNAVAILABLE.includes(dbDate.status) || !dbDate.startTime || !dbDate.endTime)
-		return dbDate.status;
-
-	return `${dateTo12Hour(toLocalTimezone(dbDate.startTime, timeZone))}-${dateTo12Hour(
-		toLocalTimezone(dbDate.endTime, timeZone)
-	)}`;
-};
-
-const initRow = ({
+const convertAvailabilityDateToRow = ({
 	dbDate,
 	timeZone
 }: {
@@ -69,7 +53,7 @@ const initRow = ({
 /*
   init rows with next 21 days, including today
 */
-const initRows = ({dbDates, timeZone}: { dbDates: AvailabilityDates; timeZone: string }) => {
+const initRows = ({ dbDates, timeZone }: { dbDates: AvailabilityDates; timeZone: string }) => {
 	const now = new Date();
 	return [...Array(21).keys()].map((x) => {
 		const date = new Date(new Date().setDate(now.getDate() + x));
@@ -79,7 +63,7 @@ const initRows = ({dbDates, timeZone}: { dbDates: AvailabilityDates; timeZone: s
 		return {
 			englishDay,
 			monthDay,
-			...initRow({dbDate: dbDates?.[monthDay], timeZone})
+			...convertAvailabilityDateToRow({ dbDate: dbDates?.[monthDay], timeZone })
 		};
 	});
 };
@@ -92,12 +76,10 @@ export const initVals = (dbVals: { dbDates: AvailabilityDates; timeZone: string 
 		emoticons: new Set(r.emoticons)
 		// availRange: r.availRange === 'Busy' ? '' : r.availRange // edit on “busy” clears text box
 	}));
-	const unsavedInds: number[] = [];
 
 	return {
 		dbRows,
 		rowsOnMount,
 		displayedRows,
-		unsavedInds
 	};
 };

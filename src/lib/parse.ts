@@ -2,7 +2,7 @@ import { PRONOUNS } from './constants';
 import type { PRONOUNS_ENUM } from './types';
 
 /*
-	format availRange to look like h(:mm)a - h(:mm)a
+	pull startHr, startMin, endHr, and endMin from something that looks like 1-2 or 1pm-2pm and so on
 */
 export function destructRange(availRange: string) {
 	// validator and formatter

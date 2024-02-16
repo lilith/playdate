@@ -2,8 +2,8 @@ import { destructRange } from '$lib/parse';
 import type { Row } from '$lib/types';
 import { AvailabilityStatus } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { requestToMarkOneRow } from '../ScheduleTable/logic';
-import type { AvailRangeParts } from '../Wrapper/types';
+import type { AvailRangeParts } from '../_shared/types';
+import { requestToMarkOneRow, extractAvailRange } from '../_shared/utils';
 
 export const toggleEmoticon = ({
 	i,
@@ -130,7 +130,7 @@ export const markRowAsAvailable = async ({
 	const startTime = availabilityValidation.val.startTime;
 	const endTime = availabilityValidation.val.endTime;
 
-	await requestToMarkOneRow({
+	const newRowContents = await requestToMarkOneRow({
 		status: AvailabilityStatus.AVAILABLE,
 		displayedRow: unsavedRow,
 		availableDetails: {
@@ -139,4 +139,18 @@ export const markRowAsAvailable = async ({
 			availRangeParts
 		}
 	});
+
+	return {
+		...unsavedRow,
+		notes: newRowContents.notes,
+		availRange: extractAvailRange({
+			dbDate: {
+				status: AvailabilityStatus.AVAILABLE,
+				startTime: new Date(newRowContents.startTime),
+				endTime: new Date(newRowContents.endTime)
+			},
+			timeZone
+		}),
+		...destructRange(unsavedRow.availRange)
+	};
 };
