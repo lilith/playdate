@@ -1,5 +1,5 @@
 import prisma from '$lib/prisma';
-import type { AvailabilityStatus, Prisma } from '@prisma/client';
+import { AvailabilityStatus, type Prisma } from '@prisma/client';
 
 export default class AvailabilityDateRepository {
 	static async delete(where: Prisma.AvailabilityDateWhereUniqueInput) {
@@ -59,5 +59,27 @@ export default class AvailabilityDateRepository {
 				endTime
 			}
 		});
+	}
+
+	static async upsertManyAsBusy(
+		filters: {
+			householdId: number;
+			month: number;
+			day: number;
+		}[]
+	) {
+		return await prisma.$transaction([
+			prisma.availabilityDate.deleteMany({
+				where: {
+					OR: filters
+				}
+			}),
+			prisma.availabilityDate.createMany({
+				data: filters.map((filter) => ({
+					...filter,
+					status: AvailabilityStatus.AVAILABLE
+				}))
+			})
+		]);
 	}
 }

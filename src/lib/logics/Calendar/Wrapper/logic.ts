@@ -1,6 +1,7 @@
 import { DAYS } from '$lib/constants';
 import { destructRange } from '$lib/parse';
 import type { Row } from '$lib/types';
+import { writeReq } from '$lib/utils';
 import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
 import { UNAVAILABLE } from '../_shared/constants';
 import { extractAvailRange } from '../_shared/utils';
@@ -80,6 +81,12 @@ export const initVals = (dbVals: { dbDates: AvailabilityDates; timeZone: string 
 	return {
 		dbRows,
 		rowsOnMount,
-		displayedRows,
+		displayedRows
 	};
+};
+
+export const requestToMarkMultipleRowsAsBusy = async () => {
+	return await writeReq('/db', {
+		type: 'upsertUnspecifiedDatesAsBusy'
+	});
 };

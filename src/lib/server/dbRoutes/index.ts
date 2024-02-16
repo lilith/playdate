@@ -7,6 +7,7 @@ import rejectFriendReq from './rejectFriendReq';
 import rejectHouseholdInvite from './rejectHouseholdInvite';
 import upsertDate from './upsertDate';
 import upsertHousehold from './upsertHousehold';
+import upsertUnspecifiedDatesAsBusy from './upsertUnspecifiedDatesAsBusy';
 import upsertUser from './upsertUser';
 
 export {
@@ -19,5 +20,6 @@ export {
 	rejectHouseholdInvite,
 	upsertDate,
 	upsertHousehold,
+	upsertUnspecifiedDatesAsBusy,
 	upsertUser
 };

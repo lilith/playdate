@@ -3,8 +3,7 @@
 	import Notifier from '$lib/components/Calendar/Notifier.svelte';
 	import ScheduleTable from '$lib/components/Calendar/ScheduleTable.svelte';
 	import NavBar from '$lib/components/NavBar.svelte';
-	import { markUnspecifiedRowsAsBusy } from '$lib/logics/Calendar/ScheduleTable/logic';
-	import { initVals } from '$lib/logics/Calendar/Wrapper/logic';
+	import { initVals, requestToMarkMultipleRowsAsBusy } from '$lib/logics/Calendar/Wrapper/logic';
 	import type { Row } from '$lib/types';
 	import { onMount } from 'svelte';
 
@@ -22,6 +21,17 @@
 	});
 
 	$: displayedRows = [...dbRows];
+
+	const markUnspecifiedRowsAsBusy = async () => {
+		try {
+			await requestToMarkMultipleRowsAsBusy();
+		} catch (err) {
+			alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
+			console.error(err);
+			console.error('Something went wrong with marking unspecified rows as busy');
+			displayedRows = [...dbRows];
+		}
+	};
 </script>
 
 <div>
@@ -34,18 +44,12 @@
 			on:changed:displayedRow={(e) => (displayedRows[e.detail.i] = e.detail.row)}
 			on:markedRow={() => (dbRows = displayedRows)}
 			on:markedRow:available={(e) => {
-				displayedRows[e.detail.i] = e.detail.newRow
-				dbRows = displayedRows
+				displayedRows[e.detail.i] = e.detail.newRow;
+				dbRows = displayedRows;
 			}}
 		/>
-		<button
-			class="mark-all-busy-btn"
-			style="margin: 1rem;"
-			on:click={() =>
-				markUnspecifiedRowsAsBusy({
-					displayedRows,
-					dbRows
-				})}>Mark unspecified days as busy</button
+		<button class="mark-all-busy-btn" style="margin: 1rem;" on:click={markUnspecifiedRowsAsBusy}
+			>Mark unspecified days as busy</button
 		>
 		<Notifier {dbRows} {rowsOnMount} {circleInfo} {user} {kidNames} />
 	</div>

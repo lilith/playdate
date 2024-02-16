@@ -5,11 +5,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_PRISMA_URL") // uses connection pooling
-//  directUrl = env("DATABASE_URL_NON_POOLING") // uses a direct connection
-//  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
+  url      = env("DATABASE_PRISMA_URL") // uses connection pooling
+  //  directUrl = env("DATABASE_URL_NON_POOLING") // uses a direct connection
+  //  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
 }
- 
+
 enum Pronoun {
   FAE_FAER_FAERS
   EEY_EM_EIRS
@@ -133,7 +133,9 @@ model AvailabilityDate {
   householdId Int
   parentId    Int?
   childId     Int?
-  date        DateTime
+  // month and day in UTC
+  month       Int // 1-12
+  day         Int // 1-31
   status      AvailabilityStatus @default(UNSPECIFIED)
   startTime   DateTime?
   endTime     DateTime?
@@ -145,7 +147,7 @@ model AvailabilityDate {
   household   Household          @relation(fields: [householdId], references: [id])
   parent      User?              @relation(fields: [parentId], references: [id])
 
-  @@unique([householdId, date])
+  @@unique([householdId, month, day])
 }
 
 model HouseholdConnection {
@@ -153,7 +155,7 @@ model HouseholdConnection {
   householdId       Int
   friendHouseholdId Int
   createdAt         DateTime  @default(now())
-  household     Household @relation("HouseholdAConnection", fields: [householdId], references: [id])
+  household         Household @relation("HouseholdAConnection", fields: [householdId], references: [id])
   friendHousehold   Household @relation("HouseholdBConnection", fields: [friendHouseholdId], references: [id])
 
   @@unique([householdId, friendHouseholdId])
