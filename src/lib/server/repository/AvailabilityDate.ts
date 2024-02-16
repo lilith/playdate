@@ -20,7 +20,8 @@ export default class AvailabilityDateRepository {
 
 	static async upsert({
 		householdId,
-		date,
+		month,
+		day,
 		status,
 		notes,
 		emoticons,
@@ -28,7 +29,8 @@ export default class AvailabilityDateRepository {
 		endTime
 	}: {
 		householdId: number;
-		date: Date | string;
+		month: number;
+		day: number;
 		status: AvailabilityStatus;
 		notes: string;
 		emoticons: string | undefined;
@@ -37,9 +39,10 @@ export default class AvailabilityDateRepository {
 	}) {
 		return await prisma.availabilityDate.upsert({
 			where: {
-				householdId_date: {
+				householdId_month_day: {
 					householdId,
-					date
+					month,
+					day
 				}
 			},
 			update: {
@@ -51,7 +54,8 @@ export default class AvailabilityDateRepository {
 			},
 			create: {
 				householdId,
-				date,
+				month,
+				day,
 				status,
 				notes,
 				emoticons,
