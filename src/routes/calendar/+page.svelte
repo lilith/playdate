@@ -1,28 +1,25 @@
 <script lang="ts">
-	import type { Row } from '$lib/types';
-	import NavBar from '$lib/components/NavBar.svelte';
-	import ScheduleTable from '$lib/components/Calendar/ScheduleTable.svelte';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { initVals } from '$lib/logics/Calendar/Wrapper/logic';
 	import Notifier from '$lib/components/Calendar/Notifier.svelte';
+	import ScheduleTable from '$lib/components/Calendar/ScheduleTable.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
 	import { markUnspecifiedRowsAsBusy } from '$lib/logics/Calendar/ScheduleTable/logic';
+	import { initVals } from '$lib/logics/Calendar/Wrapper/logic';
+	import type { Row } from '$lib/types';
+	import { onMount } from 'svelte';
 
 	let { dbAvailabilityDates, user, kidNames, circleInfo } = $page.data;
 
 	let dbRows: Row[] = []; // rows saved in db
 	let rowsOnMount: Row[] = []; // needed for generating schedule diff and determining that rows saved in db have changed
 	let displayedRows: Row[] = []; // rows actually used in rendering -- not necessarily saved to db yet
-	let unsavedInds: number[] = [];
 
 	onMount(() => {
 		const initializedVals = initVals({ dbDates: dbAvailabilityDates, timeZone: user.timeZone });
 		dbRows = initializedVals.dbRows;
 		rowsOnMount = initializedVals.rowsOnMount;
 		displayedRows = initializedVals.displayedRows;
-		unsavedInds = initializedVals.unsavedInds;
 	});
-	// $: updateRowColors();
 
 	$: displayedRows = [...dbRows];
 </script>
@@ -34,7 +31,6 @@
 			{dbRows}
 			{displayedRows}
 			timeZone={user.timeZone}
-			on:changed:displayedRows={(e) => (displayedRows = e.detail)}
 			on:changed:displayedRow={(e) => (displayedRows[e.detail.i] = e.detail.row)}
 			on:markedRow={() => (dbRows = displayedRows)}
 		/>

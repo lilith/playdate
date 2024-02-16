@@ -20,7 +20,9 @@
 	onMount(() => {
 		schedFull = generateFullSchedule(dbRows);
 	});
+
 	$: {
+		if (!rowsOnMount || !dbRows) break $
 		schedDiffs = generateDiffSchedule(rowsOnMount, dbRows);
 		schedFull = generateFullSchedule(dbRows);
 	}
