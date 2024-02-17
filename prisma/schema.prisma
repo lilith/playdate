@@ -5,21 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_PRISMA_URL") // uses connection pooling
-  //  directUrl = env("DATABASE_URL_NON_POOLING") // uses a direct connection
-  //  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
-}
-
-enum Pronoun {
-  FAE_FAER_FAERS
-  EEY_EM_EIRS
-  HE_HIM_HIS
-  PER_PER_PERS
-  SHE_HER_HERS
-  THEY_THEM_THEIRS
-  VE_VER_VIS
-  XE_XEM_XYRS
-  ZEZIE_HIR_HIRS
+  url      = env("DATABASE_PRISMA_URL")
 }
 
 model Household {
@@ -31,8 +17,8 @@ model Household {
   AvailabilityDate        AvailabilityDate[]
   FriendRequest           FriendRequest[]
   children                HouseholdChild[]
-  connectionsAsHouseholdA HouseholdConnection[]  @relation("HouseholdAConnection")
   connectionsAsHouseholdB HouseholdConnection[]  @relation("HouseholdBConnection")
+  connectionsAsHouseholdA HouseholdConnection[]  @relation("HouseholdAConnection")
   JoinHouseholdRequest    JoinHouseholdRequest[]
   parents                 User[]
 }
@@ -133,9 +119,8 @@ model AvailabilityDate {
   householdId Int
   parentId    Int?
   childId     Int?
-  // month and day in UTC
-  month       Int // 1-12
-  day         Int // 1-31
+  month       Int
+  day         Int
   status      AvailabilityStatus @default(UNSPECIFIED)
   startTime   DateTime?
   endTime     DateTime?
@@ -155,10 +140,22 @@ model HouseholdConnection {
   householdId       Int
   friendHouseholdId Int
   createdAt         DateTime  @default(now())
-  household         Household @relation("HouseholdAConnection", fields: [householdId], references: [id])
   friendHousehold   Household @relation("HouseholdBConnection", fields: [friendHouseholdId], references: [id])
+  household         Household @relation("HouseholdAConnection", fields: [householdId], references: [id])
 
   @@unique([householdId, friendHouseholdId])
+}
+
+enum Pronoun {
+  FAE_FAER_FAERS
+  EEY_EM_EIRS
+  HE_HIM_HIS
+  PER_PER_PERS
+  SHE_HER_HERS
+  THEY_THEM_THEIRS
+  VE_VER_VIS
+  XE_XEM_XYRS
+  ZEZIE_HIR_HIRS
 }
 
 enum AvailabilityStatus {
