@@ -1,7 +1,8 @@
 import { generateFullSchedule } from '$lib/logics/_shared/format';
+import generateSchedRows, { putDbDatesInDict } from '$lib/logics/_shared/generateSchedRows';
 import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
-import generateSchedRows, { getDbDates, putDbDatesInDict } from '../_shared/generateSchedRows';
+import { getDbDates } from '../_shared/getDbDates';
 import FriendRequestRepository from '../repository/FriendRequest';
 import HouseholdRepository from '../repository/Household';
 import HouseholdConnectionRepository from '../repository/HouseholdConnection';

@@ -1,5 +1,5 @@
+import generateSchedRows from '$lib/logics/_shared/generateSchedRows';
 import type { AvailabilityDates } from '$lib/logics/_shared/types';
-import generateSchedRows from '$lib/server/_shared/generateSchedRows';
 import { writeReq } from '$lib/logics/_shared/utils';
 
 export const initVals = (dbVals: { dbDates: AvailabilityDates; timeZone: string }) => {

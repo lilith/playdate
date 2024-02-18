@@ -170,3 +170,5 @@ export const EMOTICONS_REVERSE: { [key: string]: string } = {
 
 export const LEGEND_STR =
 	'Legend: 🏠(host) 🚗(visit) 👤(dropoff) 👥(together) 🏫(via school) ⭐(good) 🌟(great) 🙏(needed)\n';
+
+export const NUM_DAYS_IN_SCHED = 21;

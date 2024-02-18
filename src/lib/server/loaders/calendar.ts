@@ -1,7 +1,8 @@
-import { getDbDates, putDbDatesInDict } from '$lib/server/_shared/generateSchedRows';
+import type { HouseholdWithExtraInfo } from '$lib/logics/Calendar/_shared/types';
+import { putDbDatesInDict } from '$lib/logics/_shared/generateSchedRows';
+import { getDbDates } from '$lib/server/_shared/getDbDates';
 import HouseholdChildRepository from '$lib/server/repository/HouseholdChild';
 import HouseholdConnectionRepository from '$lib/server/repository/HouseholdConnection';
-import type { HouseholdWithExtraInfo } from '$lib/logics/Calendar/_shared/types';
 
 export const getDatesDict = async (householdId: number | null, timeZone: string) => {
 	if (!householdId) return {};

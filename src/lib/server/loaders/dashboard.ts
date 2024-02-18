@@ -13,7 +13,7 @@ import type {
 } from '$lib/logics/Dashboard/_shared/types';
 import { EMOTICONS_REVERSE } from '$lib/logics/_shared/constants';
 import { startOfToday } from '$lib/logics/_shared/date';
-import generateSchedRows, { putDbDatesInDict } from '$lib/server/_shared/generateSchedRows';
+import generateSchedRows, { putDbDatesInDict } from '$lib/logics/_shared/generateSchedRows';
 import HouseholdConnectionRepository from '$lib/server/repository/HouseholdConnection';
 import { AvailabilityStatus } from '@prisma/client';
 

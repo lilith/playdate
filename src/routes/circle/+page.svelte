@@ -6,7 +6,7 @@
 	import NavBar from '$lib/components/NavBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
-	import { circleInviteMsg } from '$lib/format';
+	import { circleInviteMsg } from '$lib/logics/_shared/format';
 
 	let phoneInput: object;
 	let inviteesPhone: string;

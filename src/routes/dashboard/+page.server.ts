@@ -1,8 +1,8 @@
 import type { CircleMember } from '$lib/logics/Dashboard/_shared/types';
 import generateSchedRows, {
-	getDbDates,
 	putDbDatesInDict
-} from '$lib/server/_shared/generateSchedRows';
+} from '$lib/logics/_shared/generateSchedRows';
+import { getDbDates } from '$lib/server/_shared/getDbDates';
 import {
 	getCircleMembers,
 	getOverlaps,

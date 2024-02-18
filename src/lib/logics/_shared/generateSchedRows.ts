@@ -1,12 +1,10 @@
-import { getEnglishDayAndMonthDay, startOfToday } from '$lib/logics/_shared/date';
 import { UNAVAILABLE } from '$lib/logics/Calendar/_shared/constants';
 import { extractAvailRange } from '$lib/logics/Calendar/_shared/utils';
-import type { AvailabilityDates } from '$lib/logics/_shared/types';
+import { getEnglishDayAndMonthDay, startOfToday } from '$lib/logics/_shared/date';
 import { destructRange } from '$lib/logics/_shared/parse';
-import type { Row } from '$lib/logics/_shared/types';
+import type { AvailabilityDates, Row } from '$lib/logics/_shared/types';
 import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
 import { DateTime } from 'luxon';
-import AvailabilityDateRepository from '../repository/AvailabilityDate';
 import { NUM_DAYS_IN_SCHED } from './constants';
 
 export function convertAvailabilityDateToRow({
@@ -67,17 +65,6 @@ export function putDbDatesInDict(dbDates: AvailabilityDate[], timeZone: string) 
 		res[`${dateInUserZone.month}/${dateInUserZone.day}`] = dbDate;
 	});
 	return res;
-}
-
-export async function getDbDates(householdId: number, timeZone: string) {
-	const now = startOfToday(timeZone);
-
-	return await AvailabilityDateRepository.findAll({
-		householdId,
-		date: {
-			gte: now.toJSDate()
-		}
-	});
 }
 
 /*
