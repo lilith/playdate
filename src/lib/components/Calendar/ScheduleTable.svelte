@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { EMOTICONS_REVERSE } from '$lib/constants';
+	import { EMOTICONS_REVERSE } from '$lib/logics/_shared/constants';
 	import { getRowColor, isAvailableOnRow } from '$lib/logics/Calendar/ScheduleTable/logic';
 	import { requestToMarkOneRow } from '$lib/logics/Calendar/_shared/utils';
-	import type { Row, Unavailable } from '$lib/types';
+	import type { Row, Unavailable } from '$lib/logics/_shared/types';
 	import { AvailabilityStatus } from '@prisma/client';
 	import { createEventDispatcher, tick } from 'svelte';
 	import Editor from './Editor.svelte';

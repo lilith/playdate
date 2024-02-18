@@ -1,4 +1,4 @@
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 
 export const generate = async () => {
 	const createdAt = new Date();

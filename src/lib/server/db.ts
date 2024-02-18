@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { User } from '@prisma/client';
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 
 async function deleteKid(req: { id: number }, user: User) {
 	const { id } = req;

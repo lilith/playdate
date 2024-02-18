@@ -1,5 +1,10 @@
+import type {
+	AvailabilityDate,
+	AvailabilityStatus,
+	PhoneContactPermissions,
+	User
+} from '@prisma/client';
 import type { PRONOUNS } from './constants';
-import type { AvailabilityStatus, PhoneContactPermissions, User } from '@prisma/client';
 
 export type PRONOUNS_ENUM = keyof typeof PRONOUNS;
 
@@ -38,3 +43,7 @@ export type Row = {
 };
 
 export type UserWithPermissions = User & { phonePermissions: PhoneContactPermissions };
+
+export type AvailabilityDates = {
+	[key: string]: AvailabilityDate;
+};

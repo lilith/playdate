@@ -1,10 +1,7 @@
-import { DAYS } from '$lib/constants';
-import { dateTo12Hour, toLocalTimezone } from '$lib/date';
-import { generateFullSchedule } from '$lib/format';
-import { destructRange } from '$lib/parse';
-import { AvailabilityStatus, type User } from '@prisma/client';
+import { generateFullSchedule } from '$lib/logics/_shared/format';
+import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
-import AvailabilityDateRepository from '../repository/AvailabilityDate';
+import generateSchedRows, { getDbDates, putDbDatesInDict } from '../_shared/generateSchedRows';
 import FriendRequestRepository from '../repository/FriendRequest';
 import HouseholdRepository from '../repository/Household';
 import HouseholdConnectionRepository from '../repository/HouseholdConnection';
@@ -14,73 +11,18 @@ import { sendMsg } from '../twilio';
 import deleteFriendReq from './_shared/deleteFriendReq';
 import deleteHouseholdInvite from './_shared/deleteHouseholdInvite';
 
-const DEFAULT_TIMEZONE = 'America/Los_Angeles';
-async function getHouseholdsFullSched(householdId: number, user: { timeZone?: string }) {
-	const now = new Date();
-	const startDate = new Date(`${now.getMonth() + 1}/${now.getDate()}`);
-	const endDate = new Date(startDate);
-	endDate.setDate(endDate.getDate() + 21);
-
-	const dates = await AvailabilityDateRepository.findAll(
-		{
-			householdId,
-			date: {
-				gte: startDate,
-				lte: endDate
-			}
-		},
-		[
-			{
-				date: 'asc'
-			}
-		]
-	);
-
-	const rows = dates.map((d) => {
-		const { date, status, startTime, endTime, notes, emoticons } = d;
-		const englishDay = DAYS[date.getDay()];
-		const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
-
-		let availRange;
-		let startHr;
-		let startMin;
-		let endHr;
-		let endMin;
-		const emoticonSet = new Set<string>(emoticons?.split(','));
-		if (status === AvailabilityStatus.AVAILABLE) {
-			availRange = 'Available';
-			if (startTime && endTime)
-				availRange = `${dateTo12Hour(
-					toLocalTimezone(startTime, user.timeZone ?? DEFAULT_TIMEZONE)
-				)}-${dateTo12Hour(toLocalTimezone(endTime, user.timeZone ?? DEFAULT_TIMEZONE))}`;
-			const timeParts = destructRange(availRange);
-			startHr = timeParts.startHr;
-			startMin = timeParts.startMin;
-			endHr = timeParts.endHr;
-			endMin = timeParts.endMin;
-		} else if (status === AvailabilityStatus.BUSY) {
-			availRange = 'Busy';
-		}
-
-		return {
-			englishDay,
-			monthDay,
-			availRange,
-			notes: notes ?? undefined,
-			emoticons: emoticonSet,
-			startHr,
-			startMin,
-			endHr,
-			endMin
-		};
-	});
-
+async function getHouseholdsFullSched(householdId: number, user: Adult) {
+	const dbDates = await getDbDates(householdId, user.timeZone);
+	const datesDict = putDbDatesInDict(dbDates, user.timeZone);
+	const rows = generateSchedRows(datesDict, user.timeZone);
 	return generateFullSchedule(rows);
 }
 
+type Adult = Pick<User, 'phone' | 'timeZone' | 'householdId'>;
+
 async function sendFaqLinks(
-	adults1: { phone?: string }[],
-	adults2: { phone?: string }[],
+	adults1: Adult[],
+	adults2: Adult[],
 	household1: { name: string; id: number },
 	household2: { name: string; id: number },
 	initiator: User
@@ -117,8 +59,8 @@ async function sendFaqLinks(
 }
 
 async function sendSched(
-	adults1: { phone?: string; timeZone?: string }[],
-	adults2: { phone?: string; timeZone?: string }[],
+	adults1: Adult[],
+	adults2: Adult[],
 	household1: { name: string; id: number },
 	household2: { name: string; id: number },
 	initiator: User
@@ -156,43 +98,8 @@ async function sendSched(
 	]);
 }
 
-async function getUserAttrsInHousehold(id: number | null, attrs: string[]) {
-	if (!id) return [];
-	const select: { [key: string]: true } = {};
-	attrs.forEach((attr) => {
-		select[attr] = true;
-	});
-
-	return await UserRepository.findAll(
-		{
-			householdId: id
-		},
-		select
-	);
-}
-
-async function getHousehold(id: number | null, attrs: string[]) {
-	if (!id) return {};
-	const select: { [key: string]: true } = {};
-	attrs.forEach((attr) => {
-		select[attr] = true;
-	});
-	return await HouseholdRepository.findOne(
-		{
-			id
-		},
-		select
-	);
-}
-
-export async function acceptFriendReq(reqId: number, householdId: number | null, phone: string) {
+async function acceptFriendReq(reqId: number, householdId: number, phone: string) {
 	const friendReq = await FriendRequestRepository.findOne({ id: reqId });
-
-	if (!householdId) {
-		throw error(401, {
-			message: 'You need to create a household before accepting friend requests'
-		});
-	}
 
 	if (!friendReq || friendReq.targetPhone !== phone) {
 		throw error(401, {
@@ -276,36 +183,92 @@ export async function acceptFriendReq(reqId: number, householdId: number | null,
 	return friendHouseholdId;
 }
 
+/*
+	get users' phones, time zones in both households
+*/
+async function getHouseholdAdults(hId1: number, hId2: number) {
+	const allAdults = (await UserRepository.findAll(
+		{
+			OR: [
+				{
+					householdId: hId1
+				},
+				{
+					householdId: hId2
+				}
+			]
+		},
+		{
+			householdId: true,
+			phone: true,
+			timeZone: true
+		}
+	)) as Adult[];
+
+	const adults1: Adult[] = [];
+	const adults2: Adult[] = [];
+	allAdults.forEach((a) => {
+		if (a.householdId === hId1) adults1.push(a);
+		else adults2.push(a);
+	});
+
+	if (!adults1.length) throw error(404, `Household ${hId1} has no adults`);
+	if (!adults2.length) throw error(404, `Household ${hId2} has no adults`);
+
+	return {
+		adults1,
+		adults2
+	};
+}
+
+/*
+	get each household's id and name
+*/
+async function getHouseholds(hId1: number, hId2: number) {
+	const households = await HouseholdRepository.findMany(
+		{
+			OR: [
+				{
+					id: hId1
+				},
+				{
+					id: hId2
+				}
+			]
+		},
+		{
+			id: true,
+			name: true
+		}
+	);
+
+	if (!households.length) throw error(404, `Missing both of households ${hId1} and ${hId2}`);
+
+	if (households.length === 1)
+		throw error(404, `Missing household ${households[0].id === hId1 ? hId2 : hId1}`);
+
+	if (households[0].id === hId1) return households;
+	return [households[1], households[0]];
+}
+
 export default async function acceptFriendReqRoute(
 	req: {
 		friendReqId: number;
 	},
 	user: User
 ) {
-	// get each household's id
+	if (!user.householdId) {
+		throw error(401, {
+			message: 'You need to create a household before accepting friend requests'
+		});
+	}
+
+	//
 	const otherHouseholdId = await acceptFriendReq(req.friendReqId, user.householdId, user.phone);
 
-	// get users' phones, time zones in both households
-	const userAttrs = ['phone', 'timeZone'];
-	const [adults1, adults2] = await Promise.all([
-		await getUserAttrsInHousehold(otherHouseholdId, userAttrs),
-		await getUserAttrsInHousehold(user.householdId, userAttrs)
-	]);
+	const { adults1, adults2 } = await getHouseholdAdults(otherHouseholdId, user.householdId);
 
-	// get names for both households
-	const attrs = ['name', 'id'];
-	const household1 = await getHousehold(otherHouseholdId, attrs);
-	if (!household1) {
-		throw error(404, {
-			message: `Can't find household ${otherHouseholdId}`
-		});
-	}
-	const household2 = await getHousehold(user.householdId, attrs);
-	if (!household2) {
-		throw error(404, {
-			message: `Can't find household ${user.householdId}`
-		});
-	}
+	const [household1, household2] = await getHouseholds(otherHouseholdId, user.householdId);
 
 	await sendFaqLinks(adults1, adults2, household1, household2, user);
 	await sendSched(adults1, adults2, household1, household2, user);

@@ -119,8 +119,7 @@ model AvailabilityDate {
   householdId Int
   parentId    Int?
   childId     Int?
-  month       Int
-  day         Int
+  date        DateTime
   status      AvailabilityStatus @default(UNSPECIFIED)
   startTime   DateTime?
   endTime     DateTime?
@@ -132,7 +131,7 @@ model AvailabilityDate {
   household   Household          @relation(fields: [householdId], references: [id])
   parent      User?              @relation(fields: [parentId], references: [id])
 
-  @@unique([householdId, month, day])
+  @@unique([householdId, date])
 }
 
 model HouseholdConnection {

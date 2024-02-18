@@ -1,4 +1,4 @@
-import type { Row } from '$lib/types';
+import type { Row } from '$lib/logics/_shared/types';
 import { UNAVAILABLE } from '../_shared/constants';
 import { LIGHT_BLUE, LIGHT_GRAY, WHITE } from './constants';
 

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { generateDiffSchedule, generateFullSchedule } from '$lib/format';
-	import type { Row, UserWithPermissions } from '$lib/types';
+	import { generateDiffSchedule, generateFullSchedule } from '$lib/logics/_shared/format';
+	import type { Row, UserWithPermissions } from '$lib/logics/_shared/types';
 	import type { CircleInfo } from '$lib/logics/Calendar/_shared/types';
-	import { getObjectivePronoun } from '$lib/parse';
+	import { getObjectivePronoun } from '$lib/logics/_shared/parse';
 	import { notify, notifyAll } from '$lib/logics/Calendar/Notifier/logic';
 
 	export let rowsOnMount: Row[]; // needed for generating schedule diff and determining that rows saved in db have changed

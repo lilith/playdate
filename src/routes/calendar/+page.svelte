@@ -4,7 +4,7 @@
 	import ScheduleTable from '$lib/components/Calendar/ScheduleTable.svelte';
 	import NavBar from '$lib/components/NavBar.svelte';
 	import { initVals, requestToMarkMultipleRowsAsBusy } from '$lib/logics/Calendar/Wrapper/logic';
-	import type { Row } from '$lib/types';
+	import type { Row } from '$lib/logics/_shared/types';
 	import { onMount } from 'svelte';
 
 	let { dbAvailabilityDates, user, kidNames, circleInfo } = $page.data;

@@ -1,4 +1,4 @@
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 import type { Prisma } from '@prisma/client';
 
 export default class FriendRequestRepository {

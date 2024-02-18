@@ -1,5 +1,5 @@
-import { destructRange } from '$lib/parse';
-import type { Row } from '$lib/types';
+import { destructRange } from '$lib/logics/_shared/parse';
+import type { Row } from '$lib/logics/_shared/types';
 import { AvailabilityStatus } from '@prisma/client';
 import { DateTime } from 'luxon';
 import type { AvailRangeParts } from '../_shared/types';

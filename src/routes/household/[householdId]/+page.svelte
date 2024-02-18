@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { PRONOUNS } from '$lib/constants';
+	import { PRONOUNS } from '$lib/logics/_shared/constants';
 	import NavBar from '$lib/components/NavBar.svelte';
 
 	export let data: PageData;

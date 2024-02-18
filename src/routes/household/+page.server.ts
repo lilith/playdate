@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import type { Pronoun, User } from '@prisma/client';
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 
 export const load = (async ({ parent, depends }) => {
 	depends('data:householdId');

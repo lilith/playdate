@@ -1,4 +1,4 @@
-import { EMOTICONS_REVERSE } from '$lib/constants';
+import { EMOTICONS_REVERSE } from '$lib/logics/_shared/constants';
 import { AvailabilityStatus } from '@prisma/client';
 import type { Row } from './types';
 

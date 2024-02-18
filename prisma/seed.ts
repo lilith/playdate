@@ -1,4 +1,7 @@
-import { PrismaClient, Pronoun } from '@prisma/client';
+import AvailabilityDateRepository from '$lib/server/repository/AvailabilityDate';
+import { AvailabilityStatus, PrismaClient, Pronoun } from '@prisma/client';
+import { DateTime } from 'luxon';
+
 const prisma = new PrismaClient();
 async function main() {
 	const phones: string[] = [
@@ -297,6 +300,48 @@ async function main() {
 		},
 		update: session6,
 		create: session6
+	});
+
+	const firstDate = DateTime.fromObject(
+		{
+			year: 2001,
+			month: 8,
+			day: 11
+		},
+		{
+			zone: 'utc'
+		}
+	);
+
+	await AvailabilityDateRepository.upsert({
+		householdId: 3,
+		date: firstDate.toJSDate(),
+		status: AvailabilityStatus.AVAILABLE,
+		notes: 'first date',
+		emoticons: '',
+		startTime: firstDate.set({ hour: 14 }).toJSDate(),
+		endTime: firstDate.set({ hour: 15 }).toJSDate()
+	});
+
+	const lastDate = DateTime.fromObject(
+		{
+			year: 2001,
+			month: 3,
+			day: 8
+		},
+		{
+			zone: 'utc'
+		}
+	);
+
+	await AvailabilityDateRepository.upsert({
+		householdId: 3,
+		date: lastDate.toJSDate(),
+		status: AvailabilityStatus.AVAILABLE,
+		notes: 'last date',
+		emoticons: '',
+		startTime: lastDate.set({ hour: 14 }).toJSDate(),
+		endTime: lastDate.set({ hour: 15 }).toJSDate()
 	});
 }
 

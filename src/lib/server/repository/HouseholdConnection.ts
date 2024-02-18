@@ -1,4 +1,4 @@
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 import type { Prisma } from '@prisma/client';
 
 export default class HouseholdConnectionRepository {
@@ -22,6 +22,16 @@ export default class HouseholdConnectionRepository {
 	static async findOne(where: Prisma.HouseholdConnectionWhereUniqueInput) {
 		return await prisma.householdConnection.findUnique({
 			where
+		});
+	}
+
+	static async findMany(
+		where: Prisma.HouseholdConnectionWhereInput,
+		select?: Prisma.HouseholdConnectionSelect
+	) {
+		return await prisma.householdConnection.findMany({
+			where,
+			select
 		});
 	}
 }

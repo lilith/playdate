@@ -1,4 +1,4 @@
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 import type { Prisma } from '@prisma/client';
 
 export default class UserRepository {
@@ -9,7 +9,7 @@ export default class UserRepository {
 		});
 	}
 
-	static async findAll(where: Prisma.UserWhereInput, select: Prisma.UserSelect) {
+	static async findAll(where: Prisma.UserWhereInput, select?: Prisma.UserSelect) {
 		return await prisma.user.findMany({
 			where,
 			select

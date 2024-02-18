@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { PRONOUNS, LANGUAGES } from '$lib/constants';
+	import { PRONOUNS, LANGUAGES } from '$lib/logics/_shared/constants';
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
 	import Modal from '$lib/components/Modal.svelte';
 	import NavBar from '$lib/components/NavBar.svelte';
-	import { writeReq } from '$lib/utils';
+	import { writeReq } from '$lib/logics/_shared/utils';
 
 	const WEEKDAYS: { [key: string]: number } = {
 		Sunday: 0,

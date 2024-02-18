@@ -1,3 +1,5 @@
+import type { Household, PhoneContactPermissions, User } from '@prisma/client';
+
 export type CircleInfo = {
 	connectionId: number;
 	id: number;
@@ -17,4 +19,8 @@ export type AvailRangeParts = {
 	startMin?: number;
 	endHr?: number;
 	endMin?: number;
+};
+
+export type HouseholdWithExtraInfo = Household & {
+	parents: (User & { phonePermissions: PhoneContactPermissions })[];
 };

@@ -1,0 +1,24 @@
+.larger {
+  font-size: larger;
+}
+
+.household {
+  text-decoration: underline;
+  color: #001430;
+  font-size: large;
+}
+
+.phone-num {
+  text-decoration: underline;
+  color: #001430;
+}
+
+.default {
+  font-size: large;
+  text-align: center;
+}
+
+.link {
+  text-decoration: underline;
+  color: #4578ff;
+}

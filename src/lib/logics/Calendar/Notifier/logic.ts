@@ -1,4 +1,4 @@
-import { writeReq } from '$lib/utils';
+import { writeReq } from '$lib/logics/_shared/utils';
 import type { Parent } from './types';
 import type { CircleInfo } from '../_shared/types';
 

@@ -1,4 +1,4 @@
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 import { AvailabilityStatus, type Prisma } from '@prisma/client';
 
 export default class AvailabilityDateRepository {
@@ -8,20 +8,15 @@ export default class AvailabilityDateRepository {
 		});
 	}
 
-	static async findAll(
-		where: Prisma.AvailabilityDateWhereInput,
-		orderBy?: Prisma.Enumerable<Prisma.AvailabilityDateOrderByWithRelationInput>
-	) {
+	static async findAll(where: Prisma.AvailabilityDateWhereInput) {
 		return await prisma.availabilityDate.findMany({
-			where,
-			orderBy
+			where
 		});
 	}
 
 	static async upsert({
 		householdId,
-		month,
-		day,
+		date,
 		status,
 		notes,
 		emoticons,
@@ -29,8 +24,7 @@ export default class AvailabilityDateRepository {
 		endTime
 	}: {
 		householdId: number;
-		month: number;
-		day: number;
+		date: Date;
 		status: AvailabilityStatus;
 		notes: string;
 		emoticons: string | undefined;
@@ -39,10 +33,9 @@ export default class AvailabilityDateRepository {
 	}) {
 		return await prisma.availabilityDate.upsert({
 			where: {
-				householdId_month_day: {
+				householdId_date: {
 					householdId,
-					month,
-					day
+					date
 				}
 			},
 			update: {
@@ -54,8 +47,7 @@ export default class AvailabilityDateRepository {
 			},
 			create: {
 				householdId,
-				month,
-				day,
+				date,
 				status,
 				notes,
 				emoticons,
@@ -68,8 +60,7 @@ export default class AvailabilityDateRepository {
 	static async upsertManyAsBusy(
 		filters: {
 			householdId: number;
-			month: number;
-			day: number;
+			date: Date;
 		}[]
 	) {
 		return await prisma.$transaction([

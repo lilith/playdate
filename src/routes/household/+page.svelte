@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount, afterUpdate } from 'svelte';
-	import { PRONOUNS } from '$lib/constants';
-	import type { PRONOUNS_ENUM } from '$lib/types';
+	import { PRONOUNS } from '$lib/logics/_shared/constants';
+	import type { PRONOUNS_ENUM } from '$lib/logics/_shared/types';
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
 	import Modal from '$lib/components/Modal.svelte';
 	import NavBar from '$lib/components/NavBar.svelte';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
-	import { writeReq } from '$lib/utils';
-	import { fullName } from '$lib/format';
+	import { writeReq } from '$lib/logics/_shared/utils';
+	import { fullName } from '$lib/logics/_shared/format';
 	import { DateTime } from 'luxon';
 
 	enum ModalReason {

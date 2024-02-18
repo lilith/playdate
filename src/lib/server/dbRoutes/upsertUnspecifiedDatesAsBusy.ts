@@ -12,12 +12,11 @@ export default async function upsertUnspecifiedDatesAsBusy(_: Record<string, nev
 	}
 
 	const filters = Array(21).map((_, i) => {
-		const date = DateTime.now().toUTC().plus({ days: i });
+		const date = DateTime.now().setZone(user.timeZone).plus({ days: i }).toJSDate();
 
 		return {
 			householdId,
-			month: date.month,
-			day: date.day
+			date
 		};
 	});
 

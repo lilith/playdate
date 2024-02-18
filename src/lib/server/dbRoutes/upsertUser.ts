@@ -1,4 +1,4 @@
-import { toLocalTimezone } from '$lib/date';
+import { toLocalTimezone } from '$lib/logics/_shared/date';
 import type { Pronoun, User } from '@prisma/client';
 import UserRepository from '../repository/User';
 

@@ -1,9 +1,9 @@
 import type { Handle, RequestEvent } from '@sveltejs/kit';
 import * as cron from 'node-cron';
 import { sendNotif } from '$lib/server/twilio';
-import { toLocalTimezone } from '$lib/date';
-import prisma from '$lib/prisma';
-import type { UserWithPermissions } from '$lib/types';
+import { toLocalTimezone } from '$lib/logics/_shared/date';
+import prisma from '$lib/logics/_shared/prisma';
+import type { UserWithPermissions } from '$lib/logics/_shared/types';
 
 import { redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';

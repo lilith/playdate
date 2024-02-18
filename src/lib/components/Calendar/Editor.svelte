@@ -3,7 +3,7 @@
 	import Legend from '$lib/components/Legend.svelte';
 	import { markRowAsAvailable, toggleEmoticon } from '$lib/logics/Calendar/Editor/logic';
 	import { EMOTICONS, UNAVAILABLE } from '$lib/logics/Calendar/_shared/constants';
-	import type { Row } from '$lib/types';
+	import type { Row } from '$lib/logics/_shared/types';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
