@@ -40,10 +40,8 @@ export async function POST({
 		res = await routes[req.type](req, user);
 		return json(res);
 	} catch (err) {
-		console.error(err);
-		throw error(500, {
-			message: `${req.type} for user ${user.id} failed`
-		});
+		console.error(`${req.type} for user ${user.id} failed`);
+		throw error(err.status, err.body.message);
 	}
 }
 

@@ -2,7 +2,7 @@
 	import { onMount, afterUpdate } from 'svelte';
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
-	import { writeReq } from '$lib/utils';
+	import { writeReq } from '$lib/logics/_shared/utils';
 	import NavBar from '$lib/components/NavBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';

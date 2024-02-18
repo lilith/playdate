@@ -1,4 +1,3 @@
-import AvailabilityDateRepository from '$lib/server/repository/AvailabilityDate';
 import { AvailabilityStatus, PrismaClient, Pronoun } from '@prisma/client';
 import { DateTime } from 'luxon';
 
@@ -313,14 +312,27 @@ async function main() {
 		}
 	);
 
-	await AvailabilityDateRepository.upsert({
-		householdId: 3,
-		date: firstDate.toJSDate(),
+
+	const firstDateBase = {
 		status: AvailabilityStatus.AVAILABLE,
 		notes: 'first date',
 		emoticons: '',
 		startTime: firstDate.set({ hour: 14 }).toJSDate(),
 		endTime: firstDate.set({ hour: 15 }).toJSDate()
+	};
+	await prisma.availabilityDate.upsert({
+		where: {
+			householdId_date: {
+				householdId: 3,
+				date: firstDate.toJSDate(),
+			}
+		},
+		update: firstDateBase,
+		create: {
+			householdId: 3,
+			date: firstDate.toJSDate(),
+			...firstDateBase
+		}
 	});
 
 	const lastDate = DateTime.fromObject(
@@ -334,14 +346,26 @@ async function main() {
 		}
 	);
 
-	await AvailabilityDateRepository.upsert({
-		householdId: 3,
-		date: lastDate.toJSDate(),
+	const lastDateBase = {
 		status: AvailabilityStatus.AVAILABLE,
 		notes: 'last date',
 		emoticons: '',
 		startTime: lastDate.set({ hour: 14 }).toJSDate(),
 		endTime: lastDate.set({ hour: 15 }).toJSDate()
+	};
+	await prisma.availabilityDate.upsert({
+		where: {
+			householdId_date: {
+				householdId: 3,
+				date: lastDate.toJSDate(),
+			}
+		},
+		update: lastDateBase,
+		create: {
+			householdId: 3,
+			date: lastDate.toJSDate(),
+			...lastDateBase
+		}
 	});
 }
 
