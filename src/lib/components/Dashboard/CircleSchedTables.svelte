@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type {
 		HouseholdsDict,
-		SpecifiedRowWithDateAndStringEmojis
 	} from '$lib/logics/Dashboard/_shared/types';
+	import type { ScheduleItem } from '$lib/logics/_shared/format';
 	import ScheduleTable from './ScheduleTable.svelte';
 	import './styles.css';
 
 	export let circleDatesDict: {
-		[key: string]: SpecifiedRowWithDateAndStringEmojis[];
+		[key: string]: ScheduleItem[];
 	};
 	export let householdsDict: HouseholdsDict;
 </script>

@@ -1,7 +1,6 @@
 import type { Row } from '$lib/logics/_shared/types';
 import type {
 	AvailabilityDate,
-	AvailabilityStatus,
 	Household,
 	HouseholdChild,
 	HouseholdConnection,
@@ -22,14 +21,6 @@ export type CircleMember = HouseholdConnection & {
 export type AvailabilityDateTime = Date | null;
 
 export type RowWithDate = Row & Pick<AvailabilityDate, 'startTime' | 'endTime'>;
-
-export type SpecifiedRowWithDate = RowWithDate & {
-	availRange: Extract<AvailabilityStatus, 'BUSY'> | string;
-};
-
-export type SpecifiedRowWithDateAndStringEmojis = SpecifiedRowWithDate & {
-	stringEmojis: string;
-};
 
 export type HouseholdsDict = {
 	[key: string]: {

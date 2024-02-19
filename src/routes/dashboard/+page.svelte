@@ -10,13 +10,13 @@
 		CircleMember,
 		HouseholdsDict,
 		Overlaps,
-		SpecifiedRowWithDateAndStringEmojis
 	} from '$lib/logics/Dashboard/_shared/types';
+	import type { ScheduleItem } from '$lib/logics/_shared/format';
 
-	const { userRows, circleDatesDict, householdsDict, overlaps, circle } = $page.data as {
-		userRows: SpecifiedRowWithDateAndStringEmojis[];
-		circleDatesDict: {
-			[key: string]: SpecifiedRowWithDateAndStringEmojis[];
+	const { displayedUserRows, displayedCircleDatesDict, householdsDict, overlaps, circle } = $page.data as {
+		displayedUserRows: ScheduleItem[];
+		displayedCircleDatesDict: {
+			[key: string]: ScheduleItem[];
 		};
 		householdsDict: HouseholdsDict;
 		overlaps: Overlaps;
@@ -26,15 +26,18 @@
 
 <div>
 	<NavBar pageName="Dashboard" />
-	<NoticesSection {userRows} {circle} />
+	<NoticesSection userRows={displayedUserRows} {circle} />
 
 	<OverlapsTable {overlaps} {householdsDict} />
 
 	<p class="subtitle">
 		<a class="link" href="/calendar">Your Schedule</a>
 	</p>
-	<ScheduleTable rows={userRows} />
+	<ScheduleTable rows={displayedUserRows} />
 
 	<p class="subtitle">Your Circle's Schedules</p>
-	<CircleSchedTables {circleDatesDict} {householdsDict} />
+	<CircleSchedTables circleDatesDict={displayedCircleDatesDict} {householdsDict} />
+	{#if circle.length === 0}
+		<p class="default">Find your friends!</p>
+	{/if}
 </div>

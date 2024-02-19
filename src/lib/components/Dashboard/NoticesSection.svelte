@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import type { CircleMember, SpecifiedRowWithDateAndStringEmojis } from "$lib/logics/Dashboard/_shared/types";
+	import type { CircleMember } from "$lib/logics/Dashboard/_shared/types";
+	import type { ScheduleItem } from "$lib/logics/_shared/format";
 	import './styles.css';
 
-  export let userRows: SpecifiedRowWithDateAndStringEmojis[];;
+  export let userRows: ScheduleItem[];
   export let circle: CircleMember[];
 
   const emptySchedule = userRows.length === 0;
@@ -17,7 +18,7 @@
 <div style="margin-bottom: 2rem;">
   <p class="subtitle">Notices<span>{numNotices}</span></p>
   {#if emptySchedule}
-    <div class="notice" on:click={() => goto('/calendar')} on:keyup={() => goto('/calendar')}>
+    <div role="button" tabindex="0" class="notice" on:click={() => goto('/calendar')} on:keyup={() => goto('/calendar')}>
       <p>Empty Schedule</p>
       <p>Please mark your tentative availability.</p>
       <p>Click <span class="link">here</span> to go to your schedule editor.</p>
@@ -25,7 +26,7 @@
   {/if}
 
   {#if noFriends}
-    <div class="notice" on:click={() => goto('/circle')} on:keyup={() => goto('/circle')}>
+    <div role="button" tabindex="0" class="notice" on:click={() => goto('/circle')} on:keyup={() => goto('/circle')}>
       <p>Find your friends</p>
       <p>Be sure to invite your friends to set up play dates!</p>
       <p>Click <span class="link">here</span> to go to your Circle page.</p>

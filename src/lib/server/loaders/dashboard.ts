@@ -7,13 +7,12 @@ import type {
 	HouseholdsDict,
 	Overlap,
 	Overlaps,
-	RowWithDate,
-	SpecifiedRowWithDate,
-	SpecifiedRowWithDateAndStringEmojis
+	RowWithDate
 } from '$lib/logics/Dashboard/_shared/types';
-import { EMOTICONS_REVERSE } from '$lib/logics/_shared/constants';
 import { startOfToday } from '$lib/logics/_shared/date';
+import { generateFullScheduleHelper, getDisplayedEmoticons } from '$lib/logics/_shared/format';
 import generateSchedRows, { putDbDatesInDict } from '$lib/logics/_shared/generateSchedRows';
+import type { Row } from '$lib/logics/_shared/types';
 import HouseholdConnectionRepository from '$lib/server/repository/HouseholdConnection';
 import { AvailabilityStatus } from '@prisma/client';
 
@@ -83,10 +82,7 @@ export const getCircleMembers = async (householdId: number | null, timeZone: str
 	);
 };
 
-export const convertSchedRowsToDisplayedRows = (rows: RowWithDate[]) => {
-	const specifiedRows = rmUnspecifiedDays(rows);
-	return addStringEmojis(specifiedRows);
-};
+export const convertSchedRowsToDisplayedRows = (rows: Row[]) => generateFullScheduleHelper(rows);
 
 export const putCircleInfoInDicts = (
 	circle: CircleMember[],
@@ -94,7 +90,7 @@ export const putCircleInfoInDicts = (
 	timeZone: string
 ) => {
 	const circleDatesDict: {
-		[key: string]: SpecifiedRowWithDateAndStringEmojis[];
+		[key: string]: RowWithDate[];
 	} = {}; // key is circle's householdId
 
 	const householdsDict: HouseholdsDict = {};
@@ -103,15 +99,13 @@ export const putCircleInfoInDicts = (
 		if (!x) return;
 		if (userHId === x.friendHouseholdId) {
 			const friendDatesDict = putDbDatesInDict(x.household.AvailabilityDate, timeZone);
-			const allFriendRows = generateSchedRows(friendDatesDict, timeZone);
-			circleDatesDict[x.householdId] = convertSchedRowsToDisplayedRows(allFriendRows);
+			circleDatesDict[x.householdId] = generateSchedRows(friendDatesDict, timeZone);
 			householdsDict[x.householdId] = getHousehold(x.household);
 			return;
 		}
 
 		const friendDatesDict = putDbDatesInDict(x.friendHousehold.AvailabilityDate, timeZone);
-		const allFriendRows = generateSchedRows(friendDatesDict, timeZone);
-		circleDatesDict[x.friendHouseholdId] = convertSchedRowsToDisplayedRows(allFriendRows);
+		circleDatesDict[x.friendHouseholdId] = generateSchedRows(friendDatesDict, timeZone);
 		householdsDict[x.friendHouseholdId] = getHousehold(x.friendHousehold);
 	});
 
@@ -151,18 +145,10 @@ export const getOverlapRange = (
 	return null;
 };
 
-const getDisplayedEmoticons = (dbEmoticons: Set<string> | null) => {
-	let emoticons = '';
-	for (const emoji of dbEmoticons ?? new Set()) {
-		emoticons += EMOTICONS_REVERSE[emoji];
-	}
-	return emoticons ?? 'N/A';
-};
-
 export const getOverlaps = (
-	userRows: SpecifiedRowWithDate[],
+	userRows: RowWithDate[],
 	circleDatesDict: {
-		[key: string]: SpecifiedRowWithDate[];
+		[key: string]: RowWithDate[];
 	},
 	timeZone: string
 ) => {
@@ -205,12 +191,3 @@ export const getOverlaps = (
 
 	return res;
 };
-
-export const rmUnspecifiedDays = (rows: RowWithDate[]) =>
-	rows.filter((r) => r.availRange !== AvailabilityStatus.UNSPECIFIED);
-
-export const addStringEmojis = (rows: SpecifiedRowWithDate[]) =>
-	rows.map((r) => ({
-		...r,
-		stringEmojis: getDisplayedEmoticons(r.emoticons)
-	}));

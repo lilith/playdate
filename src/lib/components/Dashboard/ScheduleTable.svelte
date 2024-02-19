@@ -1,15 +1,32 @@
 <script lang="ts">
-	import type { SpecifiedRowWithDateAndStringEmojis } from '$lib/logics/Dashboard/_shared/types';
-	import { AvailabilityStatus } from '@prisma/client';
 	import Legend from '../Legend.svelte';
+	import { getDisplayedEmoticons, type ScheduleItem } from '$lib/logics/_shared/format';
 
-	export let rows: SpecifiedRowWithDateAndStringEmojis[];
+	export let rows: ScheduleItem[];
 </script>
 
 <table class="schedule">
 	{#each rows as row}
 		<tr>
-			{#if row.availRange === AvailabilityStatus.BUSY}
+			<td>
+				<div class="flex">
+					{row.label}
+					{#if row.emoticons.size}
+						<div class="tooltip w-fit">
+							<p>
+								{getDisplayedEmoticons(row.emoticons)}
+								<span class="tooltiptext">
+									<Legend />
+								</span>
+							</p>
+						</div>
+					{/if}
+				</div>
+				{#if row.notes}
+					{row.notes}
+				{/if}
+			</td>
+			<!-- {#if row.availRange === AvailabilityStatus.BUSY}
 				<td>
 					Busy {row.availRange}
 				</td>
@@ -19,10 +36,10 @@
 						{row.englishDay}
 						{row.monthDay}
 						{row.availRange}
-						{#if row.stringEmojis !== 'N/A'}
+						{#if row.emoticons.size}
 							<div class="tooltip w-fit">
 								<p>
-									{row.emoticons}
+									{getDisplayedEmoticons(row.emoticons)}
 									<span class="tooltiptext">
 										<Legend />
 									</span>
@@ -34,7 +51,7 @@
 						{row.notes}
 					{/if}
 				</td>
-			{/if}
+			{/if} -->
 		</tr>
 	{/each}
 </table>

@@ -1,13 +1,14 @@
 import type { CircleMember } from '$lib/logics/Dashboard/_shared/types';
+import type { ScheduleItem } from '$lib/logics/_shared/format';
 import generateSchedRows, {
 	putDbDatesInDict
 } from '$lib/logics/_shared/generateSchedRows';
 import { getDbDates } from '$lib/server/_shared/getDbDates';
 import {
+	convertSchedRowsToDisplayedRows,
 	getCircleMembers,
 	getOverlaps,
-	putCircleInfoInDicts,
-	rmUnspecifiedDays
+	putCircleInfoInDicts
 } from '$lib/server/loaders/dashboard';
 import type { PageServerLoad } from './$types';
 
@@ -19,8 +20,6 @@ export const load = (async ({ parent }) => {
 	const userDatesDict = putDbDatesInDict(userDbDates, user.timeZone);
 	const allUserRows = generateSchedRows(userDatesDict, user.timeZone);
 
-	const userRows = rmUnspecifiedDays(allUserRows);
-
 	const circle = (await getCircleMembers(userHouseholdId, user.timeZone)) as CircleMember[];
 	const { circleDatesDict, householdsDict } = putCircleInfoInDicts(
 		circle,
@@ -28,12 +27,18 @@ export const load = (async ({ parent }) => {
 		user.timeZone
 	);
 
-	const overlaps = getOverlaps(userRows, circleDatesDict, user.timeZone);
+	const overlaps = getOverlaps(allUserRows, circleDatesDict, user.timeZone);
+
+	const displayedCircleDatesDict: { [key: string]: ScheduleItem[] } = {}
+	Object.entries(circleDatesDict).forEach(([friendHId, allFriendRows]) => {
+		displayedCircleDatesDict[friendHId] = convertSchedRowsToDisplayedRows(allFriendRows)
+	})
+
+	const displayedUserRows = convertSchedRowsToDisplayedRows(allUserRows);
 
 	return {
-		userDbDates,
-		userRows,
-		circleDatesDict,
+		displayedUserRows,
+		displayedCircleDatesDict,
 		householdsDict,
 		overlaps,
 		circle

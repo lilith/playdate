@@ -1,44 +1,59 @@
 import { EMOTICONS_REVERSE } from '$lib/logics/_shared/constants';
 import { AvailabilityStatus } from '@prisma/client';
 import type { Row } from './types';
+import type { RowWithDate } from '../Dashboard/_shared/types';
 
-function getScheduleItem(row: Row): string {
-	let scheduleItem = '';
+export type ScheduleItem = Row & {
+	label: string;
+};
+
+export const getDisplayedEmoticons = (dbEmoticons: Set<string> | null) => {
+	let emoticons = '';
+	for (const emoji of dbEmoticons ?? new Set()) {
+		emoticons += EMOTICONS_REVERSE[emoji];
+	}
+	return emoticons;
+};
+
+function getScheduleItem(row: Row) {
 	const busy = row.availRange === AvailabilityStatus.BUSY;
 	const unspecified = row.availRange === AvailabilityStatus.UNSPECIFIED;
 
-	if (busy) scheduleItem = `Busy ${row.monthDay}`;
-	else if (unspecified) scheduleItem = `Unspecified ${row.monthDay}`;
-	else scheduleItem = `${row.englishDay} ${row.monthDay} ${row.availRange}`;
+	const res: ScheduleItem = {
+		...row,
+		label: '',
+	};
 
-	if (row.emoticons?.size) {
-		scheduleItem += ' ';
-		scheduleItem += Array.from(row.emoticons)
-			.map((englishEmoji: string) => EMOTICONS_REVERSE[englishEmoji])
-			.join('');
-	}
+	if (busy) res.label = `Busy ${row.monthDay}`;
+	else if (unspecified) res.label = `Unspecified ${row.monthDay}`;
+	else res.label = `${row.englishDay} ${row.monthDay} ${row.availRange}`;
 
-	if (row.notes?.length) {
-		scheduleItem += ' ';
-		scheduleItem += row.notes;
-	}
-
-	return scheduleItem;
+	return res;
 }
 
-function updateLastScheduleItem(schedule: string[], newDate: string): void {
-	const lastScheduleItem = schedule[schedule.length - 1];
-	if (lastScheduleItem.includes('-')) {
-		const dates = lastScheduleItem.split('-');
+function updateLastScheduleItem(schedule: ScheduleItem[], newDate: string): void {
+	const lastInd = schedule.length - 1;
+	const lastScheduleItem = schedule[lastInd];
+	if (lastScheduleItem.label.includes('-')) {
+		const dates = lastScheduleItem.label.split('-');
 		dates[dates.length - 1] = newDate;
-		schedule[schedule.length - 1] = dates.join('-');
+		schedule[lastInd].label = dates.join('-');
 	} else {
-		schedule[schedule.length - 1] = `${schedule[schedule.length - 1].trim()}-${newDate}`;
+		schedule[lastInd].label = `${schedule[lastInd].label.trim()}-${newDate}`;
 	}
+}
+
+function convertSchedItemsToStrings(schedItems: ScheduleItem[]) {
+	return schedItems.map(({ label, emoticons, notes }) => {
+		let res = label;
+		if (emoticons.size) res += ` ${getDisplayedEmoticons(emoticons)}`;
+		if (notes) res += ` ${notes}`;
+		return res;
+	});
 }
 
 export function generateDiffSchedule(ogRows: Row[], rows: Row[]): string[] {
-	const diffs: string[] = [];
+	const diffs: ScheduleItem[] = [];
 	let lastIsBusy = false;
 	let lastIsUnspecified = false;
 
@@ -64,11 +79,11 @@ export function generateDiffSchedule(ogRows: Row[], rows: Row[]): string[] {
 		}
 	});
 
-	return diffs;
+	return convertSchedItemsToStrings(diffs);
 }
 
-export function generateFullSchedule(rows: Row[]): string[] {
-	const schedule: string[] = [];
+export function generateFullScheduleHelper(rows: Row[]) {
+	const schedule: ScheduleItem[] = [];
 	let lastIsBusy = false;
 
 	rows.forEach((row) => {
@@ -88,6 +103,11 @@ export function generateFullSchedule(rows: Row[]): string[] {
 	});
 
 	return schedule;
+}
+
+export function generateFullSchedule(rows: Row[]) {
+	const scheduleItems = generateFullScheduleHelper(rows);
+	return convertSchedItemsToStrings(scheduleItems);
 }
 
 export function timeToParts(t: string) {
