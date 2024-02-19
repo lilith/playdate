@@ -1,5 +1,5 @@
 import { getCircleInfo, getDatesDict, getKidsNames } from '$lib/server/loaders/calendar';
-import type { User } from '@prisma/client';
+import { type User, AvailabilityStatus } from '@prisma/client';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ parent, depends }) => {
@@ -14,6 +14,7 @@ export const load = (async ({ parent, depends }) => {
 	const circleInfo = await getCircleInfo(householdId);
 
 	return {
+		AvailabilityStatus,
 		datesDict,
 		kidNames,
 		circleInfo

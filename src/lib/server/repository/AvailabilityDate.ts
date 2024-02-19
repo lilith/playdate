@@ -57,22 +57,21 @@ export default class AvailabilityDateRepository {
 		});
 	}
 
-	static async upsertManyAsBusy(
-		filters: {
-			householdId: number;
-			date: Date;
-		}[]
-	) {
+	static async upsertManyAsBusy(householdId: number, dates: Date[]) {
 		return await prisma.$transaction([
 			prisma.availabilityDate.deleteMany({
 				where: {
-					OR: filters
+					householdId,
+					date: {
+						in: dates
+					}
 				}
 			}),
 			prisma.availabilityDate.createMany({
-				data: filters.map((filter) => ({
-					...filter,
-					status: AvailabilityStatus.AVAILABLE
+				data: dates.map((date) => ({
+					householdId,
+					date,
+					status: AvailabilityStatus.BUSY
 				}))
 			})
 		]);

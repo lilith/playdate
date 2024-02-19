@@ -7,14 +7,14 @@
 	import type { Row } from '$lib/logics/_shared/types';
 	import { onMount } from 'svelte';
 
-	let { dbAvailabilityDates, user, kidNames, circleInfo } = $page.data;
+	let { datesDict, user, kidNames, circleInfo, AvailabilityStatus } = $page.data;
 
 	let dbRows: Row[] = []; // rows saved in db
 	let rowsOnMount: Row[] = []; // needed for generating schedule diff and determining that rows saved in db have changed
 	let displayedRows: Row[] = []; // rows actually used in rendering -- not necessarily saved to db yet
 
 	onMount(() => {
-		const initializedVals = initVals({ dbDates: dbAvailabilityDates, timeZone: user.timeZone });
+		const initializedVals = initVals(datesDict, user.timeZone);
 		dbRows = initializedVals.dbRows;
 		rowsOnMount = initializedVals.rowsOnMount;
 		displayedRows = initializedVals.displayedRows;
@@ -25,6 +25,22 @@
 	const markUnspecifiedRowsAsBusy = async () => {
 		try {
 			await requestToMarkMultipleRowsAsBusy();
+
+			dbRows = displayedRows.map((r) => {
+				if (r.availRange === AvailabilityStatus.UNSPECIFIED) {
+					return {
+						...r,
+						availRange: AvailabilityStatus.BUSY,
+						notes: '',
+						emoticons: new Set(),
+						startHr: undefined,
+						startMin: undefined,
+						endHr: undefined,
+						endMin: undefined
+					};
+				}
+				return r;
+			});
 		} catch (err) {
 			alert('Something went wrong with saving'); // TODO: come up with better UI for showing err
 			console.error(err);

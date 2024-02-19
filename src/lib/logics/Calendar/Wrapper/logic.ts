@@ -2,8 +2,8 @@ import generateSchedRows from '$lib/logics/_shared/generateSchedRows';
 import type { AvailabilityDates } from '$lib/logics/_shared/types';
 import { writeReq } from '$lib/logics/_shared/utils';
 
-export const initVals = (dbVals: { dbDates: AvailabilityDates; timeZone: string }) => {
-	const dbRows = generateSchedRows(dbVals.dbDates, dbVals.timeZone);
+export const initVals = (dbDates: AvailabilityDates, timeZone: string ) => {
+	const dbRows = generateSchedRows(dbDates, timeZone);
 	const rowsOnMount = [...dbRows];
 	const displayedRows = dbRows.map((r) => ({
 		...r,

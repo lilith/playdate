@@ -1,8 +1,8 @@
-import { dateTo12Hour, toLocalTimezone } from '$lib/logics/_shared/date';
+import { dateTo12Hour, startOfToday, toLocalTimezone } from '$lib/logics/_shared/date';
 import type { Row } from '$lib/logics/_shared/types';
 import { writeReq } from '$lib/logics/_shared/utils';
 import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
-import type { DateTime } from 'luxon';
+import { DateTime } from 'luxon';
 import { UNAVAILABLE } from './constants';
 import type { AvailRangeParts } from './types';
 
@@ -27,7 +27,8 @@ export const extractAvailRange = ({
 export const requestToMarkOneRow = async ({
 	status,
 	displayedRow,
-	availableDetails
+	availableDetails,
+	timeZone
 }: {
 	status: AvailabilityStatus;
 	displayedRow: Row;
@@ -36,13 +37,24 @@ export const requestToMarkOneRow = async ({
 		endTime: DateTime;
 		availRangeParts: AvailRangeParts;
 	} | null;
+	timeZone: string;
 }) => {
+	const [month, day] = displayedRow.monthDay.split('/');
+	const today = startOfToday(timeZone)
+	const date = DateTime.fromObject({
+		year: today.year,
+		month: parseInt(month),
+		day: parseInt(day)
+	})
+
+	if (date < today) date.plus({ years: 1 })
+
 	const response = await writeReq('/db', {
 		type: 'upsertDate',
 		status,
 		notes: displayedRow.notes,
 		emoticons: Array.from(displayedRow.emoticons).join(','),
-		monthDay: displayedRow.monthDay,
+		date: date.toJSDate(),
 		...(status === AvailabilityStatus.AVAILABLE && !!availableDetails
 			? {
 					startTime: availableDetails.startTime.toJSDate(),

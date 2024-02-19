@@ -1,6 +1,9 @@
+import { NUM_DAYS_IN_SCHED } from '$lib/logics/_shared/constants';
+import { startOfToday } from '$lib/logics/_shared/date';
+import { putDbDatesInDict } from '$lib/logics/_shared/generateSchedRows';
 import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
-import { DateTime } from 'luxon';
+import { getDbDates } from '../_shared/getDbDates';
 import AvailabilityDateRepository from '../repository/AvailabilityDate';
 
 export default async function upsertUnspecifiedDatesAsBusy(_: Record<string, never>, user: User) {
@@ -11,14 +14,16 @@ export default async function upsertUnspecifiedDatesAsBusy(_: Record<string, nev
 		});
 	}
 
-	const filters = Array(21).map((_, i) => {
-		const date = DateTime.now().setZone(user.timeZone).plus({ days: i }).toJSDate();
+	const today = startOfToday(user.timeZone);
+	const dbDates = await getDbDates(householdId, user.timeZone);
+	const datesDict = putDbDatesInDict(dbDates, user.timeZone);
 
-		return {
-			householdId,
-			date
-		};
+	const dates: Date[] = [];
+	[...Array(NUM_DAYS_IN_SCHED)].forEach((_, i) => {
+		const date = today.plus({ days: i });
+		if (datesDict[`${date.month}/${date.day}`]) return;
+		dates.push(date.toJSDate());
 	});
 
-	return await AvailabilityDateRepository.upsertManyAsBusy(filters);
+	return await AvailabilityDateRepository.upsertManyAsBusy(householdId, dates);
 }

@@ -25,7 +25,7 @@ function validateMonthDay(monthDay: string) {
 
 export default async function upsertDate(
 	req: {
-		monthDay: string;
+		date: Date;
 	} & (
 		| {
 				status: Extract<AvailabilityStatus, 'AVAILABLE'>;
@@ -46,18 +46,15 @@ export default async function upsertDate(
 			message: 'You need to create / join a household before saving a schedule'
 		});
 	}
-	const { monthDay, status } = req;
+	const { date, status } = req;
 	const isAvailable = status === AvailabilityStatus.AVAILABLE;
 	const notes = (isAvailable ? req.notes : undefined) ?? '';
 	const emoticons = isAvailable ? req.emoticons : undefined;
 	const startTime = isAvailable ? new Date(req.startTime) : undefined;
 	const endTime = isAvailable ? new Date(req.endTime) : undefined;
 
-	const { month, day } = validateMonthDay(monthDay);
-
 	const res = {
-		month,
-		day,
+		date,
 		status,
 		notes,
 		emoticons,
@@ -67,10 +64,9 @@ export default async function upsertDate(
 
 	if (status === AvailabilityStatus.UNSPECIFIED) {
 		await AvailabilityDateRepository.delete({
-			householdId_month_day: {
+			householdId_date: {
 				householdId,
-				month,
-				day
+				date
 			}
 		});
 		return res;

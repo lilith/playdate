@@ -41,6 +41,7 @@ export async function POST({
 		return json(res);
 	} catch (err) {
 		console.error(`${req.type} for user ${user.id} failed`);
+		console.error(err)
 		throw error(err.status, err.body.message);
 	}
 }
