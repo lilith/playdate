@@ -1,6 +1,6 @@
 import type { Pronoun, User } from '@prisma/client';
-import { error } from '@sveltejs/kit';
 import HouseholdChildRepository from '../repository/HouseholdChild';
+import upsertHousehold from './_shared/upsertHousehold';
 
 export default async function createKid(
 	req: {
@@ -12,12 +12,16 @@ export default async function createKid(
 	user: User
 ) {
 	const { firstName, pronouns, lastName, dateOfBirth } = req;
-	const { householdId } = user;
+	let { householdId } = user;
 	// ensure the household exists before adding kid to it
 	if (!householdId) {
-		throw error(401, {
-			message: 'Create a household before trying to add a child to it'
-		});
+		const newHousehold = await upsertHousehold(
+			lastName ? `${lastName} Family` : '',
+			'',
+			householdId,
+			user.id
+		);
+		householdId = newHousehold.id;
 	}
 
 	const kid = await HouseholdChildRepository.create({
