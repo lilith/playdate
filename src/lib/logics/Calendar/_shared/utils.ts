@@ -53,7 +53,7 @@ export const requestToMarkOneRow = async ({
 		type: 'upsertDate',
 		status,
 		notes: displayedRow.notes,
-		emoticons: Array.from(displayedRow.emoticons).join(','),
+		emoticons: displayedRow.emoticons.size ? Array.from(displayedRow.emoticons).join(',') : null,
 		date: date.toJSDate(),
 		...(status === AvailabilityStatus.AVAILABLE && !!availableDetails
 			? {

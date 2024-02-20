@@ -60,7 +60,8 @@
 			await requestToMarkOneRow({
 				status,
 				displayedRow: displayedRows[i],
-				availableDetails: null
+				availableDetails: null,
+				timeZone
 			});
 			closeEditor(i);
 			dispatch('markedRow');

@@ -30,7 +30,7 @@ export default async function upsertDate(
 		| {
 				status: Extract<AvailabilityStatus, 'AVAILABLE'>;
 				notes: string | undefined;
-				emoticons: string | undefined;
+				emoticons: string | undefined | null;
 				startTime: Date;
 				endTime: Date;
 		  }

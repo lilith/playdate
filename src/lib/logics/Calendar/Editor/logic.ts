@@ -137,7 +137,8 @@ export const markRowAsAvailable = async ({
 			startTime,
 			endTime,
 			availRangeParts
-		}
+		},
+		timeZone
 	});
 
 	return {

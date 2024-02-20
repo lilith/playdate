@@ -27,7 +27,7 @@ export default class AvailabilityDateRepository {
 		date: Date;
 		status: AvailabilityStatus;
 		notes: string;
-		emoticons: string | undefined;
+		emoticons: string | undefined | null;
 		startTime: Date | string | undefined;
 		endTime: Date | string | undefined;
 	}) {

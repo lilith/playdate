@@ -14,7 +14,8 @@ import { generateFullScheduleHelper, getDisplayedEmoticons } from '$lib/logics/_
 import generateSchedRows, { putDbDatesInDict } from '$lib/logics/_shared/generateSchedRows';
 import type { Row } from '$lib/logics/_shared/types';
 import HouseholdConnectionRepository from '$lib/server/repository/HouseholdConnection';
-import { AvailabilityStatus } from '@prisma/client';
+import { AvailabilityStatus, type AvailabilityDate } from '@prisma/client';
+import { getDbDates } from '../_shared/getDbDates';
 
 export const getHousehold = (household: HouseholdWithExtraInfo) => {
 	return {
@@ -98,14 +99,12 @@ export const putCircleInfoInDicts = (
 	circle.forEach((x) => {
 		if (!x) return;
 		if (userHId === x.friendHouseholdId) {
-			const friendDatesDict = putDbDatesInDict(x.household.AvailabilityDate, timeZone);
-			circleDatesDict[x.householdId] = generateSchedRows(friendDatesDict, timeZone);
+			circleDatesDict[x.householdId] = getHouseholdRows(x.household.AvailabilityDate, timeZone);
 			householdsDict[x.householdId] = getHousehold(x.household);
 			return;
 		}
 
-		const friendDatesDict = putDbDatesInDict(x.friendHousehold.AvailabilityDate, timeZone);
-		circleDatesDict[x.friendHouseholdId] = generateSchedRows(friendDatesDict, timeZone);
+		circleDatesDict[x.friendHouseholdId] = getHouseholdRows(x.friendHousehold.AvailabilityDate, timeZone);
 		householdsDict[x.friendHouseholdId] = getHousehold(x.friendHousehold);
 	});
 
@@ -143,6 +142,16 @@ export const getOverlapRange = (
 	}
 
 	return null;
+};
+
+export const getCurrUserRows = async (householdId: number, timeZone: string) => {
+	const dbDates = await getDbDates(householdId, timeZone);
+	return getHouseholdRows(dbDates, timeZone);
+};
+
+const getHouseholdRows = (dbDates: AvailabilityDate[], timeZone: string) => {
+	const userDatesDict = putDbDatesInDict(dbDates, timeZone);
+	return generateSchedRows(userDatesDict, timeZone);
 };
 
 export const getOverlaps = (
