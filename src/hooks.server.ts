@@ -5,7 +5,7 @@ import { toLocalTimezone } from '$lib/logics/_shared/date';
 import prisma from '$lib/logics/_shared/prisma';
 import type { UserWithPermissions } from '$lib/logics/_shared/types';
 
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
 
 if (import.meta.env.PROD) {
@@ -89,7 +89,10 @@ const redirectOrContinue = (
 	) => MaybePromise<Response>
 ) => {
 	console.log('REDIRECT OR CONT', event.url.pathname, path);
-	if (event.url.pathname !== path) throw redirect(308, path);
+	if (event.url.pathname !== path) {
+		if (event.url.pathname === '/twilio') throw error(403);
+		throw redirect(308, path);
+	}
 	return resolve(event);
 };
 

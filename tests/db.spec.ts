@@ -36,7 +36,7 @@ that info is derived from the session cookie
 */
 
 test("User 4 fails to accept friend request on User 3's behalf", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user4session',
@@ -60,7 +60,7 @@ test("User 4 fails to accept friend request on User 3's behalf", async ({ page, 
 });
 
 test("User 4 fails to decline friend request on User 3's behalf", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user4session',
@@ -84,7 +84,7 @@ test("User 4 fails to decline friend request on User 3's behalf", async ({ page,
 });
 
 test("User 4 fails to delete friend on User 3's behalf", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user4session',
@@ -108,7 +108,7 @@ test("User 4 fails to delete friend on User 3's behalf", async ({ page, context 
 });
 
 test("User 4 fails to accept household invite on User 2's behalf", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user4session',
@@ -132,7 +132,7 @@ test("User 4 fails to accept household invite on User 2's behalf", async ({ page
 });
 
 test("User 4 fails to decline household invite on User 2's behalf", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user4session',

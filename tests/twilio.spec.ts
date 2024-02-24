@@ -34,7 +34,7 @@ test("User can't send circleNotif msg without session cookie", async ({ page, co
 });
 
 test("User 2 can't send circleNotif msg (no household)", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user2session',
@@ -44,7 +44,8 @@ test("User 2 can't send circleNotif msg (no household)", async ({ page, context 
 	const res = await context.request.fetch(host + '/twilio', {
 		method: 'post',
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
+			'Accept': 'application/json'
 		},
 		data: {
 			phone: '+1xxxxxxxxxx',
@@ -53,13 +54,13 @@ test("User 2 can't send circleNotif msg (no household)", async ({ page, context 
 			diff: true
 		}
 	});
-	// endpoint itself has a check for this but gonna get stopped by hooks routing even before raeching that point
-	expect(res.status()).not.toEqual(200);
+	// endpoint itself has a check for this but gonna get stopped by hooks routing even before reaching that point
+	expect(res.status()).toEqual(403);
 	await page.close();
 });
 
 test("User 6 can't send circleNotif msg to nonexistent user", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user6session',
@@ -86,7 +87,7 @@ test("User 6 can't send circleNotif msg to nonexistent user", async ({ page, con
 });
 
 test("User 6 can't send circleNotif msg to user w/ no household", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user6session',
@@ -113,7 +114,7 @@ test("User 6 can't send circleNotif msg to user w/ no household", async ({ page,
 });
 
 test("User 6 can't send circleNotif msg to user outside of circle", async ({ page, context }) => {
-	context.addCookies([
+	await context.addCookies([
 		{
 			name: 'session',
 			value: 'user6session',

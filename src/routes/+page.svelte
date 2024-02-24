@@ -47,7 +47,7 @@
 		});
 		if (res.status === 200) {
 			const { token } = await res.json();
-			if (public_env.PUBLIC_ENV === 'test') console.log('PHONE_TOKEN', phone, token);
+			if (public_env.PUBLIC_ENV === 'test') console.log('TOKEN', token);
 
 			const region = new Intl.DateTimeFormat();
 			const { timeZone } = region.resolvedOptions();
