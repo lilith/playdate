@@ -26,7 +26,7 @@
 			<div class="tooltip-container">
 				<div class="tooltip">
 					<p>
-						You: {userEmoticons}
+						You: {userEmoticons.length ? userEmoticons : 'N/A'}
 						<span class="tooltiptext">
 							<Legend />
 						</span>
@@ -35,7 +35,7 @@
 				|
 				<div class="tooltip">
 					<p>
-						Them: {friendEmoticons}
+						Them: {friendEmoticons.length ? friendEmoticons : 'N/A'}
 						<span class="tooltiptext">
 							<Legend />
 						</span>

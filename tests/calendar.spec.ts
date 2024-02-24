@@ -11,3 +11,8 @@
     b. BUSY? - Clear btn
     c. AVAILABLE? 
 */
+/*
+create profile
+create kid
+save basic info
+*/
