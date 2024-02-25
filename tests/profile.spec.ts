@@ -12,14 +12,11 @@ test.beforeEach(async () => {
 	await prisma.$disconnect();
 });
 
-test.only('User can create new profile with valid phone number', async ({ page }) => {
+test('User can create new profile with valid phone number', async ({ page }) => {
 	await page.goto(host);
-
-	console.log('CHECKPOINT 1');
-	await page.waitForTimeout(3000);
+	await page.waitForURL(host);
 	await page.getByRole('textbox').fill(phone);
 	await page.getByRole('button').click();
-	console.log('CHECKPOINT 2');
 
 	let token: string;
 	const retrieveTokenFromServerLog = async (msg: ConsoleMessage) => {
@@ -39,22 +36,20 @@ test.only('User can create new profile with valid phone number', async ({ page }
 			}
 		}, 100);
 	});
-	console.log('CHECKPOINT 3');
+
 	await page.goto(`${host}/login/${token!}`);
 	await page.waitForURL(`${host}/profile`);
-	console.log('CHECKPOINT 4');
+
 	// if this shows up, then that means the modal is open, which means this is a brand new user, as expected
 	const acceptBtn = page.locator('dialog button');
 	await acceptBtn.waitFor();
 	await acceptBtn.click();
 	await acceptBtn.waitFor({ state: 'hidden' });
-	console.log('CHECKPOINT 5');
+
 	await page.getByLabel('First Name').fill('FIRST_NAME');
 	await page.getByLabel('Last Name').fill('LAST_NAME');
 	await page.getByLabel('Pronouns').selectOption('SHE_HER_HERS');
 
-	console.log('CHECKPOINT 6');
 	await page.getByText('Save').click();
-	console.log('CHECKPOINT 7');
 	await page.waitForURL(`${host}/household`);
 });
