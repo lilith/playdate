@@ -12,7 +12,10 @@ async function main() {
 		...[3, 4].map((userInd) => utils.createUserWithEmptyHousehold(userInd)),
 		...[2, 4, 6].map((userInd) => utils.createActiveSession(userInd)),
 		utils.createUserWithEmptyHousehold(5),
-		utils.createUserWithKid(6),
+		utils.createUserWithKid(6)
+	]);
+
+	await Promise.all([
 		utils.createFriendRequest(4, 3),
 		utils.createHouseholdConnection(3, 5),
 		utils.createHouseholdInvite(5, 2)
