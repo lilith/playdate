@@ -17,7 +17,11 @@ const config: PlaywrightTestConfig = {
 		timeout: 3000
 	},
 	// timeout: 10000,
-	testDir: 'tests'
+	testDir: 'tests',
+	use: {
+		locale: 'en-US',
+		timezoneId: 'America/Los_Angeles'
+	}
 };
 
 export default config;
