@@ -139,34 +139,44 @@
 	{/if}
 
 	<form method="POST" action="/db" on:submit|preventDefault={saveToDB}>
-		<label class="subtitle" for="first-name">First Name<span class="red">*</span></label>
-		<input type="text" name="first-name" id="first-name" bind:value={firstName} required />
+		<label class="subtitle" for="first-name"
+			>First Name<span class="red">*</span><br />
+			<input type="text" name="first-name" id="first-name" bind:value={firstName} required />
+		</label>
 
-		<label class="subtitle" for="last-name">Last Name</label>
-		<input type="text" name="last-name" bind:value={lastName} />
+		<label class="subtitle" for="last-name"
+			>Last Name<br />
+			<input type="text" name="last-name" id="last-name" bind:value={lastName} />
+		</label>
 
-		<label class="subtitle" for="pronouns">Pronouns<span class="red">*</span></label>
-		<select name="pronouns" id="pronouns" bind:value={pronouns} required>
-			<option value="" />
-			{#each Object.entries(PRONOUNS) as pronoun}
-				<option value={pronoun[0]}>{pronoun[1]}</option>
-			{/each}
-		</select>
+		<label class="subtitle" for="pronouns"
+			>Pronouns<span class="red">*</span><br />
+			<select name="pronouns" id="pronouns" bind:value={pronouns} required>
+				<option value="" />
+				{#each Object.entries(PRONOUNS) as pronoun}
+					<option value={pronoun[0]}>{pronoun[1]}</option>
+				{/each}
+			</select>
+		</label>
 
-		<label class="subtitle" for="zone">Zone<span class="red">*</span></label>
-		<select name="zone" id="zone" bind:value={timeZone} required on:change={onChangeZone}>
-			{#each Intl.supportedValuesOf('timeZone') as zone}
-				<option value={zone}>{zone}</option>
-			{/each}
-		</select>
+		<label class="subtitle" for="zone"
+			>Zone<span class="red">*</span><br />
+			<select name="zone" id="zone" bind:value={timeZone} required on:change={onChangeZone}>
+				{#each Intl.supportedValuesOf('timeZone') as zone}
+					<option value={zone}>{zone}</option>
+				{/each}
+			</select>
+		</label>
 
-		<label class="subtitle" for="locale">Language<span class="red">*</span></label>
-		<select name="locale" bind:value={locale} required>
-			<option value="" />
-			{#each $page.data.LANGUAGES as lang}
-				<option value={lang.name}>{lang.name}</option>
-			{/each}
-		</select>
+		<label class="subtitle" for="locale"
+			>Language<span class="red">*</span><br />
+			<select name="locale" id="locale" bind:value={locale} required>
+				<option value="" />
+				{#each $page.data.LANGUAGES as lang}
+					<option value={lang.name}>{lang.name}</option>
+				{/each}
+			</select>
+		</label>
 
 		<label class="subtitle" for="email">Email</label>
 		<input type="text" name="email" bind:value={email} />
@@ -235,6 +245,9 @@
 </div>
 
 <style>
+	.subtitle > * {
+		font-weight: revert;
+	}
 	.subtitle-2 {
 		text-align: center;
 		font-size: 24px;

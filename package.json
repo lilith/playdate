@@ -13,7 +13,7 @@
 		"build": "vite build",
 		"nodebuild": "NODE_MODE_ADAPTER=1 vite build",
 		"preview": "vite preview",
-		"test": "playwright test",
+		"test": "rm -f screenshot.png && playwright test",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:unit": "vitest",

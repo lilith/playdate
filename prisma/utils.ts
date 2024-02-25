@@ -1,4 +1,4 @@
-import { PrismaClient, Pronoun } from '@prisma/client';
+import { Prisma, PrismaClient, Pronoun } from '@prisma/client';
 
 export default class SeedUtils {
 	#now: Date;
@@ -11,10 +11,10 @@ export default class SeedUtils {
 		'+12015550125',
 		'+12015550126'
 	];
-	
+
 	constructor(now: Date, prisma: PrismaClient) {
 		this.#now = now;
-		this.#prisma = prisma
+		this.#prisma = prisma;
 	}
 
 	permsYes(phone: string) {
@@ -117,7 +117,7 @@ export default class SeedUtils {
 
 	async createUserWithNothing(userInd: number) {
 		const phone = this.PHONES[userInd - 1];
-	
+
 		await this.#prisma.user.upsert({
 			where: {
 				phone
@@ -132,10 +132,10 @@ export default class SeedUtils {
 
 	async createActiveSession(userInd: number) {
 		const phone = this.PHONES[userInd - 1];
-	
+
 		const expires = new Date(this.#now);
 		expires.setHours(expires.getHours() + 1);
-	
+
 		const userSessionToken = `user${userInd}session`;
 		const session = {
 			token: userSessionToken,
@@ -157,7 +157,7 @@ export default class SeedUtils {
 			...this.basicUser(userInd),
 			...this.emptyHousehold(userInd)
 		};
-	
+
 		await this.#prisma.user.upsert({
 			where: {
 				phone
@@ -177,7 +177,7 @@ export default class SeedUtils {
 			fromHouseholdId: fromUserInd,
 			fromUserId: fromUserInd
 		};
-	
+
 		await this.#prisma.friendRequest.upsert({
 			where: {
 				id: toUserInd
@@ -210,7 +210,7 @@ export default class SeedUtils {
 			householdId: fromUserInd,
 			fromUserId: fromUserInd
 		};
-	
+
 		await this.#prisma.joinHouseholdRequest.upsert({
 			where: {
 				id: toUserInd
@@ -225,9 +225,9 @@ export default class SeedUtils {
 			...this.basicUser(userInd),
 			...this.householdWithKid(userInd, 1)
 		};
-	
+
 		const phone = this.PHONES[userInd - 1];
-	
+
 		await this.#prisma.user.upsert({
 			where: {
 				phone
@@ -239,5 +239,10 @@ export default class SeedUtils {
 			}
 		});
 	}
-	
+
+	async deleteUsers(where: Prisma.UserWhereUniqueInput) {
+		await this.#prisma.user.deleteMany({
+			where
+		});
+	}
 }
