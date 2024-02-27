@@ -42,7 +42,7 @@ export async function POST({
 	} catch (err) {
 		console.error(`${req.type} for user ${user.id} failed`);
 		console.error(err)
-		throw error(err.status, err.body.message);
+		throw error(err?.status || 500, err.body?.message || err);
 	}
 }
 

@@ -1,5 +1,5 @@
 import prisma from '$lib/logics/_shared/prisma';
-import type * as Prisma from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export default class HouseholdRepository {
 	static async create(

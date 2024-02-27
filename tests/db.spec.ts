@@ -1,5 +1,4 @@
 import { expect } from '@playwright/test';
-import SeedUtils from '../prisma/utils';
 import { test } from './test';
 
 const host = 'http://localhost:5173';
@@ -32,22 +31,20 @@ that info is derived from the session cookie
 */
 
 test.describe('Household Invites', () => {
-	test.beforeAll(async ({ prisma }) => {
-		const utils = new SeedUtils(new Date(), prisma);
-
+	test.beforeAll(async ({ utils }) => {
 		await Promise.all([
 			utils.deleteUserAndHousehold('+12015550001'),
 			utils.deleteUserAndHousehold('+12015550002')
 		]);
 
 		await Promise.all([
-			...[1].map((userInd) => utils.createUserWithNothing(userInd)),
-			...[2].map((userInd) => utils.createUserWithEmptyHousehold(userInd)),
-			...[1, 2].map((userInd) => utils.createActiveSession(userInd))
+			...[2, 4].map((userInd) => utils.createUserWithNothing(userInd)),
+			...[1, 3].map((userInd) => utils.createUserWithEmptyHousehold(userInd)),
+			...[1, 3].map((userInd) => utils.createActiveSession(userInd))
 		]);
 	});
 
-	test("User 1 fails to accept household invite on User 2's behalf", async ({ page, context }) => {
+	test("User 1 fails to accept household invite on User 2's behalf", async ({ context }) => {
 		await context.addCookies([
 			{
 				name: 'session',
@@ -62,20 +59,19 @@ test.describe('Household Invites', () => {
 			},
 			data: {
 				type: 'acceptHouseholdInvite',
-				id: 2
+				id: 0
 			}
 		});
 		const { message } = await res.json();
 		expect(message).toEqual("You can't accept a household invite that wasn't issued to you");
 		expect(res.status()).toEqual(401);
-		await page.close();
 	});
 
-	test("User 1 fails to decline household invite on User 2's behalf", async ({ page, context }) => {
+	test("User 3 fails to decline household invite on User 4's behalf", async ({ context }) => {
 		await context.addCookies([
 			{
 				name: 'session',
-				value: 'user1session',
+				value: 'user3session',
 				url: host
 			}
 		]);
@@ -86,38 +82,37 @@ test.describe('Household Invites', () => {
 			},
 			data: {
 				type: 'rejectHouseholdInvite',
-				id: 2
+				id: 0
 			}
 		});
 		const { message } = await res.json();
 		expect(message).toEqual("You can't delete a household invite that wasn't issued to you");
 		expect(res.status()).toEqual(401);
-		await page.close();
 	});
 });
 
 test.describe('Friend Requests', () => {
-	test.beforeAll(async ({ prisma }) => {
-		const utils = new SeedUtils(new Date(), prisma);
-
+	test.beforeAll(async ({ utils }) => {
 		await Promise.all([
-			utils.deleteUserAndHousehold('+12015550003'),
-			utils.deleteUserAndHousehold('+12015550004')
+			utils.deleteUserAndHousehold('+12015550005'),
+			utils.deleteUserAndHousehold('+12015550006'),
+			utils.deleteUserAndHousehold('+12015550007'),
+			utils.deleteUserAndHousehold('+12015550008'),
+			utils.deleteUserAndHousehold('+12015550009'),
+			utils.deleteUserAndHousehold('+12015550010')
 		]);
 
 		await Promise.all([
-			...[3, 4].map((userInd) => utils.createUserWithEmptyHousehold(userInd)),
-			...[4].map((userInd) => utils.createActiveSession(userInd))
+			...[5, 6, 7, 8, 9, 10].map((userInd) => utils.createUserWithEmptyHousehold(userInd)),
+			...[5, 7, 9].map((userInd) => utils.createActiveSession(userInd))
 		]);
-
-		await Promise.all([utils.createFriendRequest(4, 3)]);
 	});
 
-	test("User 4 fails to accept friend request on User 3's behalf", async ({ page, context }) => {
+	test("User 5 fails to accept friend request on User 6's behalf", async ({ context }) => {
 		await context.addCookies([
 			{
 				name: 'session',
-				value: 'user4session',
+				value: 'user5session',
 				url: host
 			}
 		]);
@@ -128,20 +123,19 @@ test.describe('Friend Requests', () => {
 			},
 			data: {
 				type: 'acceptFriendReq',
-				friendReqId: 3
+				friendReqId: 0
 			}
 		});
 		const { message } = await res.json();
 		expect(message).toEqual('No friend request with that id issued to you');
 		expect(res.status()).toEqual(401);
-		await page.close();
 	});
 
-	test("User 4 fails to decline friend request on User 3's behalf", async ({ page, context }) => {
+	test("User 7 fails to decline friend request on User 8's behalf", async ({ context }) => {
 		await context.addCookies([
 			{
 				name: 'session',
-				value: 'user4session',
+				value: 'user7session',
 				url: host
 			}
 		]);
@@ -152,20 +146,19 @@ test.describe('Friend Requests', () => {
 			},
 			data: {
 				type: 'rejectFriendReq',
-				reqId: 3
+				reqId: 0
 			}
 		});
 		const { message } = await res.json();
 		expect(message).toEqual("Can't delete friend request not issued to you");
 		expect(res.status()).toEqual(401);
-		await page.close();
 	});
 
-	test("User 4 fails to delete friend on User 3's behalf", async ({ page, context }) => {
+	test("User 9 fails to delete friend on User 10's behalf", async ({ context }) => {
 		await context.addCookies([
 			{
 				name: 'session',
-				value: 'user4session',
+				value: 'user9session',
 				url: host
 			}
 		]);
@@ -176,13 +169,16 @@ test.describe('Friend Requests', () => {
 			},
 			data: {
 				type: 'deleteFriend',
-				connectionId: 3
+				connectionId: 0
 			}
 		});
 		const { message } = await res.json();
 		expect(message).toEqual("You can't delete a household connection that you're not a part of");
 		expect(res.status()).toEqual(401);
-		await page.close();
 	});
 });
 // TODO: Can't create household for someone who's already in a household
+
+test.afterAll(async ({ browser }) => {
+	await browser.close();
+});

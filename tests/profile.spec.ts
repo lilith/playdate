@@ -1,15 +1,11 @@
-import { test, type ConsoleMessage } from '@playwright/test';
-import { PrismaClient } from '@prisma/client';
-import SeedUtils from '../prisma/utils';
+import type { ConsoleMessage } from '@playwright/test';
+import { test } from './test';
 
 const host = 'http://localhost:5173';
-const phone = '+12016660127';
+const phone = '+12015550019';
 
-test.beforeEach(async () => {
-	const prisma = new PrismaClient();
-	const utils = new SeedUtils(new Date(), prisma);
-	await utils.deleteUsers({ phone });
-	await prisma.$disconnect();
+test.beforeEach(async ({ utils }) => {
+	await utils.deleteUserAndHousehold(phone);
 });
 
 test('User can create new profile with valid phone number', async ({ page }) => {
@@ -52,4 +48,9 @@ test('User can create new profile with valid phone number', async ({ page }) => 
 
 	await page.getByText('Save').click();
 	await page.waitForURL(`${host}/household`);
+	await page.close();
+});
+
+test.afterAll(async ({ browser }) => {
+	await browser.close();
 });

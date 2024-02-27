@@ -16,13 +16,13 @@ const config: PlaywrightTestConfig = {
 	expect: {
 		timeout: 3000
 	},
-	timeout: 10000,
+	// timeout: 10000,
 	testDir: 'tests',
 	testMatch:'*spec.ts',
 	use: {
 		locale: 'en-US',
 		timezoneId: 'America/Los_Angeles'
-	}
+	},
 };
 
 export default config;

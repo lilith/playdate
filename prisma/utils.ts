@@ -3,15 +3,6 @@ import { Prisma, PrismaClient, Pronoun } from '@prisma/client';
 export default class SeedUtils {
 	#now: Date;
 	#prisma: PrismaClient;
-	PHONES = [
-		'+12015550121',
-		'+12015550122',
-		'+12015550123',
-		'+12015550124',
-		'+12015550125',
-		'+12015550126',
-		'+12015550127'
-	];
 
 	constructor(now: Date, prisma: PrismaClient) {
 		this.#now = now;
@@ -40,15 +31,8 @@ export default class SeedUtils {
 	emptyHousehold(ind: number) {
 		return {
 			household: {
-				connectOrCreate: {
-					where: {
-						id: ind
-					},
-					create: {
-						// phone: phones[ind - 1],
-						id: ind,
-						name: `Household ${ind}`
-					}
+				create: {
+					name: `Household ${ind}`
 				}
 			}
 		};
@@ -57,25 +41,13 @@ export default class SeedUtils {
 	householdWithKid(ind: number, kidInd: number) {
 		return {
 			household: {
-				connectOrCreate: {
-					where: {
-						id: ind
-					},
-					create: {
-						id: ind,
-						name: `Household ${ind}`,
-						children: {
-							connectOrCreate: [
-								{
-									where: {
-										id: kidInd
-									},
-									create: {
-										firstName: `User ${ind} Kid ${kidInd}`,
-										pronouns: Pronoun['HE_HIM_HIS']
-									}
-								}
-							]
+				create: {
+					id: ind,
+					name: `Household ${ind}`,
+					children: {
+						create: {
+							firstName: `User ${ind} Kid ${kidInd}`,
+							pronouns: Pronoun['HE_HIM_HIS']
 						}
 					}
 				}
@@ -95,26 +67,18 @@ export default class SeedUtils {
 		};
 	}
 
-	async deleteAllFriendRequests() {
-		await this.#prisma.friendRequest
-			.deleteMany()
-			.catch(() => console.log('No friend request table to delete'));
-	}
-
-	async deleteAllHouseholds() {
-		await this.#prisma.householdChild
-			.deleteMany()
-			.catch(() => console.log('No household child table to delete'));
-		await this.#prisma.household
-			.deleteMany()
-			.catch(() => console.log('No household table to delete'));
-	}
-
 	async deleteUserAndHousehold(phone: string) {
 		const user = await this.#prisma.user.findUnique({
 			where: { phone }
 		});
-		if (!user || !user.householdId) return;
+		if (!user) return;
+
+		if (!user.householdId) {
+			await this.#prisma.user.delete({
+				where: { phone }
+			});
+			return;
+		}
 		const { householdId } = user;
 		// delete all kids
 		const deleteKids = this.#prisma.householdChild.deleteMany({
@@ -167,47 +131,55 @@ export default class SeedUtils {
 			}
 		});
 
-		// delete all adults
-		const deleteAdults = this.#prisma.user.deleteMany({
-			where: {
-				householdId
-			}
-		});
+		try {
+			await this.#prisma.$transaction([
+				deleteKids,
+				deleteHouseholdInvites,
+				deleteFriendReqs1,
+				deleteFriendReqs2,
+				deleteFriends1,
+				deleteFriends2
+			]);
+			// delete all adults
+			await this.#prisma.user.deleteMany({
+				where: {
+					householdId
+				}
+			});
 
-		// finally, delete the household
-		const deleteHousehold = this.#prisma.household.delete({
-			where: { id: householdId }
-		});
-
-		await this.#prisma.$transaction([
-			deleteKids,
-			deleteHouseholdInvites,
-			deleteFriendReqs1,
-			deleteFriendReqs2,
-			deleteFriends1,
-			deleteFriends2,
-			deleteAdults,
-			deleteHousehold
-		]);
+			// finally, delete the household
+			await this.#prisma.household.delete({
+				where: { id: householdId }
+			});
+		} catch (err) {
+			console.error(err);
+			console.error('Failed to delete user and household for:', { phone });
+			console.error('Household Invites', await this.#prisma.joinHouseholdRequest.findMany());
+			throw new Error("Couldn't delete user and household");
+		}
 	}
 
 	async createExpiredLink(userInd: number) {
-		const expiredLink = {
-			token: '3e99472f1003794c',
-			phone: this.PHONES[userInd - 1],
-			expires: new Date('8/5/2020')
-		};
-		await this.#prisma.magicLink.upsert({
-			where: {
-				id: userInd
-			},
-			update: expiredLink,
-			create: expiredLink
+		let crypto;
+		try {
+			crypto = await import('node:crypto');
+		} catch (err) {
+			console.error('crypto support is disabled!');
+			return null;
+		}
+		const token = crypto.randomBytes(8).toString('hex');
+		await this.#prisma.magicLink.create({
+			data: {
+				token,
+				phone: this.userIndToPhone(userInd),
+				expires: new Date('8/5/2020')
+			}
 		});
+		return token;
 	}
 
 	async createUserWithNothing(userInd: number) {
-		const phone = this.PHONES[userInd - 1];
+		const phone = this.userIndToPhone(userInd);
 
 		await this.#prisma.user.upsert({
 			where: {
@@ -222,7 +194,7 @@ export default class SeedUtils {
 	}
 
 	async createActiveSession(userInd: number) {
-		const phone = this.PHONES[userInd - 1];
+		const phone = this.userIndToPhone(userInd);
 
 		const expires = new Date(this.#now);
 		expires.setHours(expires.getHours() + 1);
@@ -243,7 +215,7 @@ export default class SeedUtils {
 	}
 
 	async createUserWithEmptyHousehold(userInd: number) {
-		const phone = this.PHONES[userInd - 1];
+		const phone = this.userIndToPhone(userInd);
 		const user = {
 			...this.basicUser(userInd),
 			...this.emptyHousehold(userInd)
@@ -261,54 +233,13 @@ export default class SeedUtils {
 		});
 	}
 
-	async createFriendRequest(fromUserInd: number, toUserInd: number) {
-		const friendReq = {
-			id: toUserInd,
-			targetPhone: this.PHONES[toUserInd - 1],
-			fromHouseholdId: fromUserInd,
-			fromUserId: fromUserInd
-		};
-
-		await this.#prisma.friendRequest.upsert({
-			where: {
-				id: toUserInd
-			},
-			update: friendReq,
-			create: friendReq
-		});
-	}
-
-	async createHouseholdConnection(hId1: number, hId2: number) {
-		const householdConnection = {
-			id: hId1,
-			householdId: hId1,
-			friendHouseholdId: hId2
-		};
-		await this.#prisma.householdConnection.upsert({
-			where: {
-				id: hId1
-			},
-			update: householdConnection,
-			create: householdConnection
-		});
-	}
-
-	async createHouseholdInvite(fromUserInd: number, toUserInd: number) {
-		// household invite from User 5 to User 2
-		const householdInvite = {
-			id: toUserInd,
-			targetPhone: this.PHONES[toUserInd - 1],
-			householdId: fromUserInd,
-			fromUserId: fromUserInd
-		};
-
-		await this.#prisma.joinHouseholdRequest.upsert({
-			where: {
-				id: toUserInd
-			},
-			update: householdInvite,
-			create: householdInvite
-		});
+	userIndToPhone(userInd: number) {
+		const BASE = '+1201555';
+		let suffix = `${userInd}`;
+		while (suffix.length < 4) {
+			suffix = `0${suffix}`;
+		}
+		return `${BASE}${suffix}`;
 	}
 
 	async createUserWithKid(userInd: number) {
@@ -317,7 +248,7 @@ export default class SeedUtils {
 			...this.householdWithKid(userInd, 1)
 		};
 
-		const phone = this.PHONES[userInd - 1];
+		const phone = this.userIndToPhone(userInd);
 
 		await this.#prisma.user.upsert({
 			where: {
@@ -328,12 +259,6 @@ export default class SeedUtils {
 				...user,
 				...this.permsYes(phone)
 			}
-		});
-	}
-
-	async deleteUsers(where: Prisma.UserWhereUniqueInput) {
-		await this.#prisma.user.deleteMany({
-			where
 		});
 	}
 }
