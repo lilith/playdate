@@ -8,7 +8,8 @@ test.beforeEach(async ({ utils }) => {
 	await utils.deleteUserAndHousehold(phone);
 });
 
-test('User can create new profile with valid phone number', async ({ page }) => {
+test('User can create new profile with valid phone number', async ({ page, context }) => {
+	await context.clearCookies();
 	await page.goto(host);
 	await page.waitForURL(host);
 	await page.getByRole('textbox').fill(phone);
@@ -49,8 +50,4 @@ test('User can create new profile with valid phone number', async ({ page }) => 
 	await page.getByText('Save').click();
 	await page.waitForURL(`${host}/household`);
 	await page.close();
-});
-
-test.afterAll(async ({ browser }) => {
-	await browser.close();
 });

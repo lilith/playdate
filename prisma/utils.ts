@@ -42,7 +42,6 @@ export default class SeedUtils {
 		return {
 			household: {
 				create: {
-					id: ind,
 					name: `Household ${ind}`,
 					children: {
 						create: {

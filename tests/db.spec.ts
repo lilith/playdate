@@ -16,7 +16,6 @@ test("User can't save profile without session cookie", async ({ page, context })
 	});
 	// should redirect user to home page for logging in
 	expect(res.url()).toEqual(host + '/');
-	await page.close();
 });
 
 /* 
@@ -178,7 +177,3 @@ test.describe('Friend Requests', () => {
 	});
 });
 // TODO: Can't create household for someone who's already in a household
-
-test.afterAll(async ({ browser }) => {
-	await browser.close();
-});

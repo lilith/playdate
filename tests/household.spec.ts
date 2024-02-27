@@ -35,7 +35,3 @@ test('User can create new kid', async ({ page, context }) => {
 	expect(await page.locator('.kid-card').count()).toBe(1);
 	await page.close();
 });
-
-test.afterAll(async ({ browser }) => {
-	await browser.close();
-});

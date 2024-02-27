@@ -17,7 +17,3 @@ test('Redirect to login page w/ prefilled phone num on expired magic link', asyn
 	await expect(page).toHaveURL(`${host}?phone=+12015550018&status=403`);
 	await page.close();
 });
-
-test.afterAll(async ({ browser }) => {
-	await browser.close();
-});

@@ -150,8 +150,4 @@ Skipped tests b/c the generated SMSes are only ever sent back to the user (low /
 		);
 		expect(res.status()).toEqual(401);
 	});
-
-	test.afterAll(async ({ browser }) => {
-		await browser.close();
-	});
 });
