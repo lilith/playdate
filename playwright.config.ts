@@ -16,7 +16,7 @@ const config: PlaywrightTestConfig = {
 	expect: {
 		timeout: 3000
 	},
-	// timeout: 10000,
+	timeout: 10000,
 	testDir: 'tests',
 	use: {
 		locale: 'en-US',

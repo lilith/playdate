@@ -1,8 +1,3 @@
-export const PHONES = [
-	'+12015550121',
-	'+12015550122',
-	'+12015550123',
-	'+12015550124',
-	'+12015550125',
-	'+12015550126'
-];
+export const USERS_WITH_NOTHING = [1, 2, 7];
+export const USERS_WITH_EMPTY_HOUSEHOLD = [3, 4];
+export const USERS_WITH_ACTIVE_SESSION = [2, 4, 6, 7];

@@ -66,9 +66,7 @@
 	.flex {
 		display: flex;
 	}
-	.border-right {
-		border-right: 1px solid #dddddd;
-	}
+
 	table {
 		border-collapse: collapse;
 		border: 1px solid #dddddd;

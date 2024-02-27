@@ -9,7 +9,8 @@ export default class SeedUtils {
 		'+12015550123',
 		'+12015550124',
 		'+12015550125',
-		'+12015550126'
+		'+12015550126',
+		'+12015550127'
 	];
 
 	constructor(now: Date, prisma: PrismaClient) {
@@ -98,6 +99,96 @@ export default class SeedUtils {
 		await this.#prisma.friendRequest
 			.deleteMany()
 			.catch(() => console.log('No friend request table to delete'));
+	}
+
+	async deleteAllHouseholds() {
+		await this.#prisma.householdChild
+			.deleteMany()
+			.catch(() => console.log('No household child table to delete'));
+		await this.#prisma.household
+			.deleteMany()
+			.catch(() => console.log('No household table to delete'));
+	}
+
+	async deleteUserAndHousehold(phone: string) {
+		const user = await this.#prisma.user.findUnique({
+			where: { phone }
+		});
+		if (!user || !user.householdId) return;
+		const { householdId } = user;
+		// delete all kids
+		const deleteKids = this.#prisma.householdChild.deleteMany({
+			where: {
+				householdId
+			}
+		});
+
+		// delete household invites this household has issued
+		const deleteHouseholdInvites = this.#prisma.joinHouseholdRequest.deleteMany({
+			where: {
+				householdId
+			}
+		});
+
+		// delete friend reqs this household has issued
+		const deleteFriendReqs1 = this.#prisma.friendRequest.deleteMany({
+			where: {
+				fromHouseholdId: householdId
+			}
+		});
+
+		// delete all friends with this household
+		const deleteFriends1 = this.#prisma.householdConnection.deleteMany({
+			where: {
+				householdId
+			}
+		});
+		const deleteFriends2 = this.#prisma.householdConnection.deleteMany({
+			where: {
+				friendHouseholdId: householdId
+			}
+		});
+
+		const householdUsers = await this.#prisma.user.findMany({
+			where: {
+				householdId
+			},
+			select: {
+				phone: true
+			}
+		});
+
+		const householdPhones = householdUsers.map((x) => x.phone);
+
+		// delete friend reqs this household has received
+		const deleteFriendReqs2 = this.#prisma.friendRequest.deleteMany({
+			where: {
+				targetPhone: { in: householdPhones }
+			}
+		});
+
+		// delete all adults
+		const deleteAdults = this.#prisma.user.deleteMany({
+			where: {
+				householdId
+			}
+		});
+
+		// finally, delete the household
+		const deleteHousehold = this.#prisma.household.delete({
+			where: { id: householdId }
+		});
+
+		await this.#prisma.$transaction([
+			deleteKids,
+			deleteHouseholdInvites,
+			deleteFriendReqs1,
+			deleteFriendReqs2,
+			deleteFriends1,
+			deleteFriends2,
+			deleteAdults,
+			deleteHousehold
+		]);
 	}
 
 	async createExpiredLink(userInd: number) {

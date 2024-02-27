@@ -411,7 +411,7 @@
 		{/if}
 		<p class="subtitle">Kids</p>
 		{#each kids as kid, ind}
-			<div class="card">
+			<div class="card kid-card">
 				<p>{kid.firstName} {kid.lastName ?? ''}</p>
 				<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
 				<p class="small-font">Age: {isNaN(kid.age) ? 'N/A' : kid.age}</p>
@@ -421,26 +421,34 @@
 		{/each}
 
 		<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
-			<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
-			<input type="text" name="first-name" required />
+			<label class="subtitle-2" for="first-name"
+				>First Name<span class="red">*</span><br />
+				<input type="text" name="first-name" required />
+			</label>
 
-			<label class="subtitle-2" for="last-name">Last Name</label>
-			<input type="text" name="last-name" />
+			<label class="subtitle-2" for="last-name"
+				>Last Name<br />
+				<input type="text" name="last-name" />
+			</label>
 
-			<label class="subtitle-2" for="pronouns">Pronouns<span class="red">*</span></label>
-			<select name="pronouns" required>
-				<option value="" />
-				{#each Object.entries(PRONOUNS) as pronoun}
-					<option value={pronoun[0]}>{pronoun[1]}</option>
-				{/each}
-			</select>
+			<label class="subtitle-2" for="pronouns"
+				>Pronouns<span class="red">*</span><br />
+				<select name="pronouns" required>
+					<option value="" />
+					{#each Object.entries(PRONOUNS) as pronoun}
+						<option value={pronoun[0]}>{pronoun[1]}</option>
+					{/each}
+				</select>
+			</label>
 
-			<label class="subtitle-2" for="dob">Date of Birth</label>
-			<input
-				type="date"
-				name="dob"
-				max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
-			/>
+			<label class="subtitle-2" for="dob"
+				>Date of Birth<br />
+				<input
+					type="date"
+					name="dob"
+					max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
+				/>
+			</label>
 
 			<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
 		</form>
