@@ -18,6 +18,7 @@ const config: PlaywrightTestConfig = {
 	},
 	timeout: 10000,
 	testDir: 'tests',
+	testMatch:'*spec.ts',
 	use: {
 		locale: 'en-US',
 		timezoneId: 'America/Los_Angeles'

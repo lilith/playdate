@@ -1,31 +1,10 @@
-import { expect, test } from '@playwright/test';
-import { PrismaClient } from '@prisma/client';
+import { expect } from '@playwright/test';
 import SeedUtils from '../prisma/utils';
+import { test } from './test';
 
 const host = 'http://localhost:5173';
-const prisma = new PrismaClient();
-test.beforeAll(async () => {
-	const utils = new SeedUtils(new Date(), prisma);
 
-	await Promise.all([
-		utils.deleteUserAndHousehold('+12015550003'),
-		utils.deleteUserAndHousehold('+12015550004'),
-		utils.deleteAllFriendRequests()
-	]);
-
-	await Promise.all([
-		...[3, 4].map((userInd) => utils.createUserWithEmptyHousehold(userInd)),
-		...[4].map((userInd) => utils.createActiveSession(userInd))
-	]);
-
-	await Promise.all([
-		utils.createFriendRequest(4, 3),
-		utils.createHouseholdConnection(3, 5),
-		utils.createHouseholdInvite(5, 2)
-	]);
-});
-
-test.only("User can't save profile without session cookie", async ({ page, context }) => {
+test("User can't save profile without session cookie", async ({ page, context }) => {
 	const res = await context.request.fetch(host + '/db', {
 		method: 'post',
 		headers: {
@@ -52,8 +31,8 @@ that info is derived from the session cookie
 - User 6 fails to delete another user
 */
 
-test.describe.only('Household Invites', () => {
-	test.beforeAll(async () => {
+test.describe('Household Invites', () => {
+	test.beforeAll(async ({ prisma }) => {
 		const utils = new SeedUtils(new Date(), prisma);
 
 		await Promise.all([
@@ -117,8 +96,8 @@ test.describe.only('Household Invites', () => {
 	});
 });
 
-test.describe.only('Friend Requests', () => {
-	test.beforeAll(async () => {
+test.describe('Friend Requests', () => {
+	test.beforeAll(async ({ prisma }) => {
 		const utils = new SeedUtils(new Date(), prisma);
 
 		await Promise.all([
