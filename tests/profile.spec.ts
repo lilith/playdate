@@ -8,11 +8,13 @@ test.beforeEach(async ({ utils }) => {
 	await utils.deleteUserAndHousehold(phone);
 });
 
-test('User can create new profile with valid phone number', async ({ page, context }) => {
+test('User can create new profile with valid phone number', async ({ page }) => {
 	await page.goto(host);
 	await page.waitForURL(host);
 	await page.getByRole('textbox').fill('');
 	await page.getByRole('textbox').fill(phone);
+
+	page.on('dialog', dialog => console.log(`DIALOG: ${dialog.message()}`));
 	await page.getByRole('button').click();
 
 	let token: string;

@@ -35,7 +35,7 @@
 
 	async function login() {
 		if (!phoneInput.isValidNumber()) {
-			alert('You have entered an invalid contact number.');
+			alert(`You have entered an invalid contact number: ${phoneInput.telInput.value}`);
 			return;
 		}
 
