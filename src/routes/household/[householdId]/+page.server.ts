@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import type { Pronoun, User } from '@prisma/client';
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 import { findHouseConnection } from '$lib/server/shared';
 
 export const load = (async ({ params, parent }) => {
@@ -10,7 +10,7 @@ export const load = (async ({ params, parent }) => {
 	const householdInfo: {
 		householdId: number | null;
 		name: string;
-		publicNotes: string;
+		publicNotes: string | null;
 		kids: {
 			firstName: string;
 			pronouns: Pronoun;

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import PhoneInput from '../PhoneInput.svelte';
 	import { onMount, afterUpdate } from 'svelte';
 	import { page } from '$app/stores';
-	import NavBar from '../NavBar.svelte';
 	import { invalidate } from '$app/navigation';
-	import { writeReq } from '$lib/utils';
-	import Modal from '../Modal.svelte';
-	import { circleInviteMsg } from '$lib/format';
+	import { writeReq } from '$lib/logics/_shared/utils';
+	import NavBar from '$lib/components/NavBar.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import PhoneInput from '$lib/components/PhoneInput.svelte';
+	import { circleInviteMsg } from '$lib/logics/_shared/format';
 
 	let phoneInput: object;
 	let inviteesPhone: string;
@@ -33,7 +33,7 @@
 			return;
 		}
 		await writeReq('/db', {
-			type: 'inviteToCircle',
+			type: 'createCircleInvite',
 			targetPhone: phoneInput.getNumber()
 		});
 		inviteesPhone = phoneInput.getNumber();

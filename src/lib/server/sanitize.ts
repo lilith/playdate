@@ -1,10 +1,10 @@
-import { getObjectivePronoun } from '$lib/parse';
+import { getObjectivePronoun } from '$lib/logics/_shared/parse';
 import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 import sanitizerFunc from 'sanitize';
-import { fullName } from '$lib/format';
-import { LEGEND_STR } from '$lib/constants';
+import { fullName } from '$lib/logics/_shared/format';
+import { LEGEND_STR } from '$lib/logics/_shared/constants';
 
 const sanitizer = sanitizerFunc();
 

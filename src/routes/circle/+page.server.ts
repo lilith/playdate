@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 
 export const load = (async ({ parent, depends }) => {
 	depends('data:circle');

@@ -1,13 +1,14 @@
 <script lang="ts">
-	import PhoneInput from '../PhoneInput.svelte';
 	import { page } from '$app/stores';
 	import { onMount, afterUpdate } from 'svelte';
-	import { PRONOUNS, type PRONOUNS_ENUM } from '$lib/constants';
-	import Modal from '../Modal.svelte';
+	import { PRONOUNS } from '$lib/logics/_shared/constants';
+	import type { PRONOUNS_ENUM } from '$lib/logics/_shared/types';
 	import { invalidate, invalidateAll, goto } from '$app/navigation';
-	import NavBar from '../NavBar.svelte';
-	import { writeReq } from '$lib/utils';
-	import { fullName } from '$lib/format';
+	import Modal from '$lib/components/Modal.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
+	import PhoneInput from '$lib/components/PhoneInput.svelte';
+	import { writeReq } from '$lib/logics/_shared/utils';
+	import { fullName } from '$lib/logics/_shared/format';
 	import { DateTime } from 'luxon';
 
 	enum ModalReason {
@@ -71,7 +72,7 @@
 
 	async function saveToDB() {
 		const response = await writeReq('/db', {
-			type: 'household',
+			type: 'upsertHousehold',
 			name: name,
 			publicNotes: publicNotes
 		});
@@ -88,7 +89,7 @@
 		if (!householdId) {
 			newHouse = true;
 			const response = await writeReq('/db', {
-				type: 'household',
+				type: 'upsertHousehold',
 				name: '',
 				publicNotes: ''
 			});
@@ -98,7 +99,7 @@
 			}
 		}
 		const response = await writeReq('/db', {
-			type: 'householdChild',
+			type: 'createKid',
 			firstName: e.target[0].value,
 			pronouns: e.target[2].value,
 			lastName: e.target[1].value,
@@ -221,7 +222,7 @@
 			return;
 		}
 		await writeReq('/db', {
-			type: 'inviteToHousehold',
+			type: 'createHouseholdInvite',
 			targetPhone: phoneInput.getNumber()
 		});
 		inviteesPhone = phoneInput.getNumber();
@@ -410,7 +411,7 @@
 		{/if}
 		<p class="subtitle">Kids</p>
 		{#each kids as kid, ind}
-			<div class="card">
+			<div class="card kid-card">
 				<p>{kid.firstName} {kid.lastName ?? ''}</p>
 				<p class="small-font">Pronouns: {PRONOUNS[kid.pronouns]}</p>
 				<p class="small-font">Age: {isNaN(kid.age) ? 'N/A' : kid.age}</p>
@@ -420,26 +421,34 @@
 		{/each}
 
 		<form method="POST" action="/db" id="kid-form" on:submit|preventDefault={addKid}>
-			<label class="subtitle-2" for="first-name">First Name<span class="red">*</span></label>
-			<input type="text" name="first-name" required />
+			<label class="subtitle-2" for="first-name"
+				>First Name<span class="red">*</span><br />
+				<input type="text" name="first-name" required />
+			</label>
 
-			<label class="subtitle-2" for="last-name">Last Name</label>
-			<input type="text" name="last-name" />
+			<label class="subtitle-2" for="last-name"
+				>Last Name<br />
+				<input type="text" name="last-name" />
+			</label>
 
-			<label class="subtitle-2" for="pronouns">Pronouns<span class="red">*</span></label>
-			<select name="pronouns" required>
-				<option value="" />
-				{#each Object.entries(PRONOUNS) as pronoun}
-					<option value={pronoun[0]}>{pronoun[1]}</option>
-				{/each}
-			</select>
+			<label class="subtitle-2" for="pronouns"
+				>Pronouns<span class="red">*</span><br />
+				<select name="pronouns" required>
+					<option value="" />
+					{#each Object.entries(PRONOUNS) as pronoun}
+						<option value={pronoun[0]}>{pronoun[1]}</option>
+					{/each}
+				</select>
+			</label>
 
-			<label class="subtitle-2" for="dob">Date of Birth</label>
-			<input
-				type="date"
-				name="dob"
-				max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
-			/>
+			<label class="subtitle-2" for="dob"
+				>Date of Birth<br />
+				<input
+					type="date"
+					name="dob"
+					max={`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`}
+				/>
+			</label>
 
 			<div id="btn-container-2"><button class="text-btn">Save Child</button></div>
 		</form>

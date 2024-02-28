@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { afterUpdate } from 'svelte';
 	import { page } from '$app/stores';
-	import RejectIcon from '../../Icons/xIcon.svelte';
-	import AcceptIcon from '../../Icons/checkIcon.svelte';
-	import NavBar from '../NavBar.svelte';
+	import RejectIcon from '$lib/icons/xIcon.svelte';
+	import AcceptIcon from '$lib/icons/checkIcon.svelte';
+	import NavBar from '$lib/components/NavBar.svelte';
 	import { invalidate } from '$app/navigation';
-	import { writeReq } from '$lib/utils';
+	import { writeReq } from '$lib/logics/_shared/utils';
 
 	let { friendReqsInfo, householdInvites } = $page.data;
 	afterUpdate(() => {

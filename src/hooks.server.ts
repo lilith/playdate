@@ -1,11 +1,11 @@
 import type { Handle, RequestEvent } from '@sveltejs/kit';
-import type { User, PhoneContactPermissions } from '@prisma/client';
 import * as cron from 'node-cron';
 import { sendNotif } from '$lib/server/twilio';
-import { toLocalTimezone } from '$lib/date';
-import prisma from '$lib/prisma';
+import { toLocalTimezone } from '$lib/logics/_shared/date';
+import prisma from '$lib/logics/_shared/prisma';
+import type { UserWithPermissions } from '$lib/logics/_shared/types';
 
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { MaybePromise, ResolveOptions } from '@sveltejs/kit/types/internal';
 
 if (import.meta.env.PROD) {
@@ -15,7 +15,7 @@ if (import.meta.env.PROD) {
 }
 
 const setLocal = async (
-	user: (User & { phonePermissions: PhoneContactPermissions }) | null,
+	user: UserWithPermissions | null,
 	phone: string,
 	event: RequestEvent<Partial<Record<string, string>>, string | null>
 ) => {
@@ -89,7 +89,10 @@ const redirectOrContinue = (
 	) => MaybePromise<Response>
 ) => {
 	console.log('REDIRECT OR CONT', event.url.pathname, path);
-	if (event.url.pathname !== path) throw redirect(308, path);
+	if (event.url.pathname !== path) {
+		if (event.url.pathname === '/twilio') throw error(403);
+		throw redirect(308, path);
+	}
 	return resolve(event);
 };
 
@@ -121,16 +124,15 @@ export const handle = (async ({ event, resolve }) => {
 		if (!session || session.expires < new Date()) throw redirect(303, '/');
 
 		// from hereon, it's a valid req with a cookie / session
-		const user: (User & { phonePermissions: PhoneContactPermissions }) | null =
-			await prisma.user.findUnique({
-				where: {
-					phone: session.phone
-				},
-				include: {
-					phonePermissions: true,
-					AvailabilityDate: true
-				}
-			});
+		const user: UserWithPermissions | null = await prisma.user.findUnique({
+			where: {
+				phone: session.phone
+			},
+			include: {
+				phonePermissions: true,
+				AvailabilityDate: true
+			}
+		});
 
 		if (event.url.pathname === '/db') {
 			event.locals.user = user;

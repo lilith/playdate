@@ -5,9 +5,9 @@ import Twilio from 'twilio';
 import type { User } from '@prisma/client';
 import { circleNotif, newFriendNotif } from './sanitize';
 import { generate, save } from './login';
-import { toLocalTimezone } from '../date';
+import { toLocalTimezone } from '../logics/_shared/date';
 import { DateTime } from 'luxon';
-import prisma from '$lib/prisma';
+import prisma from '$lib/logics/_shared/prisma';
 
 const MessagingResponse = Twilio.twiml.MessagingResponse;
 

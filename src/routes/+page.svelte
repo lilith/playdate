@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { env as public_env } from '$env/dynamic/public';
-	import { writeReq } from '$lib/utils';
+	import { writeReq } from '$lib/logics/_shared/utils';
 	import { onMount } from 'svelte';
 	import intlTelInput from 'intl-tel-input';
 
@@ -35,7 +35,7 @@
 
 	async function login() {
 		if (!phoneInput.isValidNumber()) {
-			alert('You have entered an invalid contact number.');
+			alert(`You have entered an invalid contact number: ${phoneInput.telInput.value}`);
 			return;
 		}
 
@@ -47,7 +47,7 @@
 		});
 		if (res.status === 200) {
 			const { token } = await res.json();
-			if (public_env.PUBLIC_ENV === 'test') console.log('PHONE_TOKEN', phone, token);
+			if (public_env.PUBLIC_ENV === 'test') console.log('TOKEN', token);
 
 			const region = new Intl.DateTimeFormat();
 			const { timeZone } = region.resolvedOptions();

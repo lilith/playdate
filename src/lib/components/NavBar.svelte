@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import HamburgerIcon from '../Icons/hamburgerIcon.svelte';
-	import CloseIcon from '../Icons/closeIcon.svelte';
+	import HamburgerIcon from '$lib/icons/hamburgerIcon.svelte';
+	import CloseIcon from '$lib/icons/closeIcon.svelte';
 
 	let show = false;
 	const path = $page.route.id ?? '';

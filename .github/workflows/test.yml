@@ -10,6 +10,7 @@ env:
   TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
   TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
   TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+  PUBLIC_ENV: test
 jobs:
   build:
     runs-on: ubuntu-latest

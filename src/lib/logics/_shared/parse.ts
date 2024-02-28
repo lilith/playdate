@@ -1,6 +1,10 @@
-import { PRONOUNS, type PRONOUNS_ENUM } from './constants';
+import { PRONOUNS } from './constants';
+import type { PRONOUNS_ENUM } from './types';
 
-export function getAvailRangeParts(availRange: string) {
+/*
+	pull startHr, startMin, endHr, and endMin from something that looks like 1-2 or 1pm-2pm and so on
+*/
+export function destructRange(availRange: string) {
 	// validator and formatter
 	const regexpRange =
 		/\s*(?<fromhr>[0-9]+)(:(?<frommin>[0-5][0-9]))?\s*(?<fromhalf>am|pm|AM|PM)?\s*(-|to|until|till)\s*(?<tohr>[0-9]+)(:(?<tomin>[0-5][0-9]))?\s*(?<tohalf>am|pm|AM|PM)?\s*/i;
