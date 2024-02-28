@@ -2,22 +2,20 @@ import { writeReq } from '$lib/logics/_shared/utils';
 import type { Parent } from './types';
 import type { CircleInfo } from '../_shared/types';
 
-export const notify = async ({
+export const makeReqToNotifyOne = async ({
 	parent,
 	schedDiffs,
 	schedFull,
-	showFullSched,
-	notified
+	showFullSched
 }: {
 	parent: Parent;
 	schedDiffs: string[];
 	schedFull: string[];
 	showFullSched: boolean;
-	notified: Set<string>;
 }) => {
 	const { phone, phonePermissions } = parent;
 	const { allowReminders } = phonePermissions;
-	if (!allowReminders) return;
+	if (!allowReminders) return null;
 
 	await writeReq('/twilio', {
 		phone,
@@ -25,38 +23,32 @@ export const notify = async ({
 		sched: showFullSched ? schedFull.join('\n') : schedDiffs.join('\n'),
 		diff: !showFullSched
 	});
-	notified.add(phone);
-	notified = new Set(notified);
-
-	// after 4s, stop showing that you've notified a user on the UI
-	setTimeout(() => {
-		notified.delete(phone);
-		notified = new Set(notified);
-	}, 4000);
+	return phone;
 };
 
-export const notifyAll = ({
+export const makeReqToNotifyAll = async ({
 	circleInfo,
 	schedDiffs,
 	schedFull,
-	showFullSched,
-	notified
+	showFullSched
 }: {
 	circleInfo: CircleInfo;
 	schedDiffs: string[];
 	schedFull: string[];
 	showFullSched: boolean;
-	notified: Set<string>;
 }) => {
-	circleInfo.forEach((c: { parents: Parent[] }) => {
-		c.parents.forEach((parent: Parent) =>
-			notify({
-				parent,
-				schedDiffs,
-				schedFull,
-				showFullSched,
-				notified
-			})
-		);
-	});
+	return await Promise.all(
+		circleInfo.map(async (c: { parents: Parent[] }) => {
+			return await Promise.all(
+				c.parents.map((parent: Parent) =>
+					makeReqToNotifyOne({
+						parent,
+						schedDiffs,
+						schedFull,
+						showFullSched
+					})
+				)
+			);
+		})
+	);
 };

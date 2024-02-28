@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { makeReqToNotifyAll, makeReqToNotifyOne } from '$lib/logics/Calendar/Notifier/logic';
+	import type { CircleInfo, Parent } from '$lib/logics/Calendar/_shared/types';
 	import { generateDiffSchedule, generateFullSchedule } from '$lib/logics/_shared/format';
-	import type { Row, UserWithPermissions } from '$lib/logics/_shared/types';
-	import type { CircleInfo } from '$lib/logics/Calendar/_shared/types';
 	import { getObjectivePronoun } from '$lib/logics/_shared/parse';
-	import { notify, notifyAll } from '$lib/logics/Calendar/Notifier/logic';
+	import type { Row, UserWithPermissions } from '$lib/logics/_shared/types';
+	import { onMount } from 'svelte';
 
 	export let rowsOnMount: Row[]; // needed for generating schedule diff and determining that rows saved in db have changed
 	export let dbRows: Row[];
@@ -22,10 +22,45 @@
 	});
 
 	$: {
-		if (!rowsOnMount || !dbRows) break $
+		if (!rowsOnMount || !dbRows) break $;
 		schedDiffs = generateDiffSchedule(rowsOnMount, dbRows);
 		schedFull = generateFullSchedule(dbRows);
 	}
+
+	const showNotifAndTriggerHide = (phone: string | null) => {
+		if (!phone) return;
+		notified.add(phone);
+		notified = new Set(notified);
+
+		// after 4s, stop showing that you've notified a user on the UI
+		setTimeout(() => {
+			notified.delete(phone);
+			notified = new Set(notified);
+		}, 4000);
+	};
+
+	const notifyOne = async (p: Parent) => {
+		const res = await makeReqToNotifyOne({
+			parent: p,
+			schedDiffs,
+			schedFull,
+			showFullSched
+		});
+		if (!res) return;
+		showNotifAndTriggerHide(p.phone);
+	};
+
+	const notifyAll = async () => {
+		const promises = await makeReqToNotifyAll({
+			circleInfo,
+			schedDiffs,
+			schedFull,
+			showFullSched
+		});
+		promises.forEach((notifs) => {
+			notifs.forEach((notifiedPhone) => showNotifAndTriggerHide(notifiedPhone));
+		});
+	};
 </script>
 
 {#key schedDiffs}
@@ -55,18 +90,7 @@
 		{/each}
 	</div>
 
-	<button
-		class="notif-btn"
-		style="margin: 1rem;"
-		on:click={() =>
-			notifyAll({
-				circleInfo,
-				schedDiffs,
-				schedFull,
-				showFullSched,
-				notified
-			})}>Notify All</button
-	>
+	<button class="notif-btn" style="margin: 1rem;" on:click={notifyAll}>Notify All</button>
 	<table id="notif-table">
 		{#each circleInfo as c}
 			{#each c.parents as p}
@@ -78,16 +102,7 @@
 						{#if notified.has(p.phone)}
 							<p>Notified!</p>
 						{:else}
-							<button
-								class="notif-btn"
-								on:click={() =>
-									notify({
-										parent: p,
-										schedDiffs,
-										schedFull,
-										showFullSched,
-										notified
-									})}
+							<button class="notif-btn" on:click={async () => await notifyOne(p)}
 								>Notify <span class:strike={!p.phonePermissions.allowReminders}
 									>{p.firstName} {p.lastName ?? ''}</span
 								></button
@@ -105,7 +120,7 @@
 		font-size: large;
 		text-align: left;
 	}
-	
+
 	#preview-notif {
 		box-shadow: 0px 0px 4px 0px #00000096;
 		text-align: left;
@@ -203,6 +218,7 @@
 	}
 	#notif-table tr {
 		margin: 0.5rem;
+		border: 1px solid #dddddd;
 	}
 	#notif-table td {
 		padding: 0.4rem 0;
