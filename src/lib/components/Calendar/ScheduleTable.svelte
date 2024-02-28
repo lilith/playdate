@@ -3,7 +3,6 @@
 	import { getRowColor, isAvailableOnRow } from '$lib/logics/Calendar/ScheduleTable/logic';
 	import { requestToMarkOneRow } from '$lib/logics/Calendar/_shared/utils';
 	import type { Row, Unavailable } from '$lib/logics/_shared/types';
-	import { AvailabilityStatus } from '@prisma/client';
 	import { createEventDispatcher, tick } from 'svelte';
 	import Editor from './Editor.svelte';
 
@@ -12,6 +11,7 @@
 	export let dbRows: Row[];
 	export let displayedRows: Row[];
 	export let timeZone: string;
+	export let AvailabilityStatus: any;
 
 	let openedRows = new Set<number>(); // row inds which have open editors
 	let rowIndsWithTimeErrs = new Set<number>();
