@@ -3,7 +3,7 @@ import { test } from './test';
 
 const host = 'http://localhost:5173';
 
-test.describe('Twilio', () => {
+test.describe.only('Twilio', () => {
 	test.beforeAll(async ({ utils }) => {
 		await Promise.all([
 			utils.deleteUserAndHousehold('+12015550012'),

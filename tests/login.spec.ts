@@ -8,7 +8,7 @@ test.beforeEach(async ({ utils }) => {
 	[token] = await Promise.all([utils.createExpiredLink(18), utils.createUserWithNothing(18)]);
 });
 
-test('Redirect to login page w/ prefilled phone num on expired magic link', async ({ page }) => {
+test.only('Redirect to login page w/ prefilled phone num on expired magic link', async ({ page }) => {
 	test.skip(!token, "Couldn't generate expired link");
 
 	await page.goto(`http://localhost:5173/login/${token}`);

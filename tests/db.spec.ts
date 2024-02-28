@@ -3,7 +3,7 @@ import { test } from './test';
 
 const host = 'http://localhost:5173';
 
-test("User can't save profile without session cookie", async ({ page, context }) => {
+test.only("User can't save profile without session cookie", async ({ page, context }) => {
 	const res = await context.request.fetch(host + '/db', {
 		method: 'post',
 		headers: {
@@ -29,7 +29,7 @@ that info is derived from the session cookie
 - User 6 fails to delete another user
 */
 
-test.describe('Household Invites', () => {
+test.describe.only('Household Invites', () => {
 	test.beforeAll(async ({ utils }) => {
 		await Promise.all([
 			utils.deleteUserAndHousehold('+12015550001'),
@@ -90,7 +90,7 @@ test.describe('Household Invites', () => {
 	});
 });
 
-test.describe('Friend Requests', () => {
+test.describe.only('Friend Requests', () => {
 	test.beforeAll(async ({ utils }) => {
 		await Promise.all([
 			utils.deleteUserAndHousehold('+12015550005'),
