@@ -9,9 +9,9 @@ test.beforeEach(async ({ utils }) => {
 });
 
 test('User can create new profile with valid phone number', async ({ page, context }) => {
-	await context.clearCookies();
 	await page.goto(host);
 	await page.waitForURL(host);
+	await page.getByRole('textbox').fill('');
 	await page.getByRole('textbox').fill(phone);
 	await page.getByRole('button').click();
 

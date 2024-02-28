@@ -51,6 +51,7 @@ test.describe('Calendar', () => {
 		]);
 		await page.goto('/calendar');
 		await page.waitForURL('/calendar');
+		await page.waitForSelector('table#schedule');
 
 		const date = today.plus({ days: 3 });
 		await page
