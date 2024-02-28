@@ -54,6 +54,7 @@
 	<NavBar pageName="Calendar" />
 	<div style="text-align: center; margin: 2rem 0;">
 		<ScheduleTable
+			{AvailabilityStatus}
 			{dbRows}
 			{displayedRows}
 			timeZone={user.timeZone}
