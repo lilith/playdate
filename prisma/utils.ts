@@ -79,6 +79,13 @@ export default class SeedUtils {
 			return;
 		}
 		const { householdId } = user;
+
+		const deleteDates = this.#prisma.availabilityDate.deleteMany({
+			where: {
+				householdId
+			}
+		});
+
 		// delete all kids
 		const deleteKids = this.#prisma.householdChild.deleteMany({
 			where: {
@@ -137,7 +144,8 @@ export default class SeedUtils {
 				deleteFriendReqs1,
 				deleteFriendReqs2,
 				deleteFriends1,
-				deleteFriends2
+				deleteFriends2,
+				deleteDates
 			]);
 			// delete all adults
 			await this.#prisma.user.deleteMany({
@@ -249,7 +257,7 @@ export default class SeedUtils {
 
 		const phone = this.userIndToPhone(userInd);
 
-		await this.#prisma.user.upsert({
+		return await this.#prisma.user.upsert({
 			where: {
 				phone
 			},
@@ -258,6 +266,12 @@ export default class SeedUtils {
 				...user,
 				...this.permsYes(phone)
 			}
+		});
+	}
+
+	async createAvailabilityDate(data: Prisma.AvailabilityDateCreateInput) {
+		return await this.#prisma.availabilityDate.create({
+			data
 		});
 	}
 }

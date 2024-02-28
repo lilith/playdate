@@ -1,5 +1,6 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
+export const TIMEZONE = 'America/Los_Angeles';
 const config: PlaywrightTestConfig = {
 	webServer: [
 		{
@@ -18,11 +19,12 @@ const config: PlaywrightTestConfig = {
 	},
 	// timeout: 10000,
 	testDir: 'tests',
-	testMatch:'*spec.ts',
+	testMatch: '*spec.ts',
 	use: {
 		locale: 'en-US',
-		timezoneId: 'America/Los_Angeles'
-	},
+		timezoneId: TIMEZONE,
+		baseURL: 'http://localhost:5173'
+	}
 };
 
 export default config;
