@@ -121,10 +121,12 @@
 									>get texts when your kid&#39;s friends are free. text their parents when
 									you&#39;re free.<br />get weekly reminders of your schedule overlaps.<br />build
 									friendships. make memories.<br /><a href="#video">watch how much easier this is</a
-									></span
+									><br />
+<a href="#about">safe, free, open-source, and private</a>
+</span
 								>
 							</p>
-							<h3 id="text01" class="style2"><mark>login with sms</mark> or signup for the beta</h3>
+							<h3 id="text01" class="style2"><mark>enter your</mark> phone #</h3>
 							<form
 								enctype="multipart/form-data"
 								id="form01"
@@ -146,7 +148,7 @@
 									<div class="actions">
 										<button type="submit"
 											><svg><use xlink:href="/icons.svg#mobile" /></svg><span class="label"
-												>Send login link</span
+												>Login (via text)</span
 											></button
 										>
 									</div>
@@ -175,15 +177,6 @@
 										></a
 									>
 								</li>
-								<li>
-									<a
-										href="https://docs.google.com/document/d/18AJJTOX9x-pXl4mSTfKHp_9Op4cszZLhZkb9UiQZbNA/edit?usp=sharing"
-										class="button n03"
-										><svg><use xlink:href="/icons.svg#document-alt" /></svg><span class="label"
-											>Design doc</span
-										></a
-									>
-								</li>
 							</ul>
 						</div>
 					</div>
@@ -207,7 +200,11 @@
 									is focused on public good, through helping children build friendships and
 									social-emotional skills, and (eventually) by reminding parents to donate to
 									charities periodically.</span
-								><span class="p"
+								>
+<span class="p">We won't sell your info or spam you; see our <a href="/legal/privacy">Privacy Policy</a> and <a href="/legal/terms">Terms of Use</a></span>
+<span class="p">There is no "social media" or "friend discovery" mechanism; to connect with someone you BOTH have to enter each other's phone numbers.</span>
+
+<span class="p"
 									>Operating costs may become significant over time, so we ask that if you know
 									software development, consider pitching in on <a
 										href="https://github.com/lilith/playdate">Github</a
@@ -234,29 +231,6 @@
 								Your browser does not support the video tag.
 							</video>
 							<p id="text16" class="style5">© lilith river 2023</p>
-						</div>
-					</div>
-				</div>
-			</section>
-			<section id="done-section">
-				<div id="container02" class="style1 container default full">
-					<div class="wrapper">
-						<div class="inner" data-onvisible-trigger="1">
-							<h2 id="text07" class="style1">Thank You</h2>
-							<p id="text10" class="style3">
-								Maecenas aliquam velit scelerisque. Nisi vitae suscipit tellus mauris. Suscipit
-								tellus mauris a diam maecenas sed enim ut sem lorem ipsum.
-							</p>
-							<ul id="buttons06" class="style1 buttons">
-								<li>
-									<!-- svelte-ignore a11y-invalid-attribute -->
-									<a href="#" class="button n01"
-										><svg><use xlink:href="/icons.svg#arrow-right-light" /></svg><span class="label"
-											>Continue</span
-										></a
-									>
-								</li>
-							</ul>
 						</div>
 					</div>
 				</div>
